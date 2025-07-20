@@ -1,5 +1,6 @@
 import { 
   characters, quests, activities, nutritionLogs, workoutLogs, achievements, foodDatabase, workoutTemplates,
+  exercises, workoutSessions, exerciseEntries,
   type Character, type InsertCharacter,
   type Quest, type InsertQuest,
   type Activity, type InsertActivity,
@@ -7,7 +8,10 @@ import {
   type WorkoutLog, type InsertWorkoutLog,
   type Achievement, type InsertAchievement,
   type FoodDatabaseItem, type InsertFoodDatabaseItem,
-  type WorkoutTemplate, type InsertWorkoutTemplate
+  type WorkoutTemplate, type InsertWorkoutTemplate,
+  type Exercise, type InsertExercise,
+  type WorkoutSession, type InsertWorkoutSession,
+  type ExerciseEntry, type InsertExerciseEntry
 } from "@shared/schema";
 
 export interface IStorage {
@@ -59,6 +63,21 @@ export interface IStorage {
   incrementWorkoutTemplateUsage(templateId: number): Promise<void>;
   fetchWgerWorkouts(): Promise<any>;
   importFromWger(workoutData: any): Promise<WorkoutTemplate>;
+
+  // Exercise methods (Physical Activities Compendium)
+  getExercises(category?: string): Promise<Exercise[]>;
+  getExerciseById(id: number): Promise<Exercise | undefined>;
+  createExercise(exercise: InsertExercise): Promise<Exercise>;
+  searchExercises(query: string): Promise<Exercise[]>;
+
+  // Workout Session methods
+  getCharacterWorkoutSessions(characterId: number): Promise<WorkoutSession[]>;
+  getWorkoutSessionById(id: number): Promise<WorkoutSession | undefined>;
+  createWorkoutSession(session: InsertWorkoutSession): Promise<WorkoutSession>;
+  
+  // Exercise Entry methods
+  getExerciseEntriesBySession(sessionId: number): Promise<ExerciseEntry[]>;
+  createExerciseEntry(entry: InsertExerciseEntry): Promise<ExerciseEntry>;
 }
 
 export class MemStorage implements IStorage {
@@ -70,6 +89,9 @@ export class MemStorage implements IStorage {
   private achievements: Map<number, Achievement>;
   private foodDatabaseItems: Map<number, FoodDatabaseItem>;
   private workoutTemplates: Map<number, WorkoutTemplate>;
+  private exercises: Map<number, Exercise>;
+  private workoutSessions: Map<number, WorkoutSession>;
+  private exerciseEntries: Map<number, ExerciseEntry>;
   private currentIds: { [key: string]: number };
 
   constructor() {
@@ -81,6 +103,9 @@ export class MemStorage implements IStorage {
     this.achievements = new Map();
     this.foodDatabaseItems = new Map();
     this.workoutTemplates = new Map();
+    this.exercises = new Map();
+    this.workoutSessions = new Map();
+    this.exerciseEntries = new Map();
     this.currentIds = {
       characters: 1,
       quests: 1,
@@ -90,6 +115,9 @@ export class MemStorage implements IStorage {
       achievements: 1,
       foodDatabase: 1,
       workoutTemplates: 1,
+      exercises: 1,
+      workoutSessions: 1,
+      exerciseEntries: 1,
     };
     
     // Create default character and quests
@@ -515,6 +543,126 @@ export class MemStorage implements IStorage {
       this.workoutTemplates.set(template.id, template);
     });
     this.currentIds.workoutTemplates = workoutTemplates.length + 1;
+
+    // Initialize exercises from Physical Activities Compendium
+    this.initializeExerciseDatabase();
+  }
+
+  private initializeExerciseDatabase() {
+    // Common strength training exercises with MET values from the compendium
+    const exerciseData: Exercise[] = [
+      {
+        id: 1,
+        name: "Bicep Curls",
+        category: "strength",
+        metValue: "6.0", // Resistance training, multiple exercises, 8-15 reps
+        compendiumCode: "02054",
+        description: "Resistance (weight) training, multiple exercises, 8-15 reps at varied resistance",
+        trackingType: "reps_sets",
+        muscleGroups: ["biceps", "arms"],
+        equipment: ["dumbbells"],
+        instructions: "Stand with feet shoulder-width apart, curl weights toward shoulders",
+        createdAt: new Date(),
+      },
+      {
+        id: 2,
+        name: "Push-ups",
+        category: "strength",
+        metValue: "7.5", // Calisthenics, vigorous effort
+        compendiumCode: "02020",
+        description: "Calisthenics (e.g., pushups, sit ups, pull-ups, jumping jacks, burpees, battling ropes), vigorous effort",
+        trackingType: "reps_sets",
+        muscleGroups: ["chest", "shoulders", "triceps"],
+        equipment: [],
+        instructions: "Start in plank position, lower body to ground, push back up",
+        createdAt: new Date(),
+      },
+      {
+        id: 3,
+        name: "Squats",
+        category: "strength",
+        metValue: "5.0", // Resistance training, squats, deadlift
+        compendiumCode: "02052",
+        description: "Resistance (weight) training, squats, deadlift, slow or explosive effort",
+        trackingType: "reps_sets",
+        muscleGroups: ["quadriceps", "glutes", "legs"],
+        equipment: [],
+        instructions: "Stand with feet shoulder-width apart, lower hips back and down, return to standing",
+        createdAt: new Date(),
+      },
+      // Cardio exercises
+      {
+        id: 4,
+        name: "Stationary Bike",
+        category: "cardio",
+        metValue: "6.8", // Bicycling, stationary, general
+        compendiumCode: "01200",
+        description: "Bicycling, stationary, general",
+        trackingType: "time_distance",
+        muscleGroups: ["legs", "cardiovascular"],
+        equipment: ["stationary bike"],
+        instructions: "Maintain steady pace, adjust resistance as needed",
+        createdAt: new Date(),
+      },
+      {
+        id: 5,
+        name: "Treadmill Running",
+        category: "cardio",
+        metValue: "8.0", // Running, general
+        compendiumCode: "12030",
+        description: "Running, general",
+        trackingType: "time_distance",
+        muscleGroups: ["legs", "cardiovascular"],
+        equipment: ["treadmill"],
+        instructions: "Start with warm-up, maintain consistent pace",
+        createdAt: new Date(),
+      },
+      {
+        id: 6,
+        name: "Stairmaster",
+        category: "cardio",
+        metValue: "9.3", // Stair treadmill ergometer, general
+        compendiumCode: "02065",
+        description: "Stair treadmill ergometer, general",
+        trackingType: "time_only",
+        muscleGroups: ["legs", "glutes", "cardiovascular"],
+        equipment: ["stairmaster"],
+        instructions: "Step at consistent rate, use handrails for balance only",
+        createdAt: new Date(),
+      },
+      // More strength exercises
+      {
+        id: 7,
+        name: "Bench Press",
+        category: "strength",
+        metValue: "6.0", // Resistance training, vigorous effort
+        compendiumCode: "02050",
+        description: "Resistance (weight lifting - free weight, nautilus or universal-type), power lifting or body building, vigorous effort",
+        trackingType: "reps_sets",
+        muscleGroups: ["chest", "shoulders", "triceps"],
+        equipment: ["barbell", "bench"],
+        instructions: "Lie on bench, lower bar to chest, press up to full extension",
+        createdAt: new Date(),
+      },
+      {
+        id: 8,
+        name: "Deadlift",
+        category: "strength", 
+        metValue: "5.0", // Resistance training, squats, deadlift
+        compendiumCode: "02052",
+        description: "Resistance (weight) training, squats, deadlift, slow or explosive effort",
+        trackingType: "reps_sets",
+        muscleGroups: ["back", "glutes", "hamstrings"],
+        equipment: ["barbell"],
+        instructions: "Keep back straight, lift with legs and hips, not back",
+        createdAt: new Date(),
+      }
+    ];
+
+    exerciseData.forEach(exercise => {
+      this.exercises.set(exercise.id, exercise);
+    });
+    this.currentIds.exercises = exerciseData.length + 1;
   }
 
   // Character methods
@@ -943,6 +1091,83 @@ export class MemStorage implements IStorage {
     };
     
     return categoryMap[categoryId] || "strength";
+  }
+
+  // Exercise methods (Physical Activities Compendium)
+  async getExercises(category?: string): Promise<Exercise[]> {
+    let exercises = Array.from(this.exercises.values());
+    
+    if (category) {
+      exercises = exercises.filter(exercise => exercise.category === category);
+    }
+    
+    return exercises.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  async getExerciseById(id: number): Promise<Exercise | undefined> {
+    return this.exercises.get(id);
+  }
+
+  async createExercise(insertExercise: InsertExercise): Promise<Exercise> {
+    const id = this.currentIds.exercises++;
+    const exercise: Exercise = {
+      ...insertExercise,
+      id,
+      createdAt: new Date(),
+    };
+    this.exercises.set(id, exercise);
+    return exercise;
+  }
+
+  async searchExercises(query: string): Promise<Exercise[]> {
+    const searchTerms = query.toLowerCase().split(' ').filter(term => term.length > 0);
+    
+    return Array.from(this.exercises.values())
+      .filter(exercise => {
+        const searchText = `${exercise.name} ${exercise.description} ${exercise.muscleGroups?.join(' ') || ''}`.toLowerCase();
+        return searchTerms.every(term => searchText.includes(term));
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  // Workout Session methods
+  async getCharacterWorkoutSessions(characterId: number): Promise<WorkoutSession[]> {
+    return Array.from(this.workoutSessions.values())
+      .filter(session => session.characterId === characterId)
+      .sort((a, b) => b.startTime.getTime() - a.startTime.getTime());
+  }
+
+  async getWorkoutSessionById(id: number): Promise<WorkoutSession | undefined> {
+    return this.workoutSessions.get(id);
+  }
+
+  async createWorkoutSession(insertSession: InsertWorkoutSession): Promise<WorkoutSession> {
+    const id = this.currentIds.workoutSessions++;
+    const session: WorkoutSession = {
+      ...insertSession,
+      id,
+      createdAt: new Date(),
+    };
+    this.workoutSessions.set(id, session);
+    return session;
+  }
+  
+  // Exercise Entry methods
+  async getExerciseEntriesBySession(sessionId: number): Promise<ExerciseEntry[]> {
+    return Array.from(this.exerciseEntries.values())
+      .filter(entry => entry.sessionId === sessionId)
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  }
+
+  async createExerciseEntry(insertEntry: InsertExerciseEntry): Promise<ExerciseEntry> {
+    const id = this.currentIds.exerciseEntries++;
+    const entry: ExerciseEntry = {
+      ...insertEntry,
+      id,
+      createdAt: new Date(),
+    };
+    this.exerciseEntries.set(id, entry);
+    return entry;
   }
 }
 

@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, json, numeric } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -124,6 +124,53 @@ export const workoutTemplates = pgTable("workout_templates", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// New detailed exercise tracking system based on Physical Activities Compendium
+export const exercises = pgTable("exercises", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  category: text("category").notNull(), // strength, cardio, flexibility, etc
+  metValue: numeric("met_value").notNull(), // MET value from compendium
+  compendiumCode: text("compendium_code"), // Original code from compendium
+  description: text("description").notNull(),
+  trackingType: text("tracking_type").notNull(), // 'reps_sets', 'time_distance', 'time_only', 'distance_only'
+  muscleGroups: text("muscle_groups").array(),
+  equipment: text("equipment").array(),
+  instructions: text("instructions"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const workoutSessions = pgTable("workout_sessions", {
+  id: serial("id").primaryKey(),
+  characterId: integer("character_id").notNull(),
+  name: text("name").notNull(), // e.g., "Upper Body Strength", "Morning Cardio"
+  totalDuration: integer("total_duration").notNull(), // in minutes
+  totalCaloriesBurned: integer("total_calories_burned").notNull(),
+  xpGained: integer("xp_gained").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const exerciseEntries = pgTable("exercise_entries", {
+  id: serial("id").primaryKey(),
+  workoutSessionId: integer("workout_session_id").notNull(),
+  exerciseId: integer("exercise_id").notNull(),
+  // For strength training (reps/sets)
+  sets: integer("sets"),
+  reps: text("reps"), // JSON string of reps per set, e.g., "[12,10,8]"
+  weight: numeric("weight"), // in pounds or kg
+  // For cardio (time/distance)
+  duration: integer("duration"), // in minutes
+  distance: numeric("distance"), // in miles/km
+  pace: numeric("pace"), // speed or pace
+  // For stairs/elevation
+  floors: integer("floors"),
+  elevation: numeric("elevation"),
+  // General
+  caloriesBurned: integer("calories_burned").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Insert schemas
 export const insertCharacterSchema = createInsertSchema(characters).omit({
   id: true,
@@ -165,6 +212,21 @@ export const insertWorkoutTemplateSchema = createInsertSchema(workoutTemplates).
   createdAt: true,
 });
 
+export const insertExerciseSchema = createInsertSchema(exercises).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertWorkoutSessionSchema = createInsertSchema(workoutSessions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertExerciseEntrySchema = createInsertSchema(exerciseEntries).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type Character = typeof characters.$inferSelect;
 export type InsertCharacter = z.infer<typeof insertCharacterSchema>;
@@ -189,3 +251,12 @@ export type InsertFoodDatabaseItem = z.infer<typeof insertFoodDatabaseSchema>;
 
 export type WorkoutTemplate = typeof workoutTemplates.$inferSelect;
 export type InsertWorkoutTemplate = z.infer<typeof insertWorkoutTemplateSchema>;
+
+export type Exercise = typeof exercises.$inferSelect;
+export type InsertExercise = z.infer<typeof insertExerciseSchema>;
+
+export type WorkoutSession = typeof workoutSessions.$inferSelect;
+export type InsertWorkoutSession = z.infer<typeof insertWorkoutSessionSchema>;
+
+export type ExerciseEntry = typeof exerciseEntries.$inferSelect;
+export type InsertExerciseEntry = z.infer<typeof insertExerciseEntrySchema>;

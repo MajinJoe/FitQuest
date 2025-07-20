@@ -9,7 +9,7 @@ export default function BottomNavigation({ currentPath }: BottomNavigationProps)
   const navItems = [
     { path: "/", icon: Home, label: "Quest Hub" },
     { path: "/nutrition", icon: Utensils, label: "Nutrition" },
-    { path: "/workouts", icon: Dumbbell, label: "Training" },
+    { path: "/exercises", icon: Dumbbell, label: "Exercises" },
     { path: "/character", icon: User, label: "Character" },
     { path: "/progress", icon: TrendingUp, label: "Progress" },
   ];

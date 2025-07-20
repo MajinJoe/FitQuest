@@ -4,7 +4,8 @@ import { storage } from "./storage";
 import { 
   insertCharacterSchema, insertQuestSchema, insertActivitySchema,
   insertNutritionLogSchema, insertWorkoutLogSchema, insertAchievementSchema,
-  insertFoodDatabaseSchema, insertWorkoutTemplateSchema
+  insertFoodDatabaseSchema, insertWorkoutTemplateSchema,
+  insertExerciseSchema, insertWorkoutSessionSchema, insertExerciseEntrySchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -240,8 +241,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const xpGained = todaysActivities.reduce((sum, activity) => sum + activity.xpGained, 0);
       const caloriesBurned = todaysActivities
-        .filter(activity => activity.metadata && activity.metadata.caloriesBurned)
-        .reduce((sum, activity) => sum + (activity.metadata!.caloriesBurned as number), 0);
+        .filter(activity => activity.metadata && typeof activity.metadata === 'object' && 'caloriesBurned' in activity.metadata)
+        .reduce((sum, activity) => sum + (activity.metadata as any).caloriesBurned, 0);
       
       const workoutsCompleted = todaysActivities.filter(activity => 
         activity.type === "workout"
@@ -527,6 +528,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(template);
     } catch (error) {
       res.status(500).json({ message: "Failed to import from WGER" });
+    }
+  });
+
+  // Exercise routes (Physical Activities Compendium)
+  app.get("/api/exercises", async (req, res) => {
+    try {
+      const { category } = req.query;
+      const exercises = await storage.getExercises(category as string);
+      res.json(exercises);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get exercises" });
+    }
+  });
+
+  app.get("/api/exercises/search", async (req, res) => {
+    try {
+      const { q } = req.query;
+      if (!q || typeof q !== 'string') {
+        return res.status(400).json({ message: "Search query required" });
+      }
+      const exercises = await storage.searchExercises(q);
+      res.json(exercises);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to search exercises" });
+    }
+  });
+
+  app.get("/api/exercises/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const exercise = await storage.getExerciseById(parseInt(id));
+      
+      if (!exercise) {
+        return res.status(404).json({ message: "Exercise not found" });
+      }
+      
+      res.json(exercise);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get exercise" });
+    }
+  });
+
+  app.post("/api/exercises", async (req, res) => {
+    try {
+      const exerciseData = insertExerciseSchema.parse(req.body);
+      const exercise = await storage.createExercise(exerciseData);
+      res.status(201).json(exercise);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create exercise" });
+    }
+  });
+
+  // Workout Session routes
+  app.get("/api/workout-sessions", async (req, res) => {
+    try {
+      const sessions = await storage.getCharacterWorkoutSessions(characterId);
+      res.json(sessions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get workout sessions" });
+    }
+  });
+
+  app.get("/api/workout-sessions/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const session = await storage.getWorkoutSessionById(parseInt(id));
+      
+      if (!session) {
+        return res.status(404).json({ message: "Workout session not found" });
+      }
+      
+      res.json(session);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get workout session" });
+    }
+  });
+
+  app.post("/api/workout-sessions", async (req, res) => {
+    try {
+      const sessionData = insertWorkoutSessionSchema.parse({
+        ...req.body,
+        characterId,
+      });
+      const session = await storage.createWorkoutSession(sessionData);
+      res.status(201).json(session);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create workout session" });
+    }
+  });
+
+  // Exercise Entry routes
+  app.get("/api/workout-sessions/:sessionId/exercises", async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const entries = await storage.getExerciseEntriesBySession(parseInt(sessionId));
+      res.json(entries);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get exercise entries" });
+    }
+  });
+
+  app.post("/api/exercise-entries", async (req, res) => {
+    try {
+      const entryData = insertExerciseEntrySchema.parse(req.body);
+      const entry = await storage.createExerciseEntry(entryData);
+      res.status(201).json(entry);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create exercise entry" });
     }
   });
 

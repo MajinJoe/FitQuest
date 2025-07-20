@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/home";
 import Nutrition from "@/pages/nutrition";
 import Workouts from "@/pages/workouts";
+import ExerciseTracking from "@/pages/exercise-tracking";
 import Character from "@/pages/character";
 import Progress from "@/pages/progress";
 import NotFound from "@/pages/not-found";
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/nutrition" component={Nutrition} />
       <Route path="/workouts" component={Workouts} />
+      <Route path="/exercises" component={ExerciseTracking} />
       <Route path="/character" component={Character} />
       <Route path="/progress" component={Progress} />
       <Route component={NotFound} />

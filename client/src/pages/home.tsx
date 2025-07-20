@@ -22,7 +22,12 @@ export default function Home() {
     queryKey: ["/api/activities"],
   });
 
-  const { data: dailyStats } = useQuery({
+  const { data: dailyStats } = useQuery<{
+    xpGained: number;
+    caloriesBurned: number;
+    workoutsCompleted: number;
+    totalWorkouts: number;
+  }>({
     queryKey: ["/api/stats/daily"],
   });
 
