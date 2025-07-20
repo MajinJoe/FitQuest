@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { searchOpenFoodFacts } from "@/lib/foodService";
+import { searchOpenFoodFacts, searchUSDAFoodDatabase } from "@/lib/foodService";
 
 interface FoodDatabaseProps {
   onSelectFood: (food: FoodDatabaseItem) => void;
@@ -39,13 +39,31 @@ export default function FoodDatabase({ onSelectFood }: FoodDatabaseProps) {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Search Open Food Facts database
+  // Search USDA Food Database (primary external source)
+  const { data: usdaResults, isLoading: usdaLoading } = useQuery<any[]>({
+    queryKey: ['usda', searchTerm],
+    queryFn: () => searchUSDAFoodDatabase(searchTerm),
+    enabled: searchTerm.length >= 3,
+    staleTime: 15 * 60 * 1000, // Cache longer for external API
+  });
+
+  // Search Open Food Facts database (secondary source)
   const { data: openFoodFactsResults, isLoading: openFoodFactsLoading } = useQuery<any[]>({
     queryKey: ['openfoodfacts', searchTerm],
     queryFn: () => searchOpenFoodFacts(searchTerm),
-    enabled: searchTerm.length >= 3, // Require 3+ characters for external API
-    staleTime: 10 * 60 * 1000, // Cache longer for external API
+    enabled: searchTerm.length >= 3,
+    staleTime: 10 * 60 * 1000,
   });
+
+  // Combine external results with USDA taking priority
+  const globalResults = [
+    ...(usdaResults || []),
+    ...(openFoodFactsResults || []).filter(off => 
+      !(usdaResults || []).some(usda => 
+        usda.name.toLowerCase().includes(off.name.toLowerCase().substring(0, 10))
+      )
+    )
+  ].slice(0, 20);
 
   const categories = [
     { value: "all", label: "All Categories" },
@@ -58,15 +76,15 @@ export default function FoodDatabase({ onSelectFood }: FoodDatabaseProps) {
   ];
 
   const handleFoodSelect = async (food: FoodDatabaseItem | any) => {
-    // If it's from Open Food Facts, save it to our database first
-    if (food.isFromOpenFoodFacts) {
+    // If it's from external source, save it to our database first
+    if (food.isFromUSDA || food.isFromOpenFoodFacts) {
       try {
         const response = await fetch('/api/food', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             ...food,
-            source: 'openfoodfacts',
+            source: food.isFromUSDA ? 'usda' : 'openfoodfacts',
             contributedBy: null,
           }),
         });
@@ -79,7 +97,7 @@ export default function FoodDatabase({ onSelectFood }: FoodDatabaseProps) {
           onSelectFood(food);
         }
       } catch (error) {
-        console.error('Error saving Open Food Facts item:', error);
+        console.error('Error saving external food item:', error);
         onSelectFood(food);
       }
     } else {
@@ -148,7 +166,7 @@ export default function FoodDatabase({ onSelectFood }: FoodDatabaseProps) {
                 </TabsTrigger>
                 <TabsTrigger value="global" className="flex items-center gap-2">
                   <Globe className="w-4 h-4" />
-                  Global ({openFoodFactsResults?.length || 0})
+                  Global ({globalResults?.length || 0})
                 </TabsTrigger>
               </TabsList>
 
@@ -171,23 +189,24 @@ export default function FoodDatabase({ onSelectFood }: FoodDatabaseProps) {
               </TabsContent>
 
               <TabsContent value="global" className="max-h-96 overflow-y-auto space-y-2 mt-4">
-                {openFoodFactsLoading ? (
+                {(usdaLoading || openFoodFactsLoading) ? (
                   <div className="text-center py-8">
                     <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-                    <p>Searching Open Food Facts...</p>
+                    <p>Searching USDA & Global Databases...</p>
                   </div>
-                ) : !openFoodFactsResults || openFoodFactsResults.length === 0 ? (
+                ) : !globalResults || globalResults.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     <p>No global foods found</p>
                     <p className="text-sm mt-1">Try different search terms</p>
                   </div>
                 ) : (
-                  openFoodFactsResults.map((food, index) => (
+                  globalResults.map((food, index) => (
                     <FoodResultCard 
-                      key={`off_${index}`} 
+                      key={`global_${index}`} 
                       food={food} 
                       onSelect={handleFoodSelect}
-                      isFromOpenFoodFacts={true}
+                      isFromExternalSource={true}
+                      sourceType={food.isFromUSDA ? "USDA" : "Open Food Facts"}
                     />
                   ))
                 )}
@@ -204,11 +223,13 @@ export default function FoodDatabase({ onSelectFood }: FoodDatabaseProps) {
 function FoodResultCard({ 
   food, 
   onSelect, 
-  isFromOpenFoodFacts = false 
+  isFromExternalSource = false,
+  sourceType = "Local"
 }: { 
   food: any; 
   onSelect: (food: any) => void;
-  isFromOpenFoodFacts?: boolean;
+  isFromExternalSource?: boolean;
+  sourceType?: string;
 }) {
   return (
     <Card className="hover:bg-gray-50 cursor-pointer transition-colors" onClick={() => onSelect(food)}>
@@ -222,10 +243,10 @@ function FoodResultCard({
             <p className="text-xs text-gray-500">{food.servingSize}</p>
           </div>
           <div className="flex items-center gap-2">
-            {isFromOpenFoodFacts && (
+            {isFromExternalSource && (
               <Badge variant="default" className="text-xs">
                 <Globe className="w-3 h-3 mr-1" />
-                Import
+                {sourceType}
               </Badge>
             )}
             {food.verified && (
@@ -269,7 +290,7 @@ function FoodResultCard({
           </div>
         )}
 
-        {isFromOpenFoodFacts && food.ingredients && (
+        {isFromExternalSource && food.ingredients && (
           <div className="mt-2 pt-2 border-t border-gray-100">
             <p className="text-xs text-gray-600 line-clamp-2">
               <span className="font-medium">Ingredients:</span> {food.ingredients}
