@@ -103,6 +103,27 @@ export const foodDatabase = pgTable("food_database", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const workoutTemplates = pgTable("workout_templates", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(), // 'strength', 'cardio', 'flexibility', 'sports'
+  difficulty: text("difficulty").notNull(), // 'beginner', 'intermediate', 'advanced'
+  estimatedDuration: integer("estimated_duration").notNull(), // in minutes
+  estimatedCaloriesBurn: integer("estimated_calories_burn").notNull(),
+  exercises: json("exercises").notNull(), // Array of exercise objects with sets, reps, etc.
+  equipment: text("equipment").array(), // Required equipment
+  targetMuscles: text("target_muscles").array(), // Primary muscle groups
+  source: text("source").notNull().default("wger"), // 'wger', 'custom', 'user'
+  sourceId: text("source_id"), // External ID from WGER or other APIs
+  imageUrl: text("image_url"), // Workout illustration
+  instructions: text("instructions"), // Step-by-step instructions
+  tags: text("tags").array(), // Searchable tags like 'home', 'gym', 'no-equipment'
+  usageCount: integer("usage_count").notNull().default(0), // Track popularity
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Insert schemas
 export const insertCharacterSchema = createInsertSchema(characters).omit({
   id: true,
@@ -139,6 +160,11 @@ export const insertFoodDatabaseSchema = createInsertSchema(foodDatabase).omit({
   createdAt: true,
 });
 
+export const insertWorkoutTemplateSchema = createInsertSchema(workoutTemplates).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type Character = typeof characters.$inferSelect;
 export type InsertCharacter = z.infer<typeof insertCharacterSchema>;
@@ -160,3 +186,6 @@ export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
 
 export type FoodDatabaseItem = typeof foodDatabase.$inferSelect;
 export type InsertFoodDatabaseItem = z.infer<typeof insertFoodDatabaseSchema>;
+
+export type WorkoutTemplate = typeof workoutTemplates.$inferSelect;
+export type InsertWorkoutTemplate = z.infer<typeof insertWorkoutTemplateSchema>;

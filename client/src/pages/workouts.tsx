@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Dumbbell } from "lucide-react";
+import { Plus, Dumbbell, Play, Clock, Flame, Target, Filter, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -11,10 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BottomNavigation from "@/components/bottom-navigation";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { WorkoutLog } from "@shared/schema";
+import type { WorkoutLog, WorkoutTemplate } from "@shared/schema";
 
 const workoutSchema = z.object({
   workoutType: z.string().min(1, "Workout type is required"),
@@ -26,6 +28,10 @@ const workoutSchema = z.object({
 
 export default function Workouts() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<WorkoutTemplate | null>(null);
+  const [activeTab, setActiveTab] = useState("log");
+  const [templateFilter, setTemplateFilter] = useState({ category: "", difficulty: "" });
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -35,6 +41,25 @@ export default function Workouts() {
 
   const { data: todayLogs } = useQuery<WorkoutLog[]>({
     queryKey: ["/api/workouts/today"],
+  });
+
+  const { data: workoutTemplates } = useQuery<WorkoutTemplate[]>({
+    queryKey: ["/api/workout-templates", templateFilter.category, templateFilter.difficulty],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (templateFilter.category) params.append('category', templateFilter.category);
+      if (templateFilter.difficulty) params.append('difficulty', templateFilter.difficulty);
+      return fetch(`/api/workout-templates?${params}`).then(res => res.json());
+    },
+  });
+
+  const { data: searchResults } = useQuery<WorkoutTemplate[]>({
+    queryKey: ["/api/workout-templates/search", searchQuery],
+    queryFn: () => {
+      if (!searchQuery.trim()) return [];
+      return fetch(`/api/workout-templates/search?q=${encodeURIComponent(searchQuery)}`).then(res => res.json());
+    },
+    enabled: searchQuery.trim().length > 0,
   });
 
   const form = useForm<z.infer<typeof workoutSchema>>({
@@ -79,6 +104,48 @@ export default function Workouts() {
       toast({
         title: "Error",
         description: "Failed to log workout",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const startTemplateMutation = useMutation({
+    mutationFn: async (template: WorkoutTemplate) => {
+      // Increment usage count for the template
+      await apiRequest("POST", `/api/workout-templates/${template.id}/use`, {});
+      
+      // Calculate XP based on estimated duration and average intensity (moderate)
+      const xpGained = Math.floor(template.estimatedDuration * 1.5 * 3);
+      
+      const response = await apiRequest("POST", "/api/workouts", {
+        workoutType: template.name,
+        duration: template.estimatedDuration,
+        intensity: "moderate" as const,
+        caloriesBurned: template.estimatedCaloriesBurn,
+        xpGained,
+        notes: `Completed preset workout: ${template.description}`,
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/workouts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/workouts/today"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/character"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats/daily"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates"] });
+      
+      toast({
+        title: "Workout Completed!",
+        description: "Awesome! You earned XP for completing this preset workout!",
+      });
+      
+      setSelectedTemplate(null);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to complete workout",
         variant: "destructive",
       });
     },
@@ -148,158 +215,297 @@ export default function Workouts() {
           </CardContent>
         </Card>
 
-        {/* Add Workout Button */}
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="w-full mb-6 bg-fantasy-purple hover:bg-purple-600 text-white">
-              <Plus className="w-4 h-4 mr-2" />
-              Log New Workout
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-slate-800 border-fantasy-purple">
-            <DialogHeader>
-              <DialogTitle className="text-fantasy-gold">Add Workout</DialogTitle>
-            </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="workoutType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-light-text">Workout Type</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Running, Weight Training, Yoga" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="duration"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-light-text">Duration (min)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            {...field} 
-                            onChange={(e) => field.onChange(Number(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+        {/* Workout Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+          <TabsList className="grid w-full grid-cols-3 bg-slate-800">
+            <TabsTrigger value="log" className="text-gray-300 data-[state=active]:text-fantasy-purple">Log</TabsTrigger>
+            <TabsTrigger value="presets" className="text-gray-300 data-[state=active]:text-fantasy-purple">Presets</TabsTrigger>
+            <TabsTrigger value="history" className="text-gray-300 data-[state=active]:text-fantasy-purple">History</TabsTrigger>
+          </TabsList>
 
-                  <FormField
-                    control={form.control}
-                    name="caloriesBurned"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-light-text">Calories Burned</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            {...field} 
-                            onChange={(e) => field.onChange(Number(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="intensity"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-light-text">Intensity</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select intensity" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="light">Light</SelectItem>
-                          <SelectItem value="moderate">Moderate</SelectItem>
-                          <SelectItem value="intense">Intense</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="notes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-light-text">Notes (optional)</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="How did it feel? Any achievements?"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button 
-                  type="submit" 
-                  className="w-full bg-fantasy-purple hover:bg-purple-600"
-                  disabled={workoutMutation.isPending}
-                >
-                  {workoutMutation.isPending ? "Logging..." : "Complete Workout"}
+          {/* Log Workout Tab */}
+          <TabsContent value="log" className="mt-4">
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="w-full mb-6 bg-fantasy-purple hover:bg-purple-600 text-white">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Log New Workout
                 </Button>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
+              </DialogTrigger>
+              <DialogContent className="bg-slate-800 border-fantasy-purple">
+                <DialogHeader>
+                  <DialogTitle className="text-fantasy-gold">Add Workout</DialogTitle>
+                </DialogHeader>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="workoutType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-light-text">Workout Type</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., Running, Weight Training, Yoga" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="duration"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-light-text">Duration (min)</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                {...field} 
+                                onChange={(e) => field.onChange(Number(e.target.value))}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-        {/* Recent Workouts */}
-        <div className="space-y-3">
-          <h2 className="text-xl font-bold text-light-text">Recent Workouts</h2>
-          {workoutLogs?.slice(0, 10).map((log) => (
-            <Card key={log.id} className="bg-slate-800 border-gray-700">
-              <CardContent className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className="font-semibold text-light-text">{log.workoutType}</h3>
-                    <p className="text-sm text-gray-400">{log.duration} minutes</p>
+                      <FormField
+                        control={form.control}
+                        name="caloriesBurned"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-light-text">Calories Burned</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                {...field} 
+                                onChange={(e) => field.onChange(Number(e.target.value))}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="intensity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-light-text">Intensity</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select intensity" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="light">Light</SelectItem>
+                              <SelectItem value="moderate">Moderate</SelectItem>
+                              <SelectItem value="intense">Intense</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="notes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-light-text">Notes (optional)</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="How did it feel? Any achievements?"
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-fantasy-purple hover:bg-purple-600"
+                      disabled={workoutMutation.isPending}
+                    >
+                      {workoutMutation.isPending ? "Logging..." : "Complete Workout"}
+                    </Button>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
+          </TabsContent>
+
+          {/* Preset Workouts Tab */}
+          <TabsContent value="presets" className="mt-4">
+            <div className="space-y-4">
+              {/* Search and Filters */}
+              <div className="space-y-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    placeholder="Search workouts..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 bg-slate-800 border-gray-700 text-light-text"
+                  />
+                </div>
+                
+                <div className="flex gap-2">
+                  <Select
+                    value={templateFilter.category}
+                    onValueChange={(value) => setTemplateFilter(prev => ({ ...prev, category: value }))}
+                  >
+                    <SelectTrigger className="flex-1 bg-slate-800 border-gray-700">
+                      <SelectValue placeholder="Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Categories</SelectItem>
+                      <SelectItem value="strength">Strength</SelectItem>
+                      <SelectItem value="cardio">Cardio</SelectItem>
+                      <SelectItem value="flexibility">Flexibility</SelectItem>
+                      <SelectItem value="sports">Sports</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select
+                    value={templateFilter.difficulty}
+                    onValueChange={(value) => setTemplateFilter(prev => ({ ...prev, difficulty: value }))}
+                  >
+                    <SelectTrigger className="flex-1 bg-slate-800 border-gray-700">
+                      <SelectValue placeholder="Difficulty" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Levels</SelectItem>
+                      <SelectItem value="beginner">Beginner</SelectItem>
+                      <SelectItem value="intermediate">Intermediate</SelectItem>
+                      <SelectItem value="advanced">Advanced</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Workout Templates Grid */}
+              <div className="space-y-3">
+                {(searchQuery ? searchResults : workoutTemplates)?.map((template) => (
+                  <Card key={template.id} className="bg-slate-800 border-gray-700 hover:border-fantasy-purple transition-colors">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-fantasy-gold mb-1">{template.name}</h3>
+                          <p className="text-sm text-gray-300 mb-2">{template.description}</p>
+                          
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            <Badge variant="outline" className="text-xs border-fantasy-purple text-fantasy-purple">
+                              {template.category}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs border-fantasy-blue text-fantasy-blue">
+                              {template.difficulty}
+                            </Badge>
+                            {template.equipment && template.equipment.length > 0 && (
+                              <Badge variant="outline" className="text-xs border-fantasy-green text-fantasy-green">
+                                {template.equipment.join(', ')}
+                              </Badge>
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center gap-4 text-sm text-gray-400">
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-4 h-4" />
+                              {template.estimatedDuration}min
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Flame className="w-4 h-4" />
+                              {template.estimatedCaloriesBurn} cal
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Target className="w-4 h-4" />
+                              {template.targetMuscles?.slice(0, 2).join(', ')}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <Button 
+                        onClick={() => startTemplateMutation.mutate(template)}
+                        disabled={startTemplateMutation.isPending}
+                        className="w-full bg-fantasy-purple hover:bg-purple-600"
+                      >
+                        <Play className="w-4 h-4 mr-2" />
+                        {startTemplateMutation.isPending ? "Starting..." : "Start Workout"}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+                
+                {(searchQuery ? searchResults : workoutTemplates)?.length === 0 && (
+                  <div className="text-center py-8 text-gray-400">
+                    <Dumbbell className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>No workout templates found</p>
                   </div>
-                  <span className="text-fantasy-gold font-bold text-sm">+{log.xpGained} XP</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className={`font-medium ${getIntensityColor(log.intensity)}`}>
-                    {formatIntensity(log.intensity)}
-                  </span>
-                  <span className="text-gray-400">{log.caloriesBurned} calories burned</span>
-                </div>
-                {log.notes && (
-                  <p className="text-xs text-gray-500 mt-2 italic">{log.notes}</p>
                 )}
-              </CardContent>
-            </Card>
-          ))}
-
-          {(!workoutLogs || workoutLogs.length === 0) && (
-            <div className="text-center py-8 text-gray-400">
-              <Dumbbell className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>No workouts logged yet.</p>
-              <p className="text-sm">Begin your training!</p>
+              </div>
             </div>
-          )}
-        </div>
+          </TabsContent>
+
+          {/* History Tab */}
+          <TabsContent value="history" className="mt-4">
+            <div className="space-y-3">
+              <h2 className="text-xl font-bold text-light-text">Recent Workouts</h2>
+              {workoutLogs?.slice(0, 10).map((log) => (
+                <Card key={log.id} className="bg-slate-800 border-gray-700">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h3 className="font-semibold text-fantasy-gold">{log.workoutType}</h3>
+                        <p className="text-sm text-gray-400">
+                          {new Date(log.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <Badge className={getIntensityColor(log.intensity)}>
+                        {formatIntensity(log.intensity)}
+                      </Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div className="text-center">
+                        <div className="text-fantasy-blue font-bold">{log.duration}</div>
+                        <div className="text-gray-400 text-xs">Minutes</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-fantasy-green font-bold">{log.caloriesBurned}</div>
+                        <div className="text-gray-400 text-xs">Calories</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-fantasy-purple font-bold">{log.xpGained}</div>
+                        <div className="text-gray-400 text-xs">XP</div>
+                      </div>
+                    </div>
+                    
+                    {log.notes && (
+                      <p className="text-sm text-gray-300 mt-3 italic">"{log.notes}"</p>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+              
+              {(!workoutLogs || workoutLogs.length === 0) && (
+                <div className="text-center py-8 text-gray-400">
+                  <Dumbbell className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p>No workouts logged yet</p>
+                  <p className="text-sm">Start your fitness journey today!</p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </main>
 
       <BottomNavigation currentPath="/workouts" />

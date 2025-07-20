@@ -1,12 +1,13 @@
 import { 
-  characters, quests, activities, nutritionLogs, workoutLogs, achievements, foodDatabase,
+  characters, quests, activities, nutritionLogs, workoutLogs, achievements, foodDatabase, workoutTemplates,
   type Character, type InsertCharacter,
   type Quest, type InsertQuest,
   type Activity, type InsertActivity,
   type NutritionLog, type InsertNutritionLog,
   type WorkoutLog, type InsertWorkoutLog,
   type Achievement, type InsertAchievement,
-  type FoodDatabaseItem, type InsertFoodDatabaseItem
+  type FoodDatabaseItem, type InsertFoodDatabaseItem,
+  type WorkoutTemplate, type InsertWorkoutTemplate
 } from "@shared/schema";
 
 export interface IStorage {
@@ -48,6 +49,16 @@ export interface IStorage {
   getPopularFoods(limit?: number): Promise<FoodDatabaseItem[]>;
   getUserContributedFoods(characterId: number): Promise<FoodDatabaseItem[]>;
   incrementUsageCount(foodId: number): Promise<void>;
+  
+  // Workout Template methods
+  getWorkoutTemplates(category?: string, difficulty?: string): Promise<WorkoutTemplate[]>;
+  getWorkoutTemplateById(id: number): Promise<WorkoutTemplate | undefined>;
+  createWorkoutTemplate(template: InsertWorkoutTemplate): Promise<WorkoutTemplate>;
+  searchWorkoutTemplates(query: string): Promise<WorkoutTemplate[]>;
+  getPopularWorkoutTemplates(limit?: number): Promise<WorkoutTemplate[]>;
+  incrementWorkoutTemplateUsage(templateId: number): Promise<void>;
+  fetchWgerWorkouts(): Promise<any>;
+  importFromWger(workoutData: any): Promise<WorkoutTemplate>;
 }
 
 export class MemStorage implements IStorage {
@@ -58,6 +69,7 @@ export class MemStorage implements IStorage {
   private workoutLogs: Map<number, WorkoutLog>;
   private achievements: Map<number, Achievement>;
   private foodDatabaseItems: Map<number, FoodDatabaseItem>;
+  private workoutTemplates: Map<number, WorkoutTemplate>;
   private currentIds: { [key: string]: number };
 
   constructor() {
@@ -68,6 +80,7 @@ export class MemStorage implements IStorage {
     this.workoutLogs = new Map();
     this.achievements = new Map();
     this.foodDatabaseItems = new Map();
+    this.workoutTemplates = new Map();
     this.currentIds = {
       characters: 1,
       quests: 1,
@@ -76,6 +89,7 @@ export class MemStorage implements IStorage {
       workoutLogs: 1,
       achievements: 1,
       foodDatabase: 1,
+      workoutTemplates: 1,
     };
     
     // Create default character and quests
@@ -392,6 +406,115 @@ export class MemStorage implements IStorage {
       this.foodDatabaseItems.set(item.id, item);
     });
     this.currentIds.foodDatabase = foodItems.length + 1;
+
+    // Initialize default workout templates
+    const workoutTemplates: WorkoutTemplate[] = [
+      {
+        id: 1,
+        name: "Push-Up Power",
+        description: "Classic bodyweight upper body workout focusing on chest, shoulders, and triceps",
+        category: "strength",
+        difficulty: "beginner",
+        estimatedDuration: 15,
+        estimatedCaloriesBurn: 120,
+        exercises: [
+          { name: "Push-ups", sets: 3, reps: 10, restTime: 60 },
+          { name: "Incline Push-ups", sets: 2, reps: 8, restTime: 60 },
+          { name: "Wall Push-ups", sets: 2, reps: 15, restTime: 45 }
+        ],
+        equipment: [],
+        targetMuscles: ["chest", "shoulders", "triceps"],
+        source: "custom",
+        sourceId: null,
+        imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+        instructions: "Start with wall push-ups to warm up, then progress to incline push-ups, and finish with regular push-ups. Focus on proper form over speed.",
+        tags: ["bodyweight", "upper-body", "no-equipment", "home"],
+        usageCount: 45,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 2,
+        name: "Cardio Blast",
+        description: "High-intensity interval training to boost cardiovascular fitness",
+        category: "cardio",
+        difficulty: "intermediate",
+        estimatedDuration: 20,
+        estimatedCaloriesBurn: 250,
+        exercises: [
+          { name: "Jumping Jacks", duration: 45, restTime: 15 },
+          { name: "High Knees", duration: 30, restTime: 15 },
+          { name: "Burpees", reps: 5, restTime: 30 },
+          { name: "Mountain Climbers", duration: 30, restTime: 15 }
+        ],
+        equipment: [],
+        targetMuscles: ["full-body", "cardiovascular"],
+        source: "custom",
+        sourceId: null,
+        imageUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+        instructions: "Perform each exercise for the specified time/reps, rest between exercises. Complete 3-4 rounds total.",
+        tags: ["cardio", "hiit", "full-body", "no-equipment"],
+        usageCount: 72,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 3,
+        name: "Strength Foundation",
+        description: "Basic strength training workout using dumbbells",
+        category: "strength",
+        difficulty: "beginner",
+        estimatedDuration: 30,
+        estimatedCaloriesBurn: 180,
+        exercises: [
+          { name: "Dumbbell Squats", sets: 3, reps: 12, restTime: 90 },
+          { name: "Dumbbell Chest Press", sets: 3, reps: 10, restTime: 90 },
+          { name: "Dumbbell Rows", sets: 3, reps: 10, restTime: 90 },
+          { name: "Dumbbell Shoulder Press", sets: 2, reps: 8, restTime: 60 }
+        ],
+        equipment: ["dumbbells"],
+        targetMuscles: ["legs", "chest", "back", "shoulders"],
+        source: "custom",
+        sourceId: null,
+        imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+        instructions: "Use moderate weight that allows you to complete all reps with good form. Rest 90 seconds between sets.",
+        tags: ["strength", "dumbbells", "full-body", "gym"],
+        usageCount: 38,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 4,
+        name: "Flexibility Flow",
+        description: "Gentle stretching routine to improve flexibility and mobility",
+        category: "flexibility",
+        difficulty: "beginner",
+        estimatedDuration: 15,
+        estimatedCaloriesBurn: 60,
+        exercises: [
+          { name: "Cat-Cow Stretch", duration: 60, restTime: 0 },
+          { name: "Downward Dog", duration: 30, restTime: 15 },
+          { name: "Child's Pose", duration: 45, restTime: 0 },
+          { name: "Hip Flexor Stretch", duration: 30, restTime: 15 },
+          { name: "Shoulder Rolls", reps: 10, restTime: 0 }
+        ],
+        equipment: ["yoga-mat"],
+        targetMuscles: ["full-body", "core", "back"],
+        source: "custom",
+        sourceId: null,
+        imageUrl: "https://images.unsplash.com/photo-1506629905963-b3b54d45043d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+        instructions: "Move slowly and breathe deeply. Hold each stretch for the specified time and never force a movement.",
+        tags: ["flexibility", "yoga", "stretching", "recovery"],
+        usageCount: 29,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+    ];
+
+    workoutTemplates.forEach(template => {
+      this.workoutTemplates.set(template.id, template);
+    });
+    this.currentIds.workoutTemplates = workoutTemplates.length + 1;
   }
 
   // Character methods
@@ -699,6 +822,127 @@ export class MemStorage implements IStorage {
       food.updatedAt = new Date();
       this.foodDatabaseItems.set(foodId, food);
     }
+  }
+
+  // Workout Template methods
+  async getWorkoutTemplates(category?: string, difficulty?: string): Promise<WorkoutTemplate[]> {
+    let templates = Array.from(this.workoutTemplates.values());
+    
+    if (category) {
+      templates = templates.filter(template => template.category === category);
+    }
+    
+    if (difficulty) {
+      templates = templates.filter(template => template.difficulty === difficulty);
+    }
+    
+    return templates.sort((a, b) => b.usageCount - a.usageCount);
+  }
+
+  async getWorkoutTemplateById(id: number): Promise<WorkoutTemplate | undefined> {
+    return this.workoutTemplates.get(id);
+  }
+
+  async createWorkoutTemplate(insertTemplate: InsertWorkoutTemplate): Promise<WorkoutTemplate> {
+    const id = this.currentIds.workoutTemplates++;
+    const template: WorkoutTemplate = {
+      ...insertTemplate,
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.workoutTemplates.set(id, template);
+    return template;
+  }
+
+  async searchWorkoutTemplates(query: string): Promise<WorkoutTemplate[]> {
+    const searchTerms = query.toLowerCase().split(' ').filter(term => term.length > 0);
+    
+    return Array.from(this.workoutTemplates.values())
+      .filter(template => {
+        const searchText = `${template.name} ${template.description} ${template.tags?.join(' ') || ''}`.toLowerCase();
+        return searchTerms.every(term => searchText.includes(term));
+      })
+      .sort((a, b) => b.usageCount - a.usageCount);
+  }
+
+  async getPopularWorkoutTemplates(limit = 10): Promise<WorkoutTemplate[]> {
+    return Array.from(this.workoutTemplates.values())
+      .sort((a, b) => b.usageCount - a.usageCount)
+      .slice(0, limit);
+  }
+
+  async incrementWorkoutTemplateUsage(templateId: number): Promise<void> {
+    const template = this.workoutTemplates.get(templateId);
+    if (template) {
+      template.usageCount++;
+      template.updatedAt = new Date();
+      this.workoutTemplates.set(templateId, template);
+    }
+  }
+
+  async fetchWgerWorkouts(): Promise<any> {
+    try {
+      // WGER API endpoint for workouts/exercises
+      const response = await fetch('https://wger.de/api/v2/exercise/?language=2&limit=20');
+      const data = await response.json();
+      
+      if (data.results) {
+        return data.results;
+      }
+      return [];
+    } catch (error) {
+      console.error('Error fetching from WGER API:', error);
+      return [];
+    }
+  }
+
+  async importFromWger(workoutData: any): Promise<WorkoutTemplate> {
+    const template: WorkoutTemplate = {
+      id: this.currentIds.workoutTemplates++,
+      name: workoutData.name || `WGER Exercise ${workoutData.id}`,
+      description: workoutData.description || "Exercise from WGER database",
+      category: this.mapWgerCategory(workoutData.category),
+      difficulty: "intermediate", // Default since WGER doesn't specify
+      estimatedDuration: 20, // Default estimate
+      estimatedCaloriesBurn: 150, // Default estimate
+      exercises: [{
+        name: workoutData.name,
+        sets: 3,
+        reps: 12,
+        restTime: 60,
+        description: workoutData.description
+      }],
+      equipment: workoutData.equipment?.map((eq: any) => eq.name) || [],
+      targetMuscles: workoutData.muscles?.map((muscle: any) => muscle.name) || [],
+      source: "wger",
+      sourceId: workoutData.id?.toString(),
+      imageUrl: null,
+      instructions: workoutData.description || "",
+      tags: ["wger", "exercise"],
+      usageCount: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    this.workoutTemplates.set(template.id, template);
+    return template;
+  }
+
+  private mapWgerCategory(categoryId: number): string {
+    // WGER category mapping
+    const categoryMap: { [key: number]: string } = {
+      1: "strength", // Arms
+      2: "strength", // Legs
+      3: "strength", // Abs
+      4: "strength", // Chest
+      5: "strength", // Back
+      6: "strength", // Shoulders
+      7: "cardio",   // Calves
+      8: "strength"  // Generic
+    };
+    
+    return categoryMap[categoryId] || "strength";
   }
 }
 

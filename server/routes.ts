@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { 
   insertCharacterSchema, insertQuestSchema, insertActivitySchema,
   insertNutritionLogSchema, insertWorkoutLogSchema, insertAchievementSchema,
-  insertFoodDatabaseSchema
+  insertFoodDatabaseSchema, insertWorkoutTemplateSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -424,6 +424,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ message: "Failed to increment usage count" });
+    }
+  });
+
+  // Workout Template routes
+  app.get("/api/workout-templates", async (req, res) => {
+    try {
+      const { category, difficulty } = req.query;
+      const templates = await storage.getWorkoutTemplates(
+        category && typeof category === 'string' ? category : undefined,
+        difficulty && typeof difficulty === 'string' ? difficulty : undefined
+      );
+      res.json(templates);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get workout templates" });
+    }
+  });
+
+  app.get("/api/workout-templates/search", async (req, res) => {
+    try {
+      const { q: query } = req.query;
+      
+      if (!query || typeof query !== 'string') {
+        return res.status(400).json({ message: "Search query required" });
+      }
+      
+      const templates = await storage.searchWorkoutTemplates(query);
+      res.json(templates);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to search workout templates" });
+    }
+  });
+
+  app.get("/api/workout-templates/popular", async (req, res) => {
+    try {
+      const { limit } = req.query;
+      const popularTemplates = await storage.getPopularWorkoutTemplates(
+        limit ? parseInt(limit as string) : 10
+      );
+      res.json(popularTemplates);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get popular workout templates" });
+    }
+  });
+
+  app.get("/api/workout-templates/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const template = await storage.getWorkoutTemplateById(parseInt(id));
+      
+      if (!template) {
+        return res.status(404).json({ message: "Workout template not found" });
+      }
+      
+      res.json(template);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get workout template" });
+    }
+  });
+
+  app.post("/api/workout-templates", async (req, res) => {
+    try {
+      const templateData = insertWorkoutTemplateSchema.parse(req.body);
+      const template = await storage.createWorkoutTemplate(templateData);
+      res.status(201).json(template);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create workout template" });
+    }
+  });
+
+  app.post("/api/workout-templates/:id/use", async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.incrementWorkoutTemplateUsage(parseInt(id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to increment workout template usage" });
+    }
+  });
+
+  app.get("/api/wger/exercises", async (req, res) => {
+    try {
+      const exercises = await storage.fetchWgerWorkouts();
+      res.json(exercises);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch WGER exercises" });
+    }
+  });
+
+  app.post("/api/wger/import", async (req, res) => {
+    try {
+      const { exerciseData } = req.body;
+      
+      if (!exerciseData) {
+        return res.status(400).json({ message: "Exercise data required" });
+      }
+      
+      const template = await storage.importFromWger(exerciseData);
+      res.status(201).json(template);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to import from WGER" });
     }
   });
 
