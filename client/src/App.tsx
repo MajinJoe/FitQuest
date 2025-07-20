@@ -9,6 +9,7 @@ import Workouts from "@/pages/workouts";
 import ExerciseTracking from "@/pages/exercise-tracking";
 import Character from "@/pages/character";
 import Progress from "@/pages/progress";
+import ProfileSettings from "@/pages/profile-settings";
 import NotFound from "@/pages/not-found";
 
 // Router component for handling application routes
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/exercises" component={ExerciseTracking} />
       <Route path="/character" component={Character} />
       <Route path="/progress" component={Progress} />
+      <Route path="/profile/settings" component={ProfileSettings} />
       <Route component={NotFound} />
     </Switch>
   );

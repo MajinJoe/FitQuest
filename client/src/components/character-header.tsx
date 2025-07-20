@@ -1,4 +1,5 @@
 import { Cog } from "lucide-react";
+import { Link } from "wouter";
 import type { Character } from "@shared/schema";
 
 interface CharacterHeaderProps {
@@ -33,9 +34,11 @@ export default function CharacterHeader({ character, dailyStats }: CharacterHead
             <p className="text-sm text-gray-300">{character.class}</p>
           </div>
         </div>
-        <button className="text-fantasy-gold hover:text-yellow-300 transition-colors">
-          <Cog className="w-6 h-6" />
-        </button>
+        <Link href="/profile/settings">
+          <button className="text-fantasy-gold hover:text-yellow-300 transition-colors">
+            <Cog className="w-6 h-6" />
+          </button>
+        </Link>
       </div>
 
       {/* XP Progress Bar */}

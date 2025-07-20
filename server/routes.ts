@@ -5,7 +5,8 @@ import {
   insertCharacterSchema, insertQuestSchema, insertActivitySchema,
   insertNutritionLogSchema, insertWorkoutLogSchema, insertAchievementSchema,
   insertFoodDatabaseSchema, insertWorkoutTemplateSchema,
-  insertExerciseSchema, insertWorkoutSessionSchema, insertExerciseEntrySchema
+  insertExerciseSchema, insertWorkoutSessionSchema, insertExerciseEntrySchema,
+  updateCharacterProfileSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -39,6 +40,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to update character" });
+    }
+  });
+
+  // Character profile update (name, avatar only)
+  app.patch("/api/character/profile", async (req, res) => {
+    try {
+      const updates = updateCharacterProfileSchema.parse(req.body);
+      const character = await storage.updateCharacter(characterId, updates);
+      if (!character) {
+        return res.status(404).json({ message: "Character not found" });
+      }
+      res.json(character);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update profile" });
     }
   });
 

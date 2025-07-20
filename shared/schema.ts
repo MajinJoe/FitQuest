@@ -177,6 +177,17 @@ export const insertCharacterSchema = createInsertSchema(characters).omit({
   createdAt: true,
 });
 
+export const updateCharacterProfileSchema = createInsertSchema(characters)
+  .omit({
+    id: true,
+    createdAt: true,
+    level: true,
+    currentXP: true,
+    nextLevelXP: true,
+    totalXP: true,
+  })
+  .partial();
+
 export const insertQuestSchema = createInsertSchema(quests).omit({
   id: true,
   createdAt: true,
@@ -239,6 +250,7 @@ export const insertExerciseEntrySchema = createInsertSchema(exerciseEntries).omi
 // Types
 export type Character = typeof characters.$inferSelect;
 export type InsertCharacter = z.infer<typeof insertCharacterSchema>;
+export type UpdateCharacterProfile = z.infer<typeof updateCharacterProfileSchema>;
 
 export type Quest = typeof quests.$inferSelect;
 export type InsertQuest = z.infer<typeof insertQuestSchema>;
