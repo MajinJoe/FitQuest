@@ -162,35 +162,33 @@ export default function ExerciseTracking() {
       </div>
 
       {/* Header */}
-      <div className="p-4 space-y-4">
+      <div className="p-3 space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-light-text flex items-center gap-2">
-              <Dumbbell className="h-6 w-6 text-fantasy-gold" />
-              Exercise Tracking
+            <h1 className="text-xl font-bold text-light-text flex items-center gap-2">
+              <Dumbbell className="h-5 w-5 text-fantasy-gold" />
+              Exercises
             </h1>
-            <p className="text-gray-400 text-sm mt-1">
-              Track workouts with Physical Activities Compendium
-            </p>
           </div>
           
           {!activeSession ? (
             <Button 
               onClick={startNewSession} 
               disabled={createSessionMutation.isPending}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white gap-2"
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm px-3 py-1"
+              size="sm"
             >
-              <Play className="h-4 w-4" />
-              Start Workout
+              <Play className="h-3 w-3 mr-1" />
+              Start
             </Button>
           ) : (
-            <div className="flex gap-2">
-              <Badge variant="secondary" className="px-3 py-1 bg-green-900 text-green-300">
+            <div className="flex gap-1">
+              <Badge variant="secondary" className="px-2 py-1 bg-green-900 text-green-300 text-xs">
                 <Timer className="h-3 w-3 mr-1" />
                 Active
               </Badge>
-              <Button onClick={endSession} variant="outline" size="sm" className="border-gray-600 text-gray-300">
-                End Session
+              <Button onClick={endSession} variant="outline" size="sm" className="border-gray-600 text-gray-300 text-xs px-2 py-1">
+                End
               </Button>
             </div>
           )}
@@ -198,30 +196,29 @@ export default function ExerciseTracking() {
       </div>
 
       {/* Main Content */}
-      <main className="px-4 pb-20">
+      <main className="px-3 pb-20">
         {activeSession && (
-          <Card className="border-green-800 bg-green-950/30 mb-4">
-            <CardHeader>
-              <CardTitle className="text-green-300">Active Workout Session</CardTitle>
-              <CardDescription className="text-gray-400">{activeSession.name}</CardDescription>
+          <Card className="border-green-800 bg-green-950/30 mb-3">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-green-300 text-sm">{activeSession.name}</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-4 text-center">
+            <CardContent className="pt-0">
+              <div className="grid grid-cols-3 gap-3 text-center">
                 <div>
-                  <div className="text-2xl font-bold text-green-400">{exerciseEntries.length}</div>
-                  <div className="text-sm text-gray-500">Exercises</div>
+                  <div className="text-lg font-bold text-green-400">{exerciseEntries.length}</div>
+                  <div className="text-xs text-gray-500">Exercises</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-green-400">
+                  <div className="text-lg font-bold text-green-400">
                     {exerciseEntries.reduce((sum, entry) => sum + entry.caloriesBurned, 0)}
                   </div>
-                  <div className="text-sm text-gray-500">Calories</div>
+                  <div className="text-xs text-gray-500">Calories</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-green-400">
+                  <div className="text-lg font-bold text-green-400">
                     {Math.round((Date.now() - new Date(activeSession.createdAt).getTime()) / 60000)}
                   </div>
-                  <div className="text-sm text-gray-500">Minutes</div>
+                  <div className="text-xs text-gray-500">Minutes</div>
                 </div>
               </div>
             </CardContent>
@@ -229,48 +226,43 @@ export default function ExerciseTracking() {
         )}
 
         <Tabs defaultValue="browse" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-slate-800 border-slate-700">
-            <TabsTrigger value="browse" className="text-gray-300 data-[state=active]:bg-slate-700 data-[state=active]:text-fantasy-gold">Browse Exercises</TabsTrigger>
-            <TabsTrigger value="sessions" className="text-gray-300 data-[state=active]:bg-slate-700 data-[state=active]:text-fantasy-gold">Workout History</TabsTrigger>
-            <TabsTrigger value="stats" className="text-gray-300 data-[state=active]:bg-slate-700 data-[state=active]:text-fantasy-gold">Progress Stats</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 bg-slate-800 border-slate-700 h-9">
+            <TabsTrigger value="browse" className="text-gray-300 data-[state=active]:bg-slate-700 data-[state=active]:text-fantasy-gold text-xs">Browse</TabsTrigger>
+            <TabsTrigger value="sessions" className="text-gray-300 data-[state=active]:bg-slate-700 data-[state=active]:text-fantasy-gold text-xs">History</TabsTrigger>
+            <TabsTrigger value="stats" className="text-gray-300 data-[state=active]:bg-slate-700 data-[state=active]:text-fantasy-gold text-xs">Stats</TabsTrigger>
           </TabsList>
 
-        <TabsContent value="browse" className="space-y-4">
-          <div className="flex gap-4 items-end">
-            <div className="flex-1">
-              <Label htmlFor="search" className="text-gray-300">Search Exercises</Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
-                <Input
-                  id="search"
-                  placeholder="Search by exercise name or muscle group..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-slate-800 border-slate-600 text-gray-200 placeholder-gray-500"
-                />
-              </div>
+        <TabsContent value="browse" className="space-y-3">
+          <div className="space-y-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+              <Input
+                placeholder="Search exercises..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-slate-800 border-slate-600 text-gray-200 placeholder-gray-500 h-9"
+              />
             </div>
-            <div className="w-48">
-              <Label className="text-gray-300">Category</Label>
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="bg-slate-800 border-slate-600 text-gray-200">
-                  <SelectValue placeholder="All categories" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-600">
-                  <SelectItem value="all">All categories</SelectItem>
-                  <SelectItem value="strength">Strength Training</SelectItem>
-                  <SelectItem value="cardio">Cardio</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="bg-slate-800 border-slate-600 text-gray-200 h-9">
+                <SelectValue placeholder="All categories" />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-slate-600">
+                <SelectItem value="all">All categories</SelectItem>
+                <SelectItem value="strength">Strength Training</SelectItem>
+                <SelectItem value="cardio">Cardio</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-3">
             {exercisesLoading ? (
               <div className="col-span-full text-center py-8">Loading exercises...</div>
             ) : displayedExercises.length === 0 ? (
-              <div className="col-span-full text-center py-8">
-                {searchQuery ? "No exercises found for your search" : "No exercises available"}
+              <div className="text-center py-6">
+                <p className="text-gray-400 text-sm">
+                  {searchQuery ? "No exercises found for your search" : "No exercises available"}
+                </p>
               </div>
             ) : (
               displayedExercises.map((exercise) => (
@@ -294,10 +286,10 @@ export default function ExerciseTracking() {
         </TabsContent>
 
         <TabsContent value="sessions">
-          <div className="space-y-4">
+          <div className="space-y-3">
             {workoutSessions.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">No workout sessions yet. Start your first workout!</p>
+              <div className="text-center py-6">
+                <p className="text-gray-400 text-sm">No workout sessions yet. Start your first workout!</p>
               </div>
             ) : (
               workoutSessions.map((session) => (
@@ -308,48 +300,35 @@ export default function ExerciseTracking() {
         </TabsContent>
 
         <TabsContent value="stats">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-3">
             <Card className="bg-slate-800 border-slate-700">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-light-text">
-                  <Target className="h-5 w-5 text-fantasy-gold" />
-                  Total Sessions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-fantasy-gold">{workoutSessions.length}</div>
+              <CardContent className="p-3 text-center">
+                <Target className="h-4 w-4 text-fantasy-gold mx-auto mb-1" />
+                <div className="text-lg font-bold text-fantasy-gold">{workoutSessions.length}</div>
+                <div className="text-xs text-gray-400">Sessions</div>
               </CardContent>
             </Card>
             
             <Card className="bg-slate-800 border-slate-700">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-light-text">
-                  <Zap className="h-5 w-5 text-fantasy-purple" />
-                  Total Calories
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-fantasy-purple">
+              <CardContent className="p-3 text-center">
+                <Zap className="h-4 w-4 text-fantasy-purple mx-auto mb-1" />
+                <div className="text-lg font-bold text-fantasy-purple">
                   {workoutSessions.reduce((sum, session) => sum + (session.totalCaloriesBurned || 0), 0)}
                 </div>
+                <div className="text-xs text-gray-400">Calories</div>
               </CardContent>
             </Card>
 
             <Card className="bg-slate-800 border-slate-700">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-light-text">
-                  <Timer className="h-5 w-5 text-fantasy-green" />
-                  This Week
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-fantasy-green">
+              <CardContent className="p-3 text-center">
+                <Timer className="h-4 w-4 text-fantasy-green mx-auto mb-1" />
+                <div className="text-lg font-bold text-fantasy-green">
                   {workoutSessions.filter(session => {
                     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
                     return new Date(session.createdAt) > weekAgo;
                   }).length}
                 </div>
-                <p className="text-sm text-gray-400">sessions</p>
+                <div className="text-xs text-gray-400">This Week</div>
               </CardContent>
             </Card>
           </div>
@@ -386,49 +365,47 @@ function ExerciseCard({
 }) {
   return (
     <Card className="bg-slate-800 border-slate-700 hover:shadow-md transition-shadow">
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div>
-            <CardTitle className="text-lg text-light-text">{exercise.name}</CardTitle>
-            <CardDescription className="text-sm text-gray-400">{exercise.description}</CardDescription>
-          </div>
-          <Badge variant={exercise.category === "strength" ? "default" : "secondary"} 
-                 className={exercise.category === "strength" ? "bg-blue-600 text-white" : "bg-purple-600 text-white"}>
-            {exercise.category}
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="p-3">
         <div className="space-y-2">
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-400">MET Value:</span>
-            <span className="font-medium text-gray-200">{exercise.metValue}</span>
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <h3 className="font-semibold text-light-text text-sm leading-tight">{exercise.name}</h3>
+              <p className="text-xs text-gray-400 mt-1 line-clamp-2">{exercise.description}</p>
+            </div>
+            <Badge variant={exercise.category === "strength" ? "default" : "secondary"} 
+                   className={`text-xs ml-2 ${exercise.category === "strength" ? "bg-blue-600 text-white" : "bg-purple-600 text-white"}`}>
+              {exercise.category === "strength" ? "STR" : "CAR"}
+            </Badge>
           </div>
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-400">Tracking:</span>
-            <span className="font-medium text-gray-200">
-              {exercise.trackingType === "reps_sets" ? "Reps & Sets" : 
-               exercise.trackingType === "time_distance" ? "Time & Distance" : "Time Only"}
+          
+          <div className="flex justify-between items-center text-xs">
+            <span className="text-gray-400">MET: {exercise.metValue}</span>
+            <span className="text-gray-400">
+              {exercise.trackingType === "reps_sets" ? "Reps/Sets" : 
+               exercise.trackingType === "time_distance" ? "Time/Dist" : "Time"}
             </span>
           </div>
+          
           {exercise.muscleGroups && exercise.muscleGroups.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-2">
-              {exercise.muscleGroups.slice(0, 3).map((muscle) => (
-                <Badge key={muscle} variant="outline" className="text-xs border-gray-600 text-gray-300">
+            <div className="flex flex-wrap gap-1">
+              {exercise.muscleGroups.slice(0, 2).map((muscle) => (
+                <Badge key={muscle} variant="outline" className="text-xs border-gray-600 text-gray-300 px-1 py-0">
                   {muscle}
                 </Badge>
               ))}
-              {exercise.muscleGroups.length > 3 && (
-                <Badge variant="outline" className="text-xs border-gray-600 text-gray-300">
-                  +{exercise.muscleGroups.length - 3}
+              {exercise.muscleGroups.length > 2 && (
+                <Badge variant="outline" className="text-xs border-gray-600 text-gray-300 px-1 py-0">
+                  +{exercise.muscleGroups.length - 2}
                 </Badge>
               )}
             </div>
           )}
+          
           <Button 
-            className={`w-full mt-3 ${canLog 
+            className={`w-full text-xs py-1.5 ${canLog 
               ? "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white" 
               : "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"}`}
+            size="sm"
             onClick={() => {
               if (!canLog && onStartSession) {
                 onStartSession();
@@ -437,8 +414,8 @@ function ExerciseCard({
               }
             }}
           >
-            <Plus className="h-4 w-4 mr-2" />
-            {canLog ? "Add to Workout" : "Start Session & Add"}
+            <Plus className="h-3 w-3 mr-1" />
+            {canLog ? "Add" : "Start & Add"}
           </Button>
         </div>
       </CardContent>
@@ -450,23 +427,21 @@ function ExerciseCard({
 function SessionCard({ session }: { session: WorkoutSession }) {
   return (
     <Card className="bg-slate-800 border-slate-700">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between text-light-text">
-          <span>{session.name}</span>
-          <Badge variant="outline" className="border-gray-600 text-gray-300">
+      <CardContent className="p-3">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-semibold text-light-text text-sm">{session.name}</h3>
+          <Badge variant="outline" className="border-gray-600 text-gray-300 text-xs">
             {new Date(session.createdAt).toLocaleDateString()}
           </Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-4">
+        </div>
+        <div className="grid grid-cols-2 gap-3 text-center">
           <div>
-            <div className="text-2xl font-bold text-fantasy-green">{session.totalDuration}</div>
-            <div className="text-sm text-gray-400">minutes</div>
+            <div className="text-lg font-bold text-fantasy-green">{session.totalDuration}</div>
+            <div className="text-xs text-gray-400">minutes</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-fantasy-purple">{session.totalCaloriesBurned}</div>
-            <div className="text-sm text-gray-400">calories</div>
+            <div className="text-lg font-bold text-fantasy-purple">{session.totalCaloriesBurned}</div>
+            <div className="text-xs text-gray-400">calories</div>
           </div>
         </div>
       </CardContent>
