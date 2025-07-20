@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BottomNavigation from "@/components/bottom-navigation";
@@ -47,8 +47,8 @@ export default function Workouts() {
     queryKey: ["/api/workout-templates", templateFilter.category, templateFilter.difficulty],
     queryFn: () => {
       const params = new URLSearchParams();
-      if (templateFilter.category) params.append('category', templateFilter.category);
-      if (templateFilter.difficulty) params.append('difficulty', templateFilter.difficulty);
+      if (templateFilter.category && templateFilter.category !== 'all') params.append('category', templateFilter.category);
+      if (templateFilter.difficulty && templateFilter.difficulty !== 'all') params.append('difficulty', templateFilter.difficulty);
       return fetch(`/api/workout-templates?${params}`).then(res => res.json());
     },
   });
@@ -235,6 +235,9 @@ export default function Workouts() {
               <DialogContent className="bg-slate-800 border-fantasy-purple">
                 <DialogHeader>
                   <DialogTitle className="text-fantasy-gold">Add Workout</DialogTitle>
+                  <DialogDescription className="text-gray-300">
+                    Log your completed workout to earn XP and track your progress.
+                  </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -367,7 +370,7 @@ export default function Workouts() {
                       <SelectValue placeholder="Category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Categories</SelectItem>
+                      <SelectItem value="all">All Categories</SelectItem>
                       <SelectItem value="strength">Strength</SelectItem>
                       <SelectItem value="cardio">Cardio</SelectItem>
                       <SelectItem value="flexibility">Flexibility</SelectItem>
@@ -383,7 +386,7 @@ export default function Workouts() {
                       <SelectValue placeholder="Difficulty" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Levels</SelectItem>
+                      <SelectItem value="all">All Levels</SelectItem>
                       <SelectItem value="beginner">Beginner</SelectItem>
                       <SelectItem value="intermediate">Intermediate</SelectItem>
                       <SelectItem value="advanced">Advanced</SelectItem>
