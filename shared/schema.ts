@@ -89,7 +89,18 @@ export const foodDatabase = pgTable("food_database", {
   sodium: integer("sodium").default(0), // in mg
   verified: boolean("verified").notNull().default(true),
   barcode: text("barcode"), // UPC/EAN for barcode scanning
+  source: text("source").notNull().default("manual"), // 'openfoodfacts', 'user', 'manual', 'admin'
+  sourceId: text("source_id"), // External ID from Open Food Facts or other APIs
+  contributedBy: integer("contributed_by"), // Character ID who added this food
+  imageUrl: text("image_url"), // Product or meal photo
+  ingredients: text("ingredients"), // Comma-separated list
+  allergens: text("allergens"), // Common allergens present
+  isHomemade: boolean("is_homemade").notNull().default(false),
+  recipe: text("recipe"), // For homemade meals
+  tags: text("tags").array(), // Searchable tags like 'vegan', 'gluten-free', etc.
+  usageCount: integer("usage_count").notNull().default(0), // Track popularity
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // Insert schemas

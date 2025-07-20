@@ -57,6 +57,7 @@ export default function Nutrition() {
 
   const nutritionMutation = useMutation({
     mutationFn: async (data: z.infer<typeof nutritionSchema>) => {
+      // Calculate XP based on calories (simple formula)
       const xpGained = Math.floor(data.calories / 10) + (data.protein > 0 ? 20 : 0);
       
       const response = await apiRequest("POST", "/api/nutrition", {
@@ -96,6 +97,7 @@ export default function Nutrition() {
   // Handle barcode scan result with enhanced feedback
   const handleBarcodeResult = (barcode: string, productData?: FoodDatabaseItem | null) => {
     if (productData) {
+      // Auto-fill form with scanned product data
       form.setValue("foodName", productData.name);
       form.setValue("calories", productData.calories || 0);
       form.setValue("protein", productData.protein || 0);
@@ -167,9 +169,9 @@ export default function Nutrition() {
       <header className="p-4 glass-effect">
         <h1 className="text-2xl font-bold text-fantasy-gold flex items-center">
           <Apple className="mr-2" />
-          Nutrition Quest
+          Nutrition Sanctum
         </h1>
-        <p className="text-gray-300">Track meals, discover foods, and level up</p>
+        <p className="text-gray-300">Track your nutritious adventures</p>
       </header>
 
       <main className="p-4 pb-20">
@@ -382,51 +384,56 @@ export default function Nutrition() {
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-fantasy-gold hover:bg-yellow-600 text-slate-900" 
+                  className="w-full bg-fantasy-green hover:bg-green-600"
                   disabled={nutritionMutation.isPending}
                 >
-                  {nutritionMutation.isPending ? "Logging..." : "Log Meal & Gain XP"}
+                  {nutritionMutation.isPending ? "Logging..." : "Log Meal"}
                 </Button>
               </form>
             </Form>
           </DialogContent>
         </Dialog>
+        </div>
 
-        {/* Recent Nutrition Logs */}
-        <Card className="bg-slate-800 border-fantasy-blue">
-          <CardHeader>
-            <CardTitle className="text-fantasy-blue">Recent Meals</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {nutritionLogs && nutritionLogs.length > 0 ? (
-                nutritionLogs.slice(0, 5).map((log) => (
-                  <div key={log.id} className="flex justify-between items-center p-2 bg-slate-700 rounded">
-                    <div>
-                      <div className="font-medium text-fantasy-gold">{log.foodName}</div>
-                      <div className="text-xs text-gray-400">{formatMealType(log.mealType)}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-fantasy-blue font-medium">{log.calories} cal</div>
-                      <div className="text-xs text-gray-400">
-                        P:{log.protein}g C:{log.carbs}g F:{log.fat}g
-                      </div>
-                    </div>
+        {/* Barcode Scanner */}
+        <BarcodeScanner 
+          isOpen={isScannerOpen}
+          onClose={() => setIsScannerOpen(false)}
+          onScanResult={handleBarcodeResult}
+        />
+
+        {/* Recent Meals */}
+        <div className="space-y-3">
+          <h2 className="text-xl font-bold text-light-text">Recent Meals</h2>
+          {nutritionLogs?.slice(0, 10).map((log) => (
+            <Card key={log.id} className="bg-slate-800 border-gray-700">
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h3 className="font-semibold text-light-text">{log.foodName}</h3>
+                    <p className="text-sm text-fantasy-green">{formatMealType(log.mealType)}</p>
                   </div>
-                ))
-              ) : (
-                <p className="text-gray-400 text-center py-8">No meals logged yet</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </main>
+                  <span className="text-fantasy-gold font-bold text-sm">+{log.xpGained} XP</span>
+                </div>
+                <div className="grid grid-cols-4 gap-2 text-xs text-gray-400">
+                  <div>{log.calories} cal</div>
+                  <div>{log.protein}g protein</div>
+                  <div>{log.carbs}g carbs</div>
+                  <div>{log.fat}g fat</div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
 
-      <BarcodeScanner 
-        isOpen={isScannerOpen} 
-        onClose={() => setIsScannerOpen(false)} 
-        onScanResult={handleBarcodeResult}
-      />
+          {(!nutritionLogs || nutritionLogs.length === 0) && (
+            <div className="text-center py-8 text-gray-400">
+              <Apple className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>No meals logged yet.</p>
+              <p className="text-sm">Start your nutrition journey!</p>
+            </div>
+          )}
+        </div>
+      </main>
 
       <BottomNavigation currentPath="/nutrition" />
     </div>

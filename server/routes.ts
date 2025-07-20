@@ -332,28 +332,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/food/barcode/:barcode", async (req, res) => {
     try {
       const { barcode } = req.params;
-      const food = await storage.getFoodByBarcode(barcode);
+      
+      // First check our local database
+      let food = await storage.getFoodByBarcode(barcode);
       
       if (!food) {
-        return res.status(404).json({ message: "Food not found" });
+        // Try to fetch from Open Food Facts
+        const openFoodFactsData = await storage.searchOpenFoodFacts(barcode);
+        
+        if (openFoodFactsData) {
+          // Import the product from Open Food Facts
+          food = await storage.importFromOpenFoodFacts(barcode, openFoodFactsData);
+          
+          res.json({
+            ...food,
+            isNewImport: true,
+            source: "openfoodfacts"
+          });
+          return;
+        }
+        
+        return res.status(404).json({ 
+          message: "Product not found in database or Open Food Facts",
+          barcode 
+        });
       }
+      
+      // Increment usage count for existing foods
+      await storage.incrementUsageCount(food.id);
       
       res.json(food);
     } catch (error) {
+      console.error('Barcode lookup error:', error);
       res.status(500).json({ message: "Failed to get food by barcode" });
     }
   });
 
   app.post("/api/food", async (req, res) => {
     try {
-      const foodData = insertFoodDatabaseSchema.parse(req.body);
+      const foodData = insertFoodDatabaseSchema.parse({
+        ...req.body,
+        contributedBy: req.body.contributedBy || characterId, // Default to current character
+        source: req.body.source || "user",
+      });
+      
       const food = await storage.createFoodDatabaseItem(foodData);
+      
+      // Award XP for contributing to the database
+      await storage.createActivity({
+        characterId,
+        type: "food_contribution",
+        description: `Added "${food.name}" to the food database`,
+        xpGained: 25,
+        metadata: { foodId: food.id, isHomemade: food.isHomemade },
+      });
+      
       res.status(201).json(food);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to create food item" });
+    }
+  });
+
+  app.get("/api/food/popular", async (req, res) => {
+    try {
+      const { limit } = req.query;
+      const popularFoods = await storage.getPopularFoods(
+        limit ? parseInt(limit as string) : 20
+      );
+      res.json(popularFoods);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get popular foods" });
+    }
+  });
+
+  app.get("/api/food/user-contributions", async (req, res) => {
+    try {
+      const userFoods = await storage.getUserContributedFoods(characterId);
+      res.json(userFoods);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get user contributions" });
+    }
+  });
+
+  app.post("/api/food/:id/use", async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.incrementUsageCount(parseInt(id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to increment usage count" });
     }
   });
 

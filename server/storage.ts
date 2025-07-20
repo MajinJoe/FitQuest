@@ -43,6 +43,11 @@ export interface IStorage {
   searchFoodDatabase(query: string, category?: string): Promise<FoodDatabaseItem[]>;
   getFoodByBarcode(barcode: string): Promise<FoodDatabaseItem | undefined>;
   createFoodDatabaseItem(food: InsertFoodDatabaseItem): Promise<FoodDatabaseItem>;
+  searchOpenFoodFacts(barcode: string): Promise<any>;
+  importFromOpenFoodFacts(barcode: string, productData: any): Promise<FoodDatabaseItem>;
+  getPopularFoods(limit?: number): Promise<FoodDatabaseItem[]>;
+  getUserContributedFoods(characterId: number): Promise<FoodDatabaseItem[]>;
+  incrementUsageCount(foodId: number): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -202,7 +207,18 @@ export class MemStorage implements IStorage {
         sodium: 160,
         verified: true,
         barcode: "060410039236",
+        source: "admin",
+        sourceId: null,
+        contributedBy: null,
+        imageUrl: null,
+        ingredients: "Potatoes, vegetable oil, sea salt",
+        allergens: null,
+        isHomemade: false,
+        recipe: null,
+        tags: ["kettle-cooked", "snack", "crunchy"],
+        usageCount: 15,
         createdAt: new Date(),
+        updatedAt: new Date(),
       },
       {
         id: 2,
@@ -219,7 +235,18 @@ export class MemStorage implements IStorage {
         sodium: 200,
         verified: true,
         barcode: "060410039243",
+        source: "admin",
+        sourceId: null,
+        contributedBy: null,
+        imageUrl: null,
+        ingredients: "Potatoes, vegetable oil, sea salt, vinegar powder",
+        allergens: null,
+        isHomemade: false,
+        recipe: null,
+        tags: ["kettle-cooked", "tangy", "snack"],
+        usageCount: 12,
         createdAt: new Date(),
+        updatedAt: new Date(),
       },
       {
         id: 3,
@@ -558,9 +585,120 @@ export class MemStorage implements IStorage {
       ...insertFood,
       id,
       createdAt: new Date(),
+      updatedAt: new Date(),
     };
     this.foodDatabaseItems.set(id, food);
     return food;
+  }
+
+  async searchOpenFoodFacts(barcode: string): Promise<any> {
+    try {
+      const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+      const data = await response.json();
+      
+      if (data.status === 1 && data.product) {
+        return data.product;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching from Open Food Facts:', error);
+      return null;
+    }
+  }
+
+  async importFromOpenFoodFacts(barcode: string, productData: any): Promise<FoodDatabaseItem> {
+    const nutriments = productData.nutriments || {};
+    
+    const food: FoodDatabaseItem = {
+      id: this.currentIds.foodDatabase++,
+      name: productData.product_name || `Product ${barcode}`,
+      brand: productData.brands?.split(',')[0]?.trim() || null,
+      category: this.mapOpenFoodFactsCategory(productData.categories),
+      servingSize: productData.serving_size || "100g",
+      calories: Math.round(nutriments['energy-kcal_100g'] || nutriments['energy-kcal'] || 0),
+      protein: Math.round(nutriments.proteins_100g || nutriments.proteins || 0),
+      carbs: Math.round(nutriments.carbohydrates_100g || nutriments.carbohydrates || 0),
+      fat: Math.round(nutriments.fat_100g || nutriments.fat || 0),
+      fiber: Math.round(nutriments.fiber_100g || nutriments.fiber || 0),
+      sugar: Math.round(nutriments.sugars_100g || nutriments.sugars || 0),
+      sodium: Math.round((nutriments.sodium_100g || nutriments.sodium || 0) * 1000), // Convert g to mg
+      verified: true,
+      barcode,
+      source: "openfoodfacts",
+      sourceId: barcode,
+      contributedBy: null,
+      imageUrl: productData.image_url || null,
+      ingredients: productData.ingredients_text || null,
+      allergens: productData.allergens_tags?.join(', ') || null,
+      isHomemade: false,
+      recipe: null,
+      tags: this.extractTagsFromOpenFoodFacts(productData),
+      usageCount: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    this.foodDatabaseItems.set(food.id, food);
+    return food;
+  }
+
+  private mapOpenFoodFactsCategory(categories: string): string {
+    if (!categories) return "food";
+    const categoryStr = categories.toLowerCase();
+    
+    if (categoryStr.includes("snack")) return "snacks";
+    if (categoryStr.includes("bread") || categoryStr.includes("bakery")) return "bakery";
+    if (categoryStr.includes("dairy") || categoryStr.includes("milk") || categoryStr.includes("cheese")) return "dairy";
+    if (categoryStr.includes("fruit") || categoryStr.includes("vegetable")) return "produce";
+    if (categoryStr.includes("beverage") || categoryStr.includes("drink")) return "beverages";
+    if (categoryStr.includes("meat") || categoryStr.includes("fish")) return "protein";
+    
+    return "food";
+  }
+
+  private extractTagsFromOpenFoodFacts(productData: any): string[] {
+    const tags: string[] = [];
+    
+    if (productData.labels_tags) {
+      productData.labels_tags.forEach((label: string) => {
+        const cleanLabel = label.replace('en:', '').replace(/-/g, ' ');
+        if (cleanLabel.length < 20) { // Only short, relevant tags
+          tags.push(cleanLabel);
+        }
+      });
+    }
+    
+    if (productData.categories_tags) {
+      productData.categories_tags.slice(0, 3).forEach((cat: string) => {
+        const cleanCat = cat.replace('en:', '').replace(/-/g, ' ');
+        if (cleanCat.length < 15) {
+          tags.push(cleanCat);
+        }
+      });
+    }
+    
+    return tags.slice(0, 5); // Limit to 5 tags
+  }
+
+  async getPopularFoods(limit = 20): Promise<FoodDatabaseItem[]> {
+    return Array.from(this.foodDatabaseItems.values())
+      .sort((a, b) => b.usageCount - a.usageCount)
+      .slice(0, limit);
+  }
+
+  async getUserContributedFoods(characterId: number): Promise<FoodDatabaseItem[]> {
+    return Array.from(this.foodDatabaseItems.values())
+      .filter(food => food.contributedBy === characterId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  async incrementUsageCount(foodId: number): Promise<void> {
+    const food = this.foodDatabaseItems.get(foodId);
+    if (food) {
+      food.usageCount++;
+      food.updatedAt = new Date();
+      this.foodDatabaseItems.set(foodId, food);
+    }
   }
 }
 
