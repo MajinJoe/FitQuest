@@ -1,11 +1,12 @@
 import { 
-  characters, quests, activities, nutritionLogs, workoutLogs, achievements,
+  characters, quests, activities, nutritionLogs, workoutLogs, achievements, foodDatabase,
   type Character, type InsertCharacter,
   type Quest, type InsertQuest,
   type Activity, type InsertActivity,
   type NutritionLog, type InsertNutritionLog,
   type WorkoutLog, type InsertWorkoutLog,
-  type Achievement, type InsertAchievement
+  type Achievement, type InsertAchievement,
+  type FoodDatabaseItem, type InsertFoodDatabaseItem
 } from "@shared/schema";
 
 export interface IStorage {
@@ -37,6 +38,11 @@ export interface IStorage {
   // Achievement methods
   getCharacterAchievements(characterId: number): Promise<Achievement[]>;
   createAchievement(achievement: InsertAchievement): Promise<Achievement>;
+  
+  // Food Database methods
+  searchFoodDatabase(query: string, category?: string): Promise<FoodDatabaseItem[]>;
+  getFoodByBarcode(barcode: string): Promise<FoodDatabaseItem | undefined>;
+  createFoodDatabaseItem(food: InsertFoodDatabaseItem): Promise<FoodDatabaseItem>;
 }
 
 export class MemStorage implements IStorage {
@@ -46,6 +52,7 @@ export class MemStorage implements IStorage {
   private nutritionLogs: Map<number, NutritionLog>;
   private workoutLogs: Map<number, WorkoutLog>;
   private achievements: Map<number, Achievement>;
+  private foodDatabaseItems: Map<number, FoodDatabaseItem>;
   private currentIds: { [key: string]: number };
 
   constructor() {
@@ -55,6 +62,7 @@ export class MemStorage implements IStorage {
     this.nutritionLogs = new Map();
     this.workoutLogs = new Map();
     this.achievements = new Map();
+    this.foodDatabaseItems = new Map();
     this.currentIds = {
       characters: 1,
       quests: 1,
@@ -62,6 +70,7 @@ export class MemStorage implements IStorage {
       nutritionLogs: 1,
       workoutLogs: 1,
       achievements: 1,
+      foodDatabase: 1,
     };
     
     // Create default character and quests
@@ -170,6 +179,192 @@ export class MemStorage implements IStorage {
       this.activities.set(activity.id, activity);
     });
     this.currentIds.activities = 4;
+
+    // Initialize food database with real food items
+    this.initializeFoodDatabase();
+  }
+
+  private initializeFoodDatabase() {
+    const foodItems: FoodDatabaseItem[] = [
+      // Miss Vickie's Products
+      {
+        id: 1,
+        name: "Original Recipe Kettle Cooked Potato Chips",
+        brand: "Miss Vickie's",
+        category: "snacks",
+        servingSize: "1 oz (28g)",
+        calories: 160,
+        protein: 2,
+        carbs: 15,
+        fat: 10,
+        fiber: 1,
+        sugar: 1,
+        sodium: 160,
+        verified: true,
+        barcode: "060410039236",
+        createdAt: new Date(),
+      },
+      {
+        id: 2,
+        name: "Sea Salt & Vinegar Kettle Cooked Chips",
+        brand: "Miss Vickie's",
+        category: "snacks",
+        servingSize: "1 oz (28g)",
+        calories: 160,
+        protein: 2,
+        carbs: 15,
+        fat: 10,
+        fiber: 1,
+        sugar: 0,
+        sodium: 200,
+        verified: true,
+        barcode: "060410039243",
+        createdAt: new Date(),
+      },
+      {
+        id: 3,
+        name: "Jalapeño Kettle Cooked Chips",
+        brand: "Miss Vickie's",
+        category: "snacks",
+        servingSize: "1 oz (28g)",
+        calories: 160,
+        protein: 2,
+        carbs: 15,
+        fat: 10,
+        fiber: 1,
+        sugar: 1,
+        sodium: 170,
+        verified: true,
+        barcode: "060410039250",
+        createdAt: new Date(),
+      },
+      // Panera Bread Products
+      {
+        id: 4,
+        name: "Green Goddess Cobb Salad with Chicken",
+        brand: "Panera",
+        category: "restaurant",
+        servingSize: "1 full salad",
+        calories: 570,
+        protein: 40,
+        carbs: 21,
+        fat: 38,
+        fiber: 8,
+        sugar: 9,
+        sodium: 1380,
+        verified: true,
+        barcode: null,
+        createdAt: new Date(),
+      },
+      {
+        id: 5,
+        name: "Broccoli Cheddar Soup",
+        brand: "Panera",
+        category: "restaurant",
+        servingSize: "1 cup (8 oz)",
+        calories: 290,
+        protein: 11,
+        carbs: 20,
+        fat: 20,
+        fiber: 3,
+        sugar: 8,
+        sodium: 1040,
+        verified: true,
+        barcode: null,
+        createdAt: new Date(),
+      },
+      {
+        id: 6,
+        name: "Turkey Sandwich on Artisan Ciabatta",
+        brand: "Panera",
+        category: "restaurant",
+        servingSize: "1 whole sandwich",
+        calories: 520,
+        protein: 28,
+        carbs: 52,
+        fat: 22,
+        fiber: 3,
+        sugar: 8,
+        sodium: 1570,
+        verified: true,
+        barcode: null,
+        createdAt: new Date(),
+      },
+      {
+        id: 7,
+        name: "Plain Bagel",
+        brand: "Panera",
+        category: "bakery",
+        servingSize: "1 bagel",
+        calories: 280,
+        protein: 11,
+        carbs: 56,
+        fat: 2,
+        fiber: 2,
+        sugar: 6,
+        sodium: 540,
+        verified: true,
+        barcode: null,
+        createdAt: new Date(),
+      },
+      {
+        id: 8,
+        name: "Iced Coffee - Medium",
+        brand: "Panera",
+        category: "beverages",
+        servingSize: "16 fl oz",
+        calories: 5,
+        protein: 1,
+        carbs: 1,
+        fat: 0,
+        fiber: 0,
+        sugar: 0,
+        sodium: 10,
+        verified: true,
+        barcode: null,
+        createdAt: new Date(),
+      },
+      // Additional popular foods
+      {
+        id: 9,
+        name: "Greek Yogurt - Plain",
+        brand: "Chobani",
+        category: "dairy",
+        servingSize: "1 container (170g)",
+        calories: 100,
+        protein: 18,
+        carbs: 6,
+        fat: 0,
+        fiber: 0,
+        sugar: 4,
+        sodium: 60,
+        verified: true,
+        barcode: "894700010045",
+        createdAt: new Date(),
+      },
+      {
+        id: 10,
+        name: "Organic Bananas",
+        brand: "Generic",
+        category: "produce",
+        servingSize: "1 medium banana (118g)",
+        calories: 105,
+        protein: 1,
+        carbs: 27,
+        fat: 0,
+        fiber: 3,
+        sugar: 14,
+        sodium: 1,
+        verified: true,
+        barcode: null,
+        createdAt: new Date(),
+      }
+    ];
+
+    foodItems.forEach(item => {
+      this.foodDatabaseItems.set(item.id, item);
+    });
+    this.currentIds.foodDatabase = foodItems.length + 1;
   }
 
   // Character methods
@@ -321,6 +516,51 @@ export class MemStorage implements IStorage {
     };
     this.achievements.set(id, achievement);
     return achievement;
+  }
+
+  // Food Database methods
+  async searchFoodDatabase(query: string, category?: string): Promise<FoodDatabaseItem[]> {
+    const searchTerms = query.toLowerCase().split(' ');
+    
+    return Array.from(this.foodDatabaseItems.values())
+      .filter(food => {
+        // Filter by category if specified
+        if (category && category !== 'all' && food.category !== category) {
+          return false;
+        }
+        
+        // Search in name and brand
+        const searchText = `${food.name} ${food.brand || ''}`.toLowerCase();
+        
+        // Check if all search terms are found in the food name or brand
+        return searchTerms.every(term => searchText.includes(term));
+      })
+      .sort((a, b) => {
+        // Sort by relevance - exact brand matches first, then alphabetical
+        const aMatch = searchTerms.some(term => (a.brand || '').toLowerCase().includes(term));
+        const bMatch = searchTerms.some(term => (b.brand || '').toLowerCase().includes(term));
+        
+        if (aMatch && !bMatch) return -1;
+        if (!aMatch && bMatch) return 1;
+        
+        return a.name.localeCompare(b.name);
+      });
+  }
+
+  async getFoodByBarcode(barcode: string): Promise<FoodDatabaseItem | undefined> {
+    return Array.from(this.foodDatabaseItems.values())
+      .find(food => food.barcode === barcode);
+  }
+
+  async createFoodDatabaseItem(insertFood: InsertFoodDatabaseItem): Promise<FoodDatabaseItem> {
+    const id = this.currentIds.foodDatabase++;
+    const food: FoodDatabaseItem = {
+      ...insertFood,
+      id,
+      createdAt: new Date(),
+    };
+    this.foodDatabaseItems.set(id, food);
+    return food;
   }
 }
 

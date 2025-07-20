@@ -3,7 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { 
   insertCharacterSchema, insertQuestSchema, insertActivitySchema,
-  insertNutritionLogSchema, insertWorkoutLogSchema, insertAchievementSchema
+  insertNutritionLogSchema, insertWorkoutLogSchema, insertAchievementSchema,
+  insertFoodDatabaseSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -305,6 +306,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to gain XP" });
+    }
+  });
+
+  // Food Database routes
+  app.get("/api/food/search", async (req, res) => {
+    try {
+      const { q: query, category } = req.query;
+      
+      if (!query || typeof query !== 'string') {
+        return res.status(400).json({ message: "Search query required" });
+      }
+      
+      const foods = await storage.searchFoodDatabase(
+        query, 
+        category && typeof category === 'string' ? category : undefined
+      );
+      
+      res.json(foods);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to search food database" });
+    }
+  });
+
+  app.get("/api/food/barcode/:barcode", async (req, res) => {
+    try {
+      const { barcode } = req.params;
+      const food = await storage.getFoodByBarcode(barcode);
+      
+      if (!food) {
+        return res.status(404).json({ message: "Food not found" });
+      }
+      
+      res.json(food);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get food by barcode" });
+    }
+  });
+
+  app.post("/api/food", async (req, res) => {
+    try {
+      const foodData = insertFoodDatabaseSchema.parse(req.body);
+      const food = await storage.createFoodDatabaseItem(foodData);
+      res.status(201).json(food);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create food item" });
     }
   });
 

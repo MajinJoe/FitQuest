@@ -74,6 +74,24 @@ export const achievements = pgTable("achievements", {
   unlockedAt: timestamp("unlocked_at").defaultNow().notNull(),
 });
 
+export const foodDatabase = pgTable("food_database", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  brand: text("brand"),
+  category: text("category").notNull(), // 'snacks', 'bakery', 'restaurant', 'produce', etc.
+  servingSize: text("serving_size").notNull(),
+  calories: integer("calories").notNull(),
+  protein: integer("protein").notNull().default(0),
+  carbs: integer("carbs").notNull().default(0),
+  fat: integer("fat").notNull().default(0),
+  fiber: integer("fiber").default(0),
+  sugar: integer("sugar").default(0),
+  sodium: integer("sodium").default(0), // in mg
+  verified: boolean("verified").notNull().default(true),
+  barcode: text("barcode"), // UPC/EAN for barcode scanning
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Insert schemas
 export const insertCharacterSchema = createInsertSchema(characters).omit({
   id: true,
@@ -105,6 +123,11 @@ export const insertAchievementSchema = createInsertSchema(achievements).omit({
   unlockedAt: true,
 });
 
+export const insertFoodDatabaseSchema = createInsertSchema(foodDatabase).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type Character = typeof characters.$inferSelect;
 export type InsertCharacter = z.infer<typeof insertCharacterSchema>;
@@ -123,3 +146,6 @@ export type InsertWorkoutLog = z.infer<typeof insertWorkoutLogSchema>;
 
 export type Achievement = typeof achievements.$inferSelect;
 export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+
+export type FoodDatabaseItem = typeof foodDatabase.$inferSelect;
+export type InsertFoodDatabaseItem = z.infer<typeof insertFoodDatabaseSchema>;
