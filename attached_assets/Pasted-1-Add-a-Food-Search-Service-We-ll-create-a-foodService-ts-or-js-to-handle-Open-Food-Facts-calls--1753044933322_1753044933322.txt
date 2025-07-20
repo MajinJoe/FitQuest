@@ -1,0 +1,68 @@
+1. Add a Food Search Service
+We’ll create a foodService.ts (or .js) to handle Open Food Facts calls:
+
+ts
+Copy
+Edit
+export async function searchFood(query: string) {
+  const res = await fetch(
+    `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1`
+  );
+  const data = await res.json();
+
+  return data.products.slice(0, 10).map((p: any) => ({
+    name: p.product_name || "Unknown",
+    brand: p.brands || "Generic",
+    calories: p.nutriments?.["energy-kcal_100g"] || 0,
+    protein: p.nutriments?.["proteins_100g"] || 0,
+    carbs: p.nutriments?.["carbohydrates_100g"] || 0,
+    fat: p.nutriments?.["fat_100g"] || 0,
+  }));
+}
+2. Update FoodDatabase Component
+Make sure the search bar queries this service on input:
+
+ts
+Copy
+Edit
+import { useState } from "react";
+import { searchFood } from "@/lib/foodService";
+
+export default function FoodDatabase({ onSelectFood }: { onSelectFood: (food: any) => void }) {
+  const [results, setResults] = useState<any[]>([]);
+  const [query, setQuery] = useState("");
+
+  const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const q = e.target.value;
+    setQuery(q);
+    if (q.length > 2) {
+      const foods = await searchFood(q);
+      setResults(foods);
+    }
+  };
+
+  return (
+    <div className="w-full">
+      <input
+        type="text"
+        value={query}
+        onChange={handleSearch}
+        placeholder="Search foods..."
+        className="w-full p-2 border rounded"
+      />
+      <ul className="bg-slate-700 mt-2">
+        {results.map((food, idx) => (
+          <li
+            key={idx}
+            onClick={() => onSelectFood(food)}
+            className="p-2 cursor-pointer hover:bg-slate-600"
+          >
+            {food.name} - {food.calories} cal
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+3. Cache Search Results
+Once a user picks something, you can save that result to your own /api/nutrition so you don’t have to hit Open Food Facts again for the same query. This is how FitQuest will start building its own hybrid food DB.
