@@ -1,0 +1,171 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(20, 14.3%, 4.1%);
+  --muted: hsl(60, 4.8%, 95.9%);
+  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(20, 14.3%, 4.1%);
+  --border: hsl(20, 5.9%, 90%);
+  --input: hsl(20, 5.9%, 90%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(60, 4.8%, 95.9%);
+  --secondary-foreground: hsl(24, 9.8%, 10%);
+  --accent: hsl(60, 4.8%, 95.9%);
+  --accent-foreground: hsl(24, 9.8%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(20, 14.3%, 4.1%);
+  --radius: 0.5rem;
+
+  /* Fantasy theme colors */
+  --fantasy-blue: hsl(207, 90%, 54%);
+  --fantasy-purple: hsl(258, 89%, 69%);
+  --fantasy-green: hsl(158, 95%, 35%);
+  --fantasy-gold: hsl(43, 96%, 56%);
+  --dark-slate: hsl(215, 28%, 17%);
+  --light-text: hsl(210, 40%, 98%);
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .fantasy-bg {
+    background: linear-gradient(135deg, var(--dark-slate) 0%, hsl(215, 25%, 27%) 50%, var(--fantasy-blue) 100%);
+  }
+
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .xp-bar-fill {
+    transition: width 1s ease-out;
+  }
+
+  .fantasy-blue {
+    color: var(--fantasy-blue);
+  }
+
+  .fantasy-purple {
+    color: var(--fantasy-purple);
+  }
+
+  .fantasy-green {
+    color: var(--fantasy-green);
+  }
+
+  .fantasy-gold {
+    color: var(--fantasy-gold);
+  }
+
+  .bg-fantasy-blue {
+    background-color: var(--fantasy-blue);
+  }
+
+  .bg-fantasy-purple {
+    background-color: var(--fantasy-purple);
+  }
+
+  .bg-fantasy-green {
+    background-color: var(--fantasy-green);
+  }
+
+  .bg-fantasy-gold {
+    background-color: var(--fantasy-gold);
+  }
+
+  .border-fantasy-gold {
+    border-color: var(--fantasy-gold);
+  }
+
+  .border-fantasy-purple {
+    border-color: var(--fantasy-purple);
+  }
+
+  .border-fantasy-green {
+    border-color: var(--fantasy-green);
+  }
+
+  .border-fantasy-blue {
+    border-color: var(--fantasy-blue);
+  }
+
+  .text-dark-slate {
+    color: var(--dark-slate);
+  }
+
+  .text-light-text {
+    color: var(--light-text);
+  }
+
+  .bg-dark-slate {
+    background-color: var(--dark-slate);
+  }
+
+  .animate-xp-fill {
+    animation: xp-fill 1s ease-out;
+  }
+
+  .animate-level-up {
+    animation: level-up 0.8s ease-out;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s infinite;
+  }
+}
+
+@keyframes xp-fill {
+  from { width: 0%; }
+  to { width: var(--xp-width); }
+}
+
+@keyframes level-up {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 15px rgba(251, 191, 36, 0.5); }
+  50% { box-shadow: 0 0 25px rgba(251, 191, 36, 0.8); }
+}
