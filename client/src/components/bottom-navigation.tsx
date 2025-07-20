@@ -15,19 +15,19 @@ export default function BottomNavigation({ currentPath }: BottomNavigationProps)
   ];
 
   return (
-    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-slate-900 border-t border-slate-700 glass-effect">
-      <div className="flex justify-around py-2">
+    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-sm rpg-card px-2 py-2">
+      <div className="flex justify-around">
         {navItems.map(({ path, icon: Icon, label }) => (
           <Link key={path} href={path}>
             <button 
-              className={`flex flex-col items-center py-2 px-4 transition-colors ${
+              className={`flex flex-col items-center py-2 px-3 rounded transition-all duration-300 ${
                 currentPath === path 
-                  ? 'text-fantasy-gold' 
-                  : 'text-gray-400 hover:text-light-text'
+                  ? 'rpg-button text-wood-dark' 
+                  : 'rpg-text hover:text-fantasy-gold hover:scale-110'
               }`}
             >
               <Icon className="w-6 h-6 mb-1" />
-              <span className="text-xs">{label}</span>
+              <span className="text-xs font-bold">{label}</span>
             </button>
           </Link>
         ))}

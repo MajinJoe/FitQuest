@@ -26,51 +26,51 @@ export default function CharacterPage() {
 
   return (
     <div className="max-w-sm mx-auto bg-slate-900 min-h-screen fantasy-bg">
-      <header className="p-4 glass-effect">
-        <h1 className="text-2xl font-bold text-fantasy-gold flex items-center">
-          <User className="mr-2" />
+      <div className="rpg-card m-4 p-4">
+        <h1 className="rpg-title text-2xl flex items-center justify-center mb-2">
+          <User className="mr-3 text-fantasy-gold" size={28} />
           Character Profile
         </h1>
-        <p className="text-gray-300">Your fitness journey</p>
-      </header>
+        <p className="rpg-text text-center">Your fitness journey</p>
+      </div>
 
       <main className="p-4 pb-20">
         {/* Character Card */}
-        <Card className="mb-6 bg-gradient-to-br from-slate-800 to-slate-700 border-fantasy-gold">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-4 mb-6">
-              <div className="relative">
-                <img 
-                  src={character.avatarUrl} 
-                  alt="Character avatar" 
-                  className="w-20 h-20 rounded-full border-4 border-fantasy-gold shadow-lg"
-                />
-                <div className="absolute -bottom-2 -right-2 bg-fantasy-purple text-white text-sm font-bold px-3 py-1 rounded-full border-2 border-fantasy-gold">
-                  Lv.{character.level}
-                </div>
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-fantasy-gold">{character.name}</h2>
-                <p className="text-gray-300">{character.class}</p>
-                <p className="text-sm text-gray-400">Total XP: {character.totalXP.toLocaleString()}</p>
+        <div className="rpg-card mb-6 p-6">
+          <div className="flex items-center space-x-5 mb-6">
+            <div className="relative">
+              <img 
+                src={character.avatarUrl} 
+                alt="Character avatar" 
+                className="w-24 h-24 rounded-full pixel-avatar"
+              />
+              <div className="absolute -bottom-3 -right-3 bg-fantasy-purple text-white text-sm font-bold px-3 py-2 rounded pixel-border">
+                Lv.{character.level}
               </div>
             </div>
+            <div>
+              <h2 className="rpg-title text-2xl mb-1">{character.name}</h2>
+              <p className="rpg-text text-lg text-fantasy-purple">{character.class}</p>
+              <p className="rpg-text text-sm">Total XP: {character.totalXP.toLocaleString()}</p>
+            </div>
+          </div>
 
-            {/* XP Progress */}
-            <div className="mb-4">
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-gray-300">Progress to Level {character.level + 1}</span>
-                <span className="text-fantasy-gold font-bold">
-                  {character.currentXP.toLocaleString()} / {character.nextLevelXP.toLocaleString()}
-                </span>
-              </div>
-              <Progress 
-                value={xpPercentage} 
-                className="h-3 bg-gray-700"
+          {/* XP Progress */}
+          <div className="mb-6">
+            <div className="flex justify-between rpg-text mb-2">
+              <span>Progress to Level {character.level + 1}</span>
+              <span className="text-fantasy-gold font-bold">
+                {character.currentXP.toLocaleString()} / {character.nextLevelXP.toLocaleString()}
+              </span>
+            </div>
+            <div className="w-full bg-wood-brown rounded h-5 overflow-hidden pixel-border">
+              <div 
+                className="h-full xp-bar-fill rounded-sm"
+                style={{ width: `${xpPercentage}%` }}
               />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Character Stats */}
         <Card className="mb-6 bg-slate-800 border-fantasy-blue">

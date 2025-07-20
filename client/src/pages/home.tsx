@@ -40,27 +40,37 @@ export default function Home() {
   }
 
   return (
-    <div className="max-w-sm mx-auto bg-slate-900 min-h-screen relative overflow-hidden">
-      {/* Background Fantasy Elements */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-10 left-10 w-2 h-2 bg-fantasy-gold rounded-full animate-ping"></div>
-        <div className="absolute top-32 right-8 w-1 h-1 bg-fantasy-purple rounded-full animate-pulse"></div>
-        <div className="absolute top-64 left-6 w-1.5 h-1.5 bg-fantasy-green rounded-full animate-bounce"></div>
-        <div className="absolute bottom-32 right-12 w-2 h-2 bg-fantasy-gold rounded-full animate-ping delay-1000"></div>
+    <div className="max-w-sm mx-auto bg-slate-900 min-h-screen fantasy-bg relative overflow-hidden">
+      {/* Background Pixel Elements */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-10 left-10 w-2 h-2 bg-fantasy-gold rounded-sm animate-ping"></div>
+        <div className="absolute top-32 right-8 w-1 h-1 bg-fantasy-purple rounded-sm animate-pulse"></div>
+        <div className="absolute top-64 left-6 w-1.5 h-1.5 bg-fantasy-green rounded-sm animate-bounce"></div>
+        <div className="absolute bottom-32 right-12 w-2 h-2 bg-fantasy-gold rounded-sm animate-ping delay-1000"></div>
+        <div className="absolute top-20 right-20 w-1 h-1 bg-fantasy-blue rounded-sm animate-pulse delay-500"></div>
+        <div className="absolute bottom-64 left-12 w-1.5 h-1.5 bg-fantasy-purple rounded-sm animate-bounce delay-700"></div>
       </div>
 
       <CharacterHeader character={character} dailyStats={dailyStats} />
 
-      <main className="px-4 pb-20">
+      <main className="pb-20">
         {activeQuests && <ActiveQuests quests={activeQuests} />}
         <QuickActions />
         
         {/* Health Sync Section */}
-        <section className="mb-6">
-          <HealthSync />
+        <section className="mb-6 px-4">
+          <div className="rpg-card p-4">
+            <HealthSync />
+          </div>
         </section>
         
-        {activities && <ActivityFeed activities={activities} />}
+        {activities && (
+          <section className="px-4">
+            <div className="rpg-card p-4">
+              <ActivityFeed activities={activities} />
+            </div>
+          </section>
+        )}
       </main>
 
       <BottomNavigation currentPath="/" />

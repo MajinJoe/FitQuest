@@ -16,40 +16,40 @@ export default function CharacterHeader({ character, dailyStats }: CharacterHead
   const xpPercentage = (character.currentXP / character.nextLevelXP) * 100;
 
   return (
-    <header className="relative z-10 p-4 glass-effect">
+    <div className="rpg-card m-4 p-4">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-4">
           <div className="relative">
             <img 
               src={character.avatarUrl} 
               alt="Character avatar" 
-              className="w-16 h-16 rounded-full border-4 border-fantasy-gold shadow-lg"
+              className="w-20 h-20 rounded-full pixel-avatar"
             />
-            <div className="absolute -bottom-1 -right-1 bg-fantasy-purple text-xs font-bold px-2 py-0.5 rounded-full border-2 border-fantasy-gold">
-              {character.level}
+            <div className="absolute -bottom-2 -right-2 bg-fantasy-purple text-white text-xs font-bold px-2 py-1 rounded pixel-border">
+              Lv.{character.level}
             </div>
           </div>
           <div>
-            <h1 className="text-lg font-bold text-fantasy-gold">{character.name}</h1>
-            <p className="text-sm text-gray-300">{character.class}</p>
+            <h1 className="rpg-title text-xl">{character.name}</h1>
+            <p className="rpg-text text-sm">{character.class}</p>
           </div>
         </div>
         <Link href="/profile/settings">
-          <button className="text-fantasy-gold hover:text-yellow-300 transition-colors">
-            <Cog className="w-6 h-6" />
+          <button className="rpg-button px-3 py-2 rounded">
+            <Cog className="w-5 h-5" />
           </button>
         </Link>
       </div>
 
       {/* XP Progress Bar */}
-      <div className="mb-2">
-        <div className="flex justify-between text-xs mb-1">
-          <span>XP to Level {character.level + 1}</span>
+      <div className="mb-4">
+        <div className="flex justify-between rpg-text text-sm mb-2">
+          <span>Experience to Level {character.level + 1}</span>
           <span>{character.currentXP.toLocaleString()} / {character.nextLevelXP.toLocaleString()}</span>
         </div>
-        <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+        <div className="w-full bg-wood-brown rounded h-4 overflow-hidden pixel-border">
           <div 
-            className="bg-gradient-to-r from-fantasy-gold to-yellow-300 h-full rounded-full xp-bar-fill animate-pulse-glow" 
+            className="h-full xp-bar-fill rounded-sm" 
             style={{ width: `${xpPercentage}%` }}
           ></div>
         </div>
@@ -57,23 +57,23 @@ export default function CharacterHeader({ character, dailyStats }: CharacterHead
 
       {/* Today's Stats */}
       {dailyStats && (
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="bg-fantasy-green bg-opacity-20 rounded-lg p-2">
-            <div className="text-fantasy-green font-bold">+{dailyStats.xpGained}</div>
-            <div className="text-xs text-gray-300">XP Today</div>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="rpg-card bg-fantasy-green bg-opacity-10 p-3 text-center">
+            <div className="rpg-title text-fantasy-green text-lg">+{dailyStats.xpGained}</div>
+            <div className="rpg-text text-xs">XP Today</div>
           </div>
-          <div className="bg-fantasy-blue bg-opacity-20 rounded-lg p-2">
-            <div className="text-fantasy-blue font-bold">{dailyStats.caloriesBurned}</div>
-            <div className="text-xs text-gray-300">Calories</div>
+          <div className="rpg-card bg-fantasy-blue bg-opacity-10 p-3 text-center">
+            <div className="rpg-title text-fantasy-blue text-lg">{dailyStats.caloriesBurned}</div>
+            <div className="rpg-text text-xs">Calories</div>
           </div>
-          <div className="bg-fantasy-purple bg-opacity-20 rounded-lg p-2">
-            <div className="text-fantasy-purple font-bold">
+          <div className="rpg-card bg-fantasy-purple bg-opacity-10 p-3 text-center">
+            <div className="rpg-title text-fantasy-purple text-lg">
               {dailyStats.workoutsCompleted}/{dailyStats.totalWorkouts}
             </div>
-            <div className="text-xs text-gray-300">Quests</div>
+            <div className="rpg-text text-xs">Quests</div>
           </div>
         </div>
       )}
-    </header>
+    </div>
   );
 }

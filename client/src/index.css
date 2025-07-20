@@ -24,13 +24,21 @@
   --ring: hsl(20, 14.3%, 4.1%);
   --radius: 0.5rem;
 
-  /* Fantasy theme colors */
+  /* Pixel Art RPG theme colors */
   --fantasy-blue: hsl(207, 90%, 54%);
   --fantasy-purple: hsl(258, 89%, 69%);
   --fantasy-green: hsl(158, 95%, 35%);
   --fantasy-gold: hsl(43, 96%, 56%);
   --dark-slate: hsl(215, 28%, 17%);
   --light-text: hsl(210, 40%, 98%);
+  
+  /* Parchment and wood colors */
+  --parchment: hsl(43, 45%, 85%);
+  --parchment-dark: hsl(43, 35%, 75%);
+  --wood-brown: hsl(25, 50%, 40%);
+  --wood-dark: hsl(25, 40%, 30%);
+  --stone-gray: hsl(220, 13%, 18%);
+  --copper: hsl(20, 70%, 45%);
 }
 
 .dark {
@@ -68,7 +76,7 @@
 
 @layer utilities {
   .fantasy-bg {
-    background: linear-gradient(135deg, var(--dark-slate) 0%, hsl(215, 25%, 27%) 50%, var(--fantasy-blue) 100%);
+    background: linear-gradient(135deg, var(--stone-gray) 0%, hsl(215, 25%, 27%) 50%, var(--dark-slate) 100%);
   }
 
   .glass-effect {
@@ -76,9 +84,111 @@
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
   }
+  
+  /* Pixel Art RPG Card Styles */
+  .rpg-card {
+    background: linear-gradient(145deg, var(--parchment) 0%, var(--parchment-dark) 100%);
+    border: 4px solid var(--wood-brown);
+    border-image: linear-gradient(45deg, var(--wood-brown), var(--wood-dark), var(--copper)) 1;
+    box-shadow: 
+      inset 0 0 0 2px var(--parchment),
+      inset 0 0 0 4px var(--wood-dark),
+      4px 4px 8px rgba(0, 0, 0, 0.6);
+    position: relative;
+  }
+  
+  .rpg-card::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, var(--copper), var(--wood-brown));
+    z-index: -1;
+    border-radius: inherit;
+  }
+  
+  .rpg-card::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+    border-radius: 4px;
+  }
+  
+  .rpg-text {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    color: hsl(25, 30%, 25%);
+    text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5);
+  }
+  
+  .rpg-title {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    color: var(--wood-dark);
+    text-shadow: 2px 2px 0px var(--fantasy-gold);
+    font-size: 1.25rem;
+    letter-spacing: 1px;
+  }
+  
+  .pixel-border {
+    border: 3px solid var(--wood-brown);
+    border-image: linear-gradient(45deg, var(--wood-brown), var(--copper)) 1;
+    box-shadow: 
+      inset 0 0 0 1px var(--parchment),
+      2px 2px 4px rgba(0, 0, 0, 0.4);
+  }
+  
+  .pixel-avatar {
+    border: 4px solid var(--fantasy-gold);
+    box-shadow: 
+      inset 0 0 0 2px var(--wood-brown),
+      0 0 0 2px var(--wood-dark),
+      4px 4px 8px rgba(0, 0, 0, 0.5);
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+  }
 
   .xp-bar-fill {
     transition: width 1s ease-out;
+    background: linear-gradient(90deg, var(--fantasy-gold), var(--fantasy-green));
+    border: 1px solid var(--wood-dark);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  
+  .rpg-button {
+    background: linear-gradient(145deg, var(--fantasy-gold), hsl(43, 86%, 46%));
+    border: 2px solid var(--wood-brown);
+    color: var(--wood-dark);
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.3);
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.4),
+      2px 2px 4px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+  }
+  
+  .rpg-button:hover {
+    background: linear-gradient(145deg, hsl(43, 100%, 65%), var(--fantasy-gold));
+    transform: translateY(-1px);
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      3px 3px 6px rgba(0, 0, 0, 0.4);
+  }
+  
+  .rpg-button:active {
+    transform: translateY(1px);
+    box-shadow: 
+      inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+      1px 1px 2px rgba(0, 0, 0, 0.3);
   }
 
   .fantasy-blue {
@@ -123,6 +233,18 @@
 
   .border-fantasy-green {
     border-color: var(--fantasy-green);
+  }
+  
+  .bg-parchment {
+    background-color: var(--parchment);
+  }
+  
+  .bg-wood-brown {
+    background-color: var(--wood-brown);
+  }
+  
+  .text-wood-dark {
+    color: var(--wood-dark);
   }
 
   .border-fantasy-blue {

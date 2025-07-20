@@ -41,48 +41,50 @@ export default function QuickActions() {
   };
 
   return (
-    <section className="mb-6">
-      <h2 className="text-xl font-bold mb-4 flex items-center text-light-text">
-        <Zap className="text-fantasy-gold mr-2" />
-        Quick Actions
-      </h2>
+    <section className="mb-6 px-4">
+      <div className="rpg-card p-4 mb-4">
+        <h2 className="rpg-title text-xl flex items-center justify-center">
+          <Zap className="text-fantasy-gold mr-3" size={24} />
+          Quick Actions
+        </h2>
+      </div>
       
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         <button 
           onClick={() => navigate('/nutrition')}
-          className="bg-gradient-to-br from-fantasy-green to-green-600 rounded-xl p-4 text-center hover:from-green-500 hover:to-green-700 transition-all duration-300 transform hover:scale-105"
+          className="rpg-card rpg-button p-4 text-center hover:scale-105 transition-all duration-300"
         >
-          <Apple className="w-8 h-8 mx-auto mb-2" />
-          <div className="font-semibold">Log Meal</div>
-          <div className="text-xs opacity-80">Gain XP</div>
+          <Apple className="w-10 h-10 mx-auto mb-2 text-fantasy-green" />
+          <div className="rpg-text font-bold">Log Meal</div>
+          <div className="rpg-text text-xs">Gain XP</div>
         </button>
         
         <button 
           onClick={() => navigate('/workouts')}
-          className="bg-gradient-to-br from-fantasy-purple to-purple-600 rounded-xl p-4 text-center hover:from-purple-500 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
+          className="rpg-card rpg-button p-4 text-center hover:scale-105 transition-all duration-300"
         >
-          <Dumbbell className="w-8 h-8 mx-auto mb-2" />
-          <div className="font-semibold">Start Workout</div>
-          <div className="text-xs opacity-80">Begin Quest</div>
+          <Dumbbell className="w-10 h-10 mx-auto mb-2 text-fantasy-purple" />
+          <div className="rpg-text font-bold">Start Workout</div>
+          <div className="rpg-text text-xs">Begin Quest</div>
         </button>
         
         <button 
           onClick={handleWaterIntake}
           disabled={xpGainMutation.isPending}
-          className="bg-gradient-to-br from-fantasy-blue to-blue-600 rounded-xl p-4 text-center hover:from-blue-500 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
+          className="rpg-card rpg-button p-4 text-center hover:scale-105 transition-all duration-300 disabled:opacity-50"
         >
-          <Droplets className="w-8 h-8 mx-auto mb-2" />
-          <div className="font-semibold">Add Water</div>
-          <div className="text-xs opacity-80">Quick Log</div>
+          <Droplets className="w-10 h-10 mx-auto mb-2 text-fantasy-blue" />
+          <div className="rpg-text font-bold">Add Water</div>
+          <div className="rpg-text text-xs">+10 XP</div>
         </button>
         
         <button 
           onClick={() => navigate('/character')}
-          className="bg-gradient-to-br from-fantasy-gold to-yellow-600 rounded-xl p-4 text-center hover:from-yellow-500 hover:to-yellow-700 transition-all duration-300 transform hover:scale-105"
+          className="rpg-card rpg-button p-4 text-center hover:scale-105 transition-all duration-300"
         >
-          <Trophy className="w-8 h-8 mx-auto mb-2" />
-          <div className="font-semibold">Achievements</div>
-          <div className="text-xs opacity-80">View Rewards</div>
+          <Trophy className="w-10 h-10 mx-auto mb-2 text-fantasy-gold" />
+          <div className="rpg-text font-bold">Achievements</div>
+          <div className="rpg-text text-xs">View Progress</div>
         </button>
       </div>
     </section>

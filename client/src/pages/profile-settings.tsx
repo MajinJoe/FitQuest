@@ -97,19 +97,17 @@ export default function ProfileSettings() {
   }
 
   return (
-    <div className="max-w-sm mx-auto bg-slate-900 min-h-screen">
+    <div className="max-w-sm mx-auto bg-slate-900 min-h-screen fantasy-bg">
       {/* Header */}
-      <div className="p-4 border-b border-slate-700">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="sm"
+      <div className="rpg-card m-4 p-4">
+        <div className="flex items-center gap-4">
+          <button
             onClick={() => setLocation("/character")}
-            className="text-fantasy-gold hover:text-yellow-300"
+            className="rpg-button px-3 py-2 rounded"
           >
             <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <h1 className="text-xl font-bold text-light-text">Profile Settings</h1>
+          </button>
+          <h1 className="rpg-title text-xl">Profile Settings</h1>
         </div>
       </div>
 
@@ -117,33 +115,31 @@ export default function ProfileSettings() {
       <div className="p-4">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Avatar Selection */}
-          <Card className="bg-slate-800 border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-light-text flex items-center gap-2">
-                <Camera className="h-5 w-5 text-fantasy-gold" />
-                Profile Picture
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <div className="rpg-card p-6">
+            <div className="rpg-title text-lg flex items-center gap-3 mb-4">
+              <Camera className="h-6 w-6 text-fantasy-gold" />
+              Profile Picture
+            </div>
+            <div className="space-y-4">
               <div className="flex justify-center">
                 <div className="relative">
                   <img
                     src={selectedAvatar}
                     alt="Selected avatar"
-                    className="w-24 h-24 rounded-full border-4 border-fantasy-gold shadow-lg"
+                    className="w-28 h-28 rounded-full pixel-avatar"
                   />
                   <button
                     type="button"
                     onClick={() => setIsAvatarSelectorOpen(!isAvatarSelectorOpen)}
-                    className="absolute -bottom-2 -right-2 bg-fantasy-gold text-slate-900 p-2 rounded-full hover:bg-yellow-300 transition-colors"
+                    className="absolute -bottom-2 -right-2 rpg-button p-3 rounded-full"
                   >
-                    <Camera className="h-4 w-4" />
+                    <Camera className="h-5 w-5" />
                   </button>
                 </div>
               </div>
 
               {isAvatarSelectorOpen && (
-                <div className="grid grid-cols-4 gap-2 p-4 bg-slate-700 rounded-lg">
+                <div className="grid grid-cols-4 gap-3 p-4 rpg-card">
                   {AVATAR_OPTIONS.map((avatarUrl, index) => (
                     <button
                       key={index}
@@ -154,76 +150,70 @@ export default function ProfileSettings() {
                       }}
                       className={`relative overflow-hidden rounded-full transition-transform hover:scale-105 ${
                         selectedAvatar === avatarUrl
-                          ? "ring-4 ring-fantasy-gold"
-                          : "ring-2 ring-slate-600"
+                          ? "ring-4 ring-fantasy-gold pixel-avatar"
+                          : "ring-2 ring-wood-brown pixel-avatar"
                       }`}
                     >
                       <img
                         src={avatarUrl}
                         alt={`Avatar option ${index + 1}`}
-                        className="w-12 h-12 object-cover"
+                        className="w-14 h-14 object-cover"
                       />
                     </button>
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Character Name */}
-          <Card className="bg-slate-800 border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-light-text flex items-center gap-2">
-                <User className="h-5 w-5 text-fantasy-gold" />
-                Character Name
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <Label htmlFor="characterName" className="text-gray-300">
-                  Choose your character name
-                </Label>
-                <Input
-                  id="characterName"
-                  value={characterName}
-                  onChange={(e) => setCharacterName(e.target.value)}
-                  placeholder="Enter your character name"
-                  className="bg-slate-700 border-slate-600 text-gray-200 placeholder-gray-500"
-                  maxLength={30}
-                />
-                <p className="text-xs text-gray-400">
-                  {characterName.length}/30 characters
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="rpg-card p-6">
+            <div className="rpg-title text-lg flex items-center gap-3 mb-4">
+              <User className="h-6 w-6 text-fantasy-gold" />
+              Character Name
+            </div>
+            <div className="space-y-3">
+              <Label htmlFor="characterName" className="rpg-text">
+                Choose your character name
+              </Label>
+              <Input
+                id="characterName"
+                value={characterName}
+                onChange={(e) => setCharacterName(e.target.value)}
+                placeholder="Enter your character name"
+                className="bg-parchment border-wood-brown text-wood-dark placeholder-wood-brown pixel-border font-mono font-bold"
+                maxLength={30}
+              />
+              <p className="rpg-text text-xs">
+                {characterName.length}/30 characters
+              </p>
+            </div>
+          </div>
 
           {/* Character Class Info */}
           {character && (
-            <Card className="bg-slate-800 border-slate-700">
-              <CardContent className="p-4">
-                <div className="text-center space-y-2">
-                  <p className="text-gray-400 text-sm">Your Current Class</p>
-                  <p className="text-fantasy-purple font-semibold text-lg">
-                    {character.class}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Level {character.level} • {character.totalXP.toLocaleString()} Total XP
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="rpg-card p-6">
+              <div className="text-center space-y-3">
+                <p className="rpg-text">Your Current Class</p>
+                <p className="rpg-title text-fantasy-purple text-xl">
+                  {character.class}
+                </p>
+                <p className="rpg-text text-sm">
+                  Level {character.level} • {character.totalXP.toLocaleString()} Total XP
+                </p>
+              </div>
+            </div>
           )}
 
           {/* Save Button */}
-          <Button
+          <button
             type="submit"
             disabled={updateProfileMutation.isPending}
-            className="w-full bg-gradient-to-r from-fantasy-gold to-yellow-500 hover:from-yellow-500 hover:to-fantasy-gold text-slate-900 font-bold py-3"
+            className="w-full rpg-button py-4 text-lg rounded-lg"
           >
-            <Save className="h-4 w-4 mr-2" />
+            <Save className="h-5 w-5 mr-3" />
             {updateProfileMutation.isPending ? "Saving..." : "Save Profile"}
-          </Button>
+          </button>
         </form>
       </div>
     </div>

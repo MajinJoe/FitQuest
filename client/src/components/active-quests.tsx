@@ -50,32 +50,36 @@ export default function ActiveQuests({ quests }: ActiveQuestsProps) {
   };
 
   return (
-    <section className="mb-6">
-      <h2 className="text-xl font-bold mb-4 flex items-center text-light-text">
-        <Mountain className="text-fantasy-purple mr-2" />
-        Active Dungeons
-      </h2>
+    <section className="mb-6 px-4">
+      <div className="rpg-card p-4 mb-4">
+        <h2 className="rpg-title text-xl flex items-center justify-center">
+          <Mountain className="text-fantasy-purple mr-3" size={24} />
+          Active Dungeons
+        </h2>
+      </div>
       
-      <div className="space-y-3">
+      <div className="space-y-4">
         {quests.map((quest) => (
-          <div key={quest.id} className={`${getQuestGradient(quest.type)} rounded-xl p-4 border ${getBorderColor(quest.type)}`}>
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-semibold text-light-text">{quest.name}</h3>
-              <span className="bg-fantasy-gold text-dark-slate px-2 py-1 rounded-full text-xs font-bold">
+          <div key={quest.id} className="rpg-card p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="rpg-title text-lg">{quest.name}</h3>
+              <span className="bg-fantasy-gold text-wood-dark px-3 py-1 rounded pixel-border font-bold text-sm">
                 +{quest.xpReward} XP
               </span>
             </div>
-            <p className="text-sm text-gray-200 mb-3">{quest.description}</p>
+            <p className="rpg-text text-sm mb-4">{quest.description}</p>
             <div className="flex justify-between items-center">
-              <div className="flex-1 mr-3">
-                <div className="bg-black bg-opacity-30 rounded-full h-2">
+              <div className="flex-1 mr-4">
+                <div className="bg-wood-brown rounded h-3 overflow-hidden pixel-border">
                   <div 
-                    className="bg-gradient-to-r from-fantasy-green to-green-400 h-2 rounded-full transition-all duration-500" 
+                    className="xp-bar-fill h-full rounded-sm transition-all duration-500" 
                     style={{ width: `${getProgressPercentage(quest)}%` }}
                   ></div>
                 </div>
               </div>
-              <span className="text-xs text-gray-200">{getProgressText(quest)}</span>
+              <span className="rpg-text text-sm font-bold">
+                {getProgressText(quest)}
+              </span>
             </div>
           </div>
         ))}
