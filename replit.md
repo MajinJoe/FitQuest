@@ -45,6 +45,12 @@ Preferred communication style: Simple, everyday language.
 - Quick action buttons for common activities
 - Activity categorization and metadata storage
 
+#### Quality of Life Features
+- **Barcode Scanner**: Camera-based barcode scanning for quick food lookup
+- **Food Database**: Comprehensive searchable food database with verified nutrition data
+- **Health Integration**: Connects to device health APIs for automatic activity sync
+- **Smart XP Rewards**: Bonus XP for health milestones (10K steps, active minutes, calories)
+
 #### Nutrition Logging
 - Detailed food tracking with macronutrient breakdown
 - Meal type categorization (breakfast, lunch, dinner, snack)

@@ -6,6 +6,7 @@ import ActivityFeed from "@/components/activity-feed";
 import BottomNavigation from "@/components/bottom-navigation";
 import XPNotification from "@/components/xp-notification";
 import LevelUpModal from "@/components/level-up-modal";
+import HealthSync from "@/components/health-sync";
 import type { Character, Quest, Activity } from "@shared/schema";
 
 export default function Home() {
@@ -48,6 +49,12 @@ export default function Home() {
       <main className="px-4 pb-20">
         {activeQuests && <ActiveQuests quests={activeQuests} />}
         <QuickActions />
+        
+        {/* Health Sync Section */}
+        <section className="mb-6">
+          <HealthSync />
+        </section>
+        
         {activities && <ActivityFeed activities={activities} />}
       </main>
 

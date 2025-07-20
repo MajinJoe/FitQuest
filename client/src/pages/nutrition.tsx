@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import BottomNavigation from "@/components/bottom-navigation";
+import BarcodeScanner from "@/components/barcode-scanner";
+import FoodDatabase from "@/components/food-database";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { NutritionLog } from "@shared/schema";
@@ -26,6 +28,7 @@ const nutritionSchema = z.object({
 
 export default function Nutrition() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -88,6 +91,46 @@ export default function Nutrition() {
     nutritionMutation.mutate(data);
   };
 
+  // Handle barcode scan result
+  const handleBarcodeResult = (barcode: string, productData?: any) => {
+    if (productData) {
+      // Auto-fill form with scanned product data
+      form.setValue("foodName", productData.name);
+      form.setValue("calories", productData.calories || 0);
+      form.setValue("protein", productData.protein || 0);
+      form.setValue("carbs", productData.carbs || 0);
+      form.setValue("fat", productData.fat || 0);
+      
+      toast({
+        title: "Product Scanned!",
+        description: `${productData.name} nutrition data loaded`,
+      });
+      
+      setIsDialogOpen(true);
+    } else {
+      toast({
+        title: "Barcode Scanned",
+        description: `Barcode: ${barcode} - Manual entry required`,
+      });
+    }
+  };
+
+  // Handle food database selection
+  const handleFoodSelection = (food: any) => {
+    form.setValue("foodName", food.name);
+    form.setValue("calories", food.calories);
+    form.setValue("protein", food.protein);
+    form.setValue("carbs", food.carbs);
+    form.setValue("fat", food.fat);
+    
+    toast({
+      title: "Food Selected!",
+      description: `${food.name} nutrition data loaded`,
+    });
+    
+    setIsDialogOpen(true);
+  };
+
   const todayTotals = todayLogs?.reduce(
     (totals, log) => ({
       calories: totals.calories + log.calories,
@@ -140,15 +183,26 @@ export default function Nutrition() {
           </CardContent>
         </Card>
 
-        {/* Add Meal Button */}
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="w-full mb-6 bg-fantasy-green hover:bg-green-600 text-white">
-              <Plus className="w-4 h-4 mr-2" />
-              Log New Meal
+        {/* Quick Add Options */}
+        <div className="mb-6 space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <Button 
+              onClick={() => setIsScannerOpen(true)}
+              className="bg-fantasy-blue hover:bg-blue-600 text-white"
+            >
+              📱 Scan Barcode
             </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-slate-800 border-fantasy-green">
+            <FoodDatabase onSelectFood={handleFoodSelection} />
+          </div>
+          
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="w-full bg-fantasy-green hover:bg-green-600 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Log New Meal
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-slate-800 border-fantasy-green">
             <DialogHeader>
               <DialogTitle className="text-fantasy-gold">Add Meal</DialogTitle>
             </DialogHeader>
@@ -279,6 +333,14 @@ export default function Nutrition() {
             </Form>
           </DialogContent>
         </Dialog>
+        </div>
+
+        {/* Barcode Scanner */}
+        <BarcodeScanner 
+          isOpen={isScannerOpen}
+          onClose={() => setIsScannerOpen(false)}
+          onScanResult={handleBarcodeResult}
+        />
 
         {/* Recent Meals */}
         <div className="space-y-3">
