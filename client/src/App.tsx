@@ -11,6 +11,7 @@ import Character from "@/pages/character";
 import Progress from "@/pages/progress";
 import NotFound from "@/pages/not-found";
 
+// Router component for handling application routes
 function Router() {
   return (
     <Switch>
