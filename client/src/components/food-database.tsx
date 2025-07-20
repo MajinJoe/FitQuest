@@ -20,7 +20,19 @@ export default function FoodDatabase({ onSelectFood }: FoodDatabaseProps) {
 
   // Search food database using API
   const { data: searchResults, isLoading, error } = useQuery<FoodDatabaseItem[]>({
-    queryKey: ['/api/food/search', { q: searchTerm, category: selectedCategory }],
+    queryKey: ['/api/food/search', searchTerm, selectedCategory],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        q: searchTerm,
+        ...(selectedCategory !== 'all' && { category: selectedCategory })
+      });
+      
+      const response = await fetch(`/api/food/search?${params}`);
+      if (!response.ok) {
+        throw new Error('Failed to search food database');
+      }
+      return response.json();
+    },
     enabled: searchTerm.length >= 2, // Only search with 2+ characters
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
