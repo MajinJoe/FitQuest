@@ -74,6 +74,7 @@ export interface IStorage {
   getCharacterWorkoutSessions(characterId: number): Promise<WorkoutSession[]>;
   getWorkoutSessionById(id: number): Promise<WorkoutSession | undefined>;
   createWorkoutSession(session: InsertWorkoutSession): Promise<WorkoutSession>;
+  updateWorkoutSession(id: number, updates: Partial<InsertWorkoutSession>): Promise<WorkoutSession | undefined>;
   
   // Exercise Entry methods
   getExerciseEntriesBySession(sessionId: number): Promise<ExerciseEntry[]>;
@@ -1134,7 +1135,7 @@ export class MemStorage implements IStorage {
   async getCharacterWorkoutSessions(characterId: number): Promise<WorkoutSession[]> {
     return Array.from(this.workoutSessions.values())
       .filter(session => session.characterId === characterId)
-      .sort((a, b) => b.startTime.getTime() - a.startTime.getTime());
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
   async getWorkoutSessionById(id: number): Promise<WorkoutSession | undefined> {
@@ -1147,15 +1148,32 @@ export class MemStorage implements IStorage {
       ...insertSession,
       id,
       createdAt: new Date(),
+      notes: insertSession.notes || null,
+      xpGained: insertSession.xpGained || 0,
+      totalDuration: insertSession.totalDuration || 0,
+      totalCaloriesBurned: insertSession.totalCaloriesBurned || 0,
     };
     this.workoutSessions.set(id, session);
     return session;
+  }
+
+  async updateWorkoutSession(id: number, updates: Partial<InsertWorkoutSession>): Promise<WorkoutSession | undefined> {
+    const session = this.workoutSessions.get(id);
+    if (!session) return undefined;
+    
+    const updatedSession: WorkoutSession = {
+      ...session,
+      ...updates,
+      id,
+    };
+    this.workoutSessions.set(id, updatedSession);
+    return updatedSession;
   }
   
   // Exercise Entry methods
   async getExerciseEntriesBySession(sessionId: number): Promise<ExerciseEntry[]> {
     return Array.from(this.exerciseEntries.values())
-      .filter(entry => entry.sessionId === sessionId)
+      .filter(entry => entry.workoutSessionId === sessionId)
       .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
   }
 
@@ -1165,6 +1183,14 @@ export class MemStorage implements IStorage {
       ...insertEntry,
       id,
       createdAt: new Date(),
+      duration: insertEntry.duration || null,
+      notes: insertEntry.notes || null,
+      sets: insertEntry.sets || null,
+      reps: insertEntry.reps || null,
+      weight: insertEntry.weight || null,
+      distance: insertEntry.distance || null,
+      intensity: insertEntry.intensity || null,
+      elevation: insertEntry.elevation || null,
     };
     this.exerciseEntries.set(id, entry);
     return entry;

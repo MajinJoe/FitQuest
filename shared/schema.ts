@@ -217,10 +217,19 @@ export const insertExerciseSchema = createInsertSchema(exercises).omit({
   createdAt: true,
 });
 
-export const insertWorkoutSessionSchema = createInsertSchema(workoutSessions).omit({
-  id: true,
-  createdAt: true,
-});
+export const insertWorkoutSessionSchema = createInsertSchema(workoutSessions)
+  .omit({
+    id: true,
+    createdAt: true,
+    totalDuration: true,
+    totalCaloriesBurned: true,
+    xpGained: true,
+  })
+  .extend({
+    totalDuration: z.number().optional(),
+    totalCaloriesBurned: z.number().optional(), 
+    xpGained: z.number().optional(),
+  });
 
 export const insertExerciseEntrySchema = createInsertSchema(exerciseEntries).omit({
   id: true,

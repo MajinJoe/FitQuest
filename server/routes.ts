@@ -589,6 +589,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sessions = await storage.getCharacterWorkoutSessions(characterId);
       res.json(sessions);
     } catch (error) {
+      console.error("Error getting workout sessions:", error);
       res.status(500).json({ message: "Failed to get workout sessions" });
     }
   });
@@ -621,6 +622,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to create workout session" });
+    }
+  });
+
+  app.patch("/api/workout-sessions/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateSchema = insertWorkoutSessionSchema.partial();
+      const updates = updateSchema.parse(req.body);
+      const session = await storage.updateWorkoutSession(parseInt(id), updates);
+      if (!session) {
+        return res.status(404).json({ message: "Workout session not found" });
+      }
+      res.json(session);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update workout session" });
     }
   });
 
