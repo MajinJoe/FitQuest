@@ -70,6 +70,7 @@ export default function ExerciseTracking() {
       return response.json();
     },
     onSuccess: (session) => {
+      console.log("SESSION CREATED:", session); // Debug
       setActiveSession(session);
       queryClient.invalidateQueries({ queryKey: ["/api/workout-sessions"] });
       toast({ title: "Workout session started!", description: "Ready to log exercises" });
@@ -276,8 +277,16 @@ export default function ExerciseTracking() {
                 <ExerciseCard
                   key={exercise.id}
                   exercise={exercise}
-                  onSelect={setCurrentExercise}
+                  onSelect={(selectedExercise) => {
+                    // Store the exercise to be logged after session creation
+                    setCurrentExercise(selectedExercise);
+                  }}
                   canLog={!!activeSession}
+                  onStartSession={() => {
+                    // Store which exercise to log after session is created
+                    setCurrentExercise(exercise);
+                    startNewSession();
+                  }}
                 />
               ))
             )}
@@ -367,11 +376,13 @@ export default function ExerciseTracking() {
 function ExerciseCard({ 
   exercise, 
   onSelect, 
-  canLog 
+  canLog,
+  onStartSession 
 }: { 
   exercise: Exercise; 
   onSelect: (exercise: Exercise) => void;
   canLog: boolean;
+  onStartSession?: () => void;
 }) {
   return (
     <Card className="bg-slate-800 border-slate-700 hover:shadow-md transition-shadow">
@@ -417,12 +428,17 @@ function ExerciseCard({
           <Button 
             className={`w-full mt-3 ${canLog 
               ? "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white" 
-              : "bg-gray-700 text-gray-400 cursor-not-allowed"}`}
-            onClick={() => onSelect(exercise)}
-            disabled={!canLog}
+              : "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"}`}
+            onClick={() => {
+              if (!canLog && onStartSession) {
+                onStartSession();
+              } else if (canLog) {
+                onSelect(exercise);
+              }
+            }}
           >
             <Plus className="h-4 w-4 mr-2" />
-            {canLog ? "Add to Workout" : "Start Session to Log"}
+            {canLog ? "Add to Workout" : "Start Session & Add"}
           </Button>
         </div>
       </CardContent>
