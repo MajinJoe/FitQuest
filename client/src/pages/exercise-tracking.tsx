@@ -14,7 +14,7 @@ import type { Exercise, WorkoutSession, ExerciseEntry } from "@shared/schema";
 
 export default function ExerciseTracking() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [activeSession, setActiveSession] = useState<WorkoutSession | null>(null);
   const [exerciseEntries, setExerciseEntries] = useState<ExerciseEntry[]>([]);
   const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
@@ -26,7 +26,9 @@ export default function ExerciseTracking() {
     queryKey: ["/api/exercises", selectedCategory],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (selectedCategory) params.append("category", selectedCategory);
+      if (selectedCategory && selectedCategory !== "all") {
+        params.append("category", selectedCategory);
+      }
       const response = await fetch(`/api/exercises?${params}`);
       if (!response.ok) throw new Error("Failed to fetch exercises");
       return response.json();
@@ -236,7 +238,7 @@ export default function ExerciseTracking() {
                   <SelectValue placeholder="All categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All categories</SelectItem>
+                  <SelectItem value="all">All categories</SelectItem>
                   <SelectItem value="strength">Strength Training</SelectItem>
                   <SelectItem value="cardio">Cardio</SelectItem>
                 </SelectContent>
