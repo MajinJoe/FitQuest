@@ -222,11 +222,11 @@ export default function ExerciseTracking() {
         )}
 
         <Tabs defaultValue="browse" className="w-full">
-          <div className="flex bg-wood-brown/20 rounded-lg p-1 mb-4 pixel-border">
+          <TabsList className="flex bg-wood-brown/20 rounded-lg p-1 mb-4 pixel-border w-full">
             <TabsTrigger value="browse" className="flex-1 text-xs rpg-text data-[state=active]:bg-fantasy-gold/20 data-[state=active]:text-fantasy-gold rounded px-3 py-2 transition-all">Browse</TabsTrigger>
             <TabsTrigger value="sessions" className="flex-1 text-xs rpg-text data-[state=active]:bg-fantasy-gold/20 data-[state=active]:text-fantasy-gold rounded px-3 py-2 transition-all">History</TabsTrigger>
             <TabsTrigger value="stats" className="flex-1 text-xs rpg-text data-[state=active]:bg-fantasy-gold/20 data-[state=active]:text-fantasy-gold rounded px-3 py-2 transition-all">Stats</TabsTrigger>
-          </div>
+          </TabsList>
 
         <TabsContent value="browse" className="space-y-3">
           <div className="space-y-2">

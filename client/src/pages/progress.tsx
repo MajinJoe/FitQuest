@@ -178,17 +178,38 @@ export default function Progress() {
         )}
 
         {/* Motivation Message */}
-        <Card className="bg-gradient-to-br from-fantasy-purple to-purple-800 border-fantasy-gold">
-          <CardContent className="p-6 text-center">
-            <h3 className="text-xl font-bold text-fantasy-gold mb-2">Keep Going, Champion!</h3>
-            <p className="text-light-text">
-              {currentStreak > 0 
-                ? `You're on a ${currentStreak}-day streak! Your dedication is paying off.`
-                : "Every journey begins with a single step. Start your streak today!"
-              }
-            </p>
-          </CardContent>
-        </Card>
+        <div className="rpg-card p-6 text-center relative overflow-hidden">
+          {/* Campfire background effect */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-8 h-8 bg-orange-500 rounded-full animate-pulse"></div>
+            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 w-6 h-6 bg-red-500 rounded-full animate-ping"></div>
+            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-yellow-500 rounded-full animate-bounce"></div>
+          </div>
+          
+          {/* Knight silhouette */}
+          <div className="mb-4 relative z-10">
+            <div className="text-4xl mb-2">🏰</div>
+            <div className="text-2xl">⚔️</div>
+          </div>
+          
+          <h3 className="rpg-title text-xl text-fantasy-gold mb-3 relative z-10">
+            "Keep Going, Champion!"
+          </h3>
+          <div className="rpg-text text-sm italic relative z-10 max-w-xs mx-auto">
+            {currentStreak > 0 
+              ? `A wise knight by the campfire whispers: "Your ${currentStreak}-day journey grows stronger with each step, noble warrior."`
+              : "An old knight speaks from beside the flickering flames: 'Every legend begins with courage to take the first step into darkness.'"
+            }
+          </div>
+          
+          {/* Decorative medieval elements */}
+          <div className="flex justify-center mt-4 space-x-2 relative z-10">
+            <div className="text-fantasy-gold opacity-70">⚡</div>
+            <div className="text-fantasy-purple opacity-70">✨</div>
+            <div className="text-fantasy-blue opacity-70">🛡️</div>
+            <div className="text-fantasy-green opacity-70">🌟</div>
+          </div>
+        </div>
       </main>
 
       <BottomNavigation currentPath="/progress" />
