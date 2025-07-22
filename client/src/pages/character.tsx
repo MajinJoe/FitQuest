@@ -73,68 +73,62 @@ export default function CharacterPage() {
         </div>
 
         {/* Character Stats */}
-        <Card className="mb-6 bg-slate-800 border-fantasy-blue">
-          <CardHeader>
-            <CardTitle className="text-fantasy-blue flex items-center">
-              <Star className="mr-2" />
-              Character Stats
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-3 bg-slate-700 rounded-lg">
-                <div className="text-xl font-bold text-fantasy-green">{character.level}</div>
-                <div className="text-xs text-gray-400">Level</div>
-              </div>
-              <div className="text-center p-3 bg-slate-700 rounded-lg">
-                <div className="text-xl font-bold text-fantasy-gold">{character.totalXP.toLocaleString()}</div>
-                <div className="text-xs text-gray-400">Total XP</div>
-              </div>
-              <div className="text-center p-3 bg-slate-700 rounded-lg">
-                <div className="text-xl font-bold text-fantasy-purple">{achievements?.length || 0}</div>
-                <div className="text-xs text-gray-400">Achievements</div>
-              </div>
-              <div className="text-center p-3 bg-slate-700 rounded-lg">
-                <div className="text-xl font-bold text-fantasy-blue">
-                  {Math.floor((Date.now() - new Date(character.createdAt).getTime()) / (1000 * 60 * 60 * 24))}
-                </div>
-                <div className="text-xs text-gray-400">Days Active</div>
-              </div>
+        <div className="rpg-card p-4 mb-6">
+          <h3 className="rpg-title text-fantasy-blue text-lg mb-4 text-center flex items-center justify-center">
+            <Star className="mr-2" />
+            Character Stats
+          </h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center p-3 rpg-card">
+              <div className="text-xl rpg-title text-fantasy-green">{character.level}</div>
+              <div className="text-xs rpg-text">Level</div>
             </div>
-          </CardContent>
-        </Card>
+            <div className="text-center p-3 rpg-card">
+              <div className="text-xl rpg-title text-fantasy-gold">{character.totalXP.toLocaleString()}</div>
+              <div className="text-xs rpg-text">Total XP</div>
+            </div>
+            <div className="text-center p-3 rpg-card">
+              <div className="text-xl rpg-title text-fantasy-purple">{achievements?.length || 0}</div>
+              <div className="text-xs rpg-text">Achievements</div>
+            </div>
+            <div className="text-center p-3 rpg-card">
+              <div className="text-xl rpg-title text-fantasy-blue">
+                {Math.floor((Date.now() - new Date(character.createdAt).getTime()) / (1000 * 60 * 60 * 24))}
+              </div>
+              <div className="text-xs rpg-text">Days Active</div>
+            </div>
+          </div>
+        </div>
 
         {/* Achievements */}
-        <Card className="bg-slate-800 border-fantasy-gold">
-          <CardHeader>
-            <CardTitle className="text-fantasy-gold flex items-center">
-              <Trophy className="mr-2" />
-              Achievements
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {achievements && achievements.length > 0 ? (
-              <div className="space-y-3">
-                {achievements.map((achievement) => (
-                  <div key={achievement.id} className="flex items-center space-x-3 p-3 bg-slate-700 rounded-lg">
+        <div className="rpg-card p-4">
+          <h3 className="rpg-title text-fantasy-gold text-lg mb-4 text-center flex items-center justify-center">
+            <Trophy className="mr-2" />
+            Achievements
+          </h3>
+          {achievements && achievements.length > 0 ? (
+            <div className="space-y-3">
+              {achievements.map((achievement) => (
+                <div key={achievement.id} className="rpg-card p-3">
+                  <div className="flex items-center space-x-3">
                     <div className="text-2xl">{achievement.icon}</div>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-light-text">{achievement.name}</h3>
-                      <p className="text-xs text-gray-400">{achievement.description}</p>
+                      <h3 className="rpg-title text-light-text">{achievement.name}</h3>
+                      <p className="text-xs rpg-text">{achievement.description}</p>
                     </div>
-                    <div className="text-fantasy-gold font-bold text-sm">+{achievement.xpReward} XP</div>
+                    <div className="text-fantasy-gold rpg-title text-sm">+{achievement.xpReward} XP</div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-400">
-                <Award className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>No achievements unlocked yet.</p>
-                <p className="text-sm">Complete quests to earn rewards!</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 rpg-text">
+              <Award className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>No achievements unlocked yet</p>
+              <p className="text-sm">Complete quests to earn rewards!</p>
+            </div>
+          )}
+        </div>
       </main>
 
       <BottomNavigation currentPath="/character" />

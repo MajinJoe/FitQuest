@@ -165,9 +165,9 @@ export default function ExerciseTracking() {
       <div className="p-3 space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-light-text flex items-center gap-2">
+            <h1 className="rpg-title text-xl flex items-center gap-2">
               <Dumbbell className="h-5 w-5 text-fantasy-gold" />
-              Exercises
+              Training Grounds
             </h1>
           </div>
           
@@ -175,7 +175,7 @@ export default function ExerciseTracking() {
             <Button 
               onClick={startNewSession} 
               disabled={createSessionMutation.isPending}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm px-3 py-1"
+              className="bg-fantasy-blue hover:bg-blue-600 text-white text-sm px-3 py-1 pixel-border"
               size="sm"
             >
               <Play className="h-3 w-3 mr-1" />
@@ -183,11 +183,11 @@ export default function ExerciseTracking() {
             </Button>
           ) : (
             <div className="flex gap-1">
-              <Badge variant="secondary" className="px-2 py-1 bg-green-900 text-green-300 text-xs">
+              <Badge variant="secondary" className="px-2 py-1 bg-fantasy-green/20 text-fantasy-green text-xs pixel-border">
                 <Timer className="h-3 w-3 mr-1" />
                 Active
               </Badge>
-              <Button onClick={endSession} variant="outline" size="sm" className="border-gray-600 text-gray-300 text-xs px-2 py-1">
+              <Button onClick={endSession} variant="outline" size="sm" className="pixel-border rpg-text text-xs px-2 py-1">
                 End
               </Button>
             </div>
@@ -198,56 +198,52 @@ export default function ExerciseTracking() {
       {/* Main Content */}
       <main className="px-3 pb-20">
         {activeSession && (
-          <Card className="border-green-800 bg-green-950/30 mb-3">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-green-300 text-sm">{activeSession.name}</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="grid grid-cols-3 gap-3 text-center">
-                <div>
-                  <div className="text-lg font-bold text-green-400">{exerciseEntries.length}</div>
-                  <div className="text-xs text-gray-500">Exercises</div>
-                </div>
-                <div>
-                  <div className="text-lg font-bold text-green-400">
-                    {exerciseEntries.reduce((sum, entry) => sum + entry.caloriesBurned, 0)}
-                  </div>
-                  <div className="text-xs text-gray-500">Calories</div>
-                </div>
-                <div>
-                  <div className="text-lg font-bold text-green-400">
-                    {Math.round((Date.now() - new Date(activeSession.createdAt).getTime()) / 60000)}
-                  </div>
-                  <div className="text-xs text-gray-500">Minutes</div>
-                </div>
+          <div className="rpg-card p-4 mb-3 bg-fantasy-green/10">
+            <h3 className="rpg-title text-fantasy-green text-sm mb-3">{activeSession.name}</h3>
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div>
+                <div className="text-lg rpg-title text-fantasy-green">{exerciseEntries.length}</div>
+                <div className="text-xs rpg-text">Exercises</div>
               </div>
-            </CardContent>
-          </Card>
+              <div>
+                <div className="text-lg rpg-title text-fantasy-green">
+                  {exerciseEntries.reduce((sum, entry) => sum + entry.caloriesBurned, 0)}
+                </div>
+                <div className="text-xs rpg-text">Calories</div>
+              </div>
+              <div>
+                <div className="text-lg rpg-title text-fantasy-green">
+                  {Math.round((Date.now() - new Date(activeSession.createdAt).getTime()) / 60000)}
+                </div>
+                <div className="text-xs rpg-text">Minutes</div>
+              </div>
+            </div>
+          </div>
         )}
 
         <Tabs defaultValue="browse" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-slate-800 border-slate-700 h-9">
-            <TabsTrigger value="browse" className="text-gray-300 data-[state=active]:bg-slate-700 data-[state=active]:text-fantasy-gold text-xs">Browse</TabsTrigger>
-            <TabsTrigger value="sessions" className="text-gray-300 data-[state=active]:bg-slate-700 data-[state=active]:text-fantasy-gold text-xs">History</TabsTrigger>
-            <TabsTrigger value="stats" className="text-gray-300 data-[state=active]:bg-slate-700 data-[state=active]:text-fantasy-gold text-xs">Stats</TabsTrigger>
-          </TabsList>
+          <div className="flex bg-wood-brown/20 rounded-lg p-1 mb-4 pixel-border">
+            <TabsTrigger value="browse" className="flex-1 text-xs rpg-text data-[state=active]:bg-fantasy-gold/20 data-[state=active]:text-fantasy-gold rounded px-3 py-2 transition-all">Browse</TabsTrigger>
+            <TabsTrigger value="sessions" className="flex-1 text-xs rpg-text data-[state=active]:bg-fantasy-gold/20 data-[state=active]:text-fantasy-gold rounded px-3 py-2 transition-all">History</TabsTrigger>
+            <TabsTrigger value="stats" className="flex-1 text-xs rpg-text data-[state=active]:bg-fantasy-gold/20 data-[state=active]:text-fantasy-gold rounded px-3 py-2 transition-all">Stats</TabsTrigger>
+          </div>
 
         <TabsContent value="browse" className="space-y-3">
           <div className="space-y-2">
             <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-fantasy-blue/70" />
               <Input
                 placeholder="Search exercises..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-slate-800 border-slate-600 text-gray-200 placeholder-gray-500 h-9"
+                className="pl-10 rpg-input h-9"
               />
             </div>
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="bg-slate-800 border-slate-600 text-gray-200 h-9">
+              <SelectTrigger className="rpg-input h-9">
                 <SelectValue placeholder="All categories" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-600">
+              <SelectContent className="rpg-card">
                 <SelectItem value="all">All categories</SelectItem>
                 <SelectItem value="strength">Strength Training</SelectItem>
                 <SelectItem value="cardio">Cardio</SelectItem>
@@ -364,88 +360,84 @@ function ExerciseCard({
   onStartSession?: () => void;
 }) {
   return (
-    <Card className="bg-slate-800 border-slate-700 hover:shadow-md transition-shadow">
-      <CardContent className="p-3">
-        <div className="space-y-2">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <h3 className="font-semibold text-light-text text-sm leading-tight">{exercise.name}</h3>
-              <p className="text-xs text-gray-400 mt-1 line-clamp-2">{exercise.description}</p>
-            </div>
-            <Badge variant={exercise.category === "strength" ? "default" : "secondary"} 
-                   className={`text-xs ml-2 ${exercise.category === "strength" ? "bg-blue-600 text-white" : "bg-purple-600 text-white"}`}>
-              {exercise.category === "strength" ? "STR" : "CAR"}
-            </Badge>
+    <div className="rpg-card p-3 hover:shadow-md transition-shadow">
+      <div className="space-y-2">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <h3 className="rpg-title text-sm leading-tight">{exercise.name}</h3>
+            <p className="text-xs rpg-text mt-1 line-clamp-2">{exercise.description}</p>
           </div>
-          
-          <div className="flex justify-between items-center text-xs">
-            <span className="text-gray-400">MET: {exercise.metValue}</span>
-            <span className="text-gray-400">
-              {exercise.trackingType === "reps_sets" ? "Reps/Sets" : 
-               exercise.trackingType === "time_distance" ? "Time/Dist" : "Time"}
-            </span>
-          </div>
-          
-          {exercise.muscleGroups && exercise.muscleGroups.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {exercise.muscleGroups.slice(0, 2).map((muscle) => (
-                <Badge key={muscle} variant="outline" className="text-xs border-gray-600 text-gray-300 px-1 py-0">
-                  {muscle}
-                </Badge>
-              ))}
-              {exercise.muscleGroups.length > 2 && (
-                <Badge variant="outline" className="text-xs border-gray-600 text-gray-300 px-1 py-0">
-                  +{exercise.muscleGroups.length - 2}
-                </Badge>
-              )}
-            </div>
-          )}
-          
-          <Button 
-            className={`w-full text-xs py-1.5 ${canLog 
-              ? "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white" 
-              : "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"}`}
-            size="sm"
-            onClick={() => {
-              if (!canLog && onStartSession) {
-                onStartSession();
-              } else if (canLog) {
-                onSelect(exercise);
-              }
-            }}
-          >
-            <Plus className="h-3 w-3 mr-1" />
-            {canLog ? "Add" : "Start & Add"}
-          </Button>
+          <Badge variant={exercise.category === "strength" ? "default" : "secondary"} 
+                 className={`text-xs ml-2 pixel-border ${exercise.category === "strength" ? "bg-fantasy-blue text-white" : "bg-fantasy-purple text-white"}`}>
+            {exercise.category === "strength" ? "STR" : "CAR"}
+          </Badge>
         </div>
-      </CardContent>
-    </Card>
+        
+        <div className="flex justify-between items-center text-xs">
+          <span className="rpg-text">MET: {exercise.metValue}</span>
+          <span className="rpg-text">
+            {exercise.trackingType === "reps_sets" ? "Reps/Sets" : 
+             exercise.trackingType === "time_distance" ? "Time/Dist" : "Time"}
+          </span>
+        </div>
+        
+        {exercise.muscleGroups && exercise.muscleGroups.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {exercise.muscleGroups.slice(0, 2).map((muscle) => (
+              <Badge key={muscle} variant="outline" className="text-xs pixel-border rpg-text px-1 py-0">
+                {muscle}
+              </Badge>
+            ))}
+            {exercise.muscleGroups.length > 2 && (
+              <Badge variant="outline" className="text-xs pixel-border rpg-text px-1 py-0">
+                +{exercise.muscleGroups.length - 2}
+              </Badge>
+            )}
+          </div>
+        )}
+        
+        <Button 
+          className={`w-full text-xs py-1.5 pixel-border ${canLog 
+            ? "bg-fantasy-green hover:bg-green-600 text-white" 
+            : "bg-fantasy-gold hover:bg-yellow-600 text-slate-900"}`}
+          size="sm"
+          onClick={() => {
+            if (!canLog && onStartSession) {
+              onStartSession();
+            } else if (canLog) {
+              onSelect(exercise);
+            }
+          }}
+        >
+          <Plus className="h-3 w-3 mr-1" />
+          {canLog ? "Start & Add" : "Start & Add"}
+        </Button>
+      </div>
+    </div>
   );
 }
 
 // Session Card Component
 function SessionCard({ session }: { session: WorkoutSession }) {
   return (
-    <Card className="bg-slate-800 border-slate-700">
-      <CardContent className="p-3">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="font-semibold text-light-text text-sm">{session.name}</h3>
-          <Badge variant="outline" className="border-gray-600 text-gray-300 text-xs">
-            {new Date(session.createdAt).toLocaleDateString()}
-          </Badge>
+    <div className="rpg-card p-3">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="rpg-title text-sm">{session.name}</h3>
+        <Badge variant="outline" className="pixel-border rpg-text text-xs">
+          {new Date(session.createdAt).toLocaleDateString()}
+        </Badge>
+      </div>
+      <div className="grid grid-cols-2 gap-3 text-center">
+        <div>
+          <div className="text-lg rpg-title text-fantasy-green">{session.totalDuration}</div>
+          <div className="text-xs rpg-text">minutes</div>
         </div>
-        <div className="grid grid-cols-2 gap-3 text-center">
-          <div>
-            <div className="text-lg font-bold text-fantasy-green">{session.totalDuration}</div>
-            <div className="text-xs text-gray-400">minutes</div>
-          </div>
-          <div>
-            <div className="text-lg font-bold text-fantasy-purple">{session.totalCaloriesBurned}</div>
-            <div className="text-xs text-gray-400">calories</div>
-          </div>
+        <div>
+          <div className="text-lg rpg-title text-fantasy-purple">{session.totalCaloriesBurned}</div>
+          <div className="text-xs rpg-text">calories</div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 

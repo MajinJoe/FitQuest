@@ -368,33 +368,34 @@ export default function Nutrition() {
         </Dialog>
 
         {/* Recent Nutrition Logs */}
-        <Card className="bg-slate-800 border-fantasy-blue">
-          <CardHeader>
-            <CardTitle className="text-fantasy-blue">Recent Meals</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {nutritionLogs && nutritionLogs.length > 0 ? (
-                nutritionLogs.slice(0, 5).map((log) => (
-                  <div key={log.id} className="flex justify-between items-center p-2 bg-slate-700 rounded">
+        <div className="rpg-card p-4">
+          <h3 className="rpg-title text-fantasy-blue text-lg mb-4 text-center">Recent Meals</h3>
+          <div className="space-y-3">
+            {nutritionLogs && nutritionLogs.length > 0 ? (
+              nutritionLogs.slice(0, 5).map((log) => (
+                <div key={log.id} className="rpg-card p-3">
+                  <div className="flex justify-between items-center">
                     <div>
-                      <div className="font-medium text-fantasy-gold">{log.foodName}</div>
-                      <div className="text-xs text-gray-400">{formatMealType(log.mealType)}</div>
+                      <div className="rpg-title text-fantasy-gold">{log.foodName}</div>
+                      <div className="rpg-text text-xs">{formatMealType(log.mealType)}</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-fantasy-blue font-medium">{log.calories} cal</div>
-                      <div className="text-xs text-gray-400">
+                      <div className="rpg-title text-fantasy-blue">{log.calories} cal</div>
+                      <div className="rpg-text text-xs">
                         P:{log.protein}g C:{log.carbs}g F:{log.fat}g
                       </div>
                     </div>
                   </div>
-                ))
-              ) : (
-                <p className="text-gray-400 text-center py-8">No meals logged yet</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 rpg-text">
+                <p>No meals logged yet</p>
+                <p className="text-sm">Start your nutrition quest!</p>
+              </div>
+            )}
+          </div>
+        </div>
       </main>
 
       <BarcodeScanner 

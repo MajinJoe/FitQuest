@@ -78,115 +78,103 @@ export default function Progress() {
   return (
     <div className="max-w-sm mx-auto bg-slate-900 min-h-screen fantasy-bg">
       <header className="p-4 glass-effect">
-        <h1 className="text-2xl font-bold text-fantasy-blue flex items-center">
+        <h1 className="rpg-title text-2xl flex items-center">
           <TrendingUp className="mr-2" />
           Progress Analytics
         </h1>
-        <p className="text-gray-300">Track your fitness journey</p>
+        <p className="rpg-text">Track your fitness journey</p>
       </header>
 
       <main className="p-4 pb-20 space-y-6">
         {/* Today's Summary */}
         {dailyStats && (
-          <Card className="bg-slate-800 border-fantasy-green">
-            <CardHeader>
-              <CardTitle className="text-fantasy-green flex items-center">
-                <Calendar className="mr-2" />
-                Today's Progress
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-3 bg-slate-700 rounded-lg">
-                  <div className="text-2xl font-bold text-fantasy-gold">+{dailyStats.xpGained}</div>
-                  <div className="text-xs text-gray-400">XP Earned</div>
-                </div>
-                <div className="text-center p-3 bg-slate-700 rounded-lg">
-                  <div className="text-2xl font-bold text-fantasy-blue">{dailyStats.caloriesBurned}</div>
-                  <div className="text-xs text-gray-400">Calories Burned</div>
-                </div>
-                <div className="text-center p-3 bg-slate-700 rounded-lg">
-                  <div className="text-2xl font-bold text-fantasy-purple">
-                    {dailyStats.workoutsCompleted}/{dailyStats.totalWorkouts}
-                  </div>
-                  <div className="text-xs text-gray-400">Quests Done</div>
-                </div>
-                <div className="text-center p-3 bg-slate-700 rounded-lg">
-                  <div className="text-2xl font-bold text-fantasy-green">{currentStreak}</div>
-                  <div className="text-xs text-gray-400">Day Streak</div>
-                </div>
+          <div className="rpg-card p-4">
+            <h3 className="rpg-title text-fantasy-green text-lg mb-4 text-center flex items-center justify-center">
+              <Calendar className="mr-2" />
+              Today's Progress
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center p-3 rpg-card">
+                <div className="text-2xl rpg-title text-fantasy-gold">+{dailyStats.xpGained}</div>
+                <div className="text-xs rpg-text">XP Earned</div>
               </div>
-            </CardContent>
-          </Card>
+              <div className="text-center p-3 rpg-card">
+                <div className="text-2xl rpg-title text-fantasy-blue">{dailyStats.caloriesBurned}</div>
+                <div className="text-xs rpg-text">Calories Burned</div>
+              </div>
+              <div className="text-center p-3 rpg-card">
+                <div className="text-2xl rpg-title text-fantasy-purple">
+                  {dailyStats.workoutsCompleted}/{dailyStats.totalWorkouts}
+                </div>
+                <div className="text-xs rpg-text">Quests Done</div>
+              </div>
+              <div className="text-center p-3 rpg-card">
+                <div className="text-2xl rpg-title text-fantasy-green">{currentStreak}</div>
+                <div className="text-xs rpg-text">Day Streak</div>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Weekly Summary */}
-        <Card className="bg-slate-800 border-fantasy-purple">
-          <CardHeader>
-            <CardTitle className="text-fantasy-purple flex items-center">
-              <Zap className="mr-2" />
-              This Week
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-3 bg-slate-700 rounded-lg">
-                <div className="text-2xl font-bold text-fantasy-gold">+{weeklyXP}</div>
-                <div className="text-xs text-gray-400">Weekly XP</div>
-              </div>
-              <div className="text-center p-3 bg-slate-700 rounded-lg">
-                <div className="text-2xl font-bold text-fantasy-purple">{weeklyWorkouts}</div>
-                <div className="text-xs text-gray-400">Workouts</div>
-              </div>
-              <div className="text-center p-3 bg-slate-700 rounded-lg">
-                <div className="text-2xl font-bold text-fantasy-green">{weeklyMeals}</div>
-                <div className="text-xs text-gray-400">Meals Logged</div>
-              </div>
-              <div className="text-center p-3 bg-slate-700 rounded-lg">
-                <div className="text-2xl font-bold text-fantasy-blue">{weeklyCalories}</div>
-                <div className="text-xs text-gray-400">Calories Burned</div>
-              </div>
+        <div className="rpg-card p-4">
+          <h3 className="rpg-title text-fantasy-purple text-lg mb-4 text-center flex items-center justify-center">
+            <Zap className="mr-2" />
+            This Week
+          </h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center p-3 rpg-card">
+              <div className="text-2xl rpg-title text-fantasy-gold">+{weeklyXP}</div>
+              <div className="text-xs rpg-text">Weekly XP</div>
             </div>
-          </CardContent>
-        </Card>
+            <div className="text-center p-3 rpg-card">
+              <div className="text-2xl rpg-title text-fantasy-purple">{weeklyWorkouts}</div>
+              <div className="text-xs rpg-text">Workouts</div>
+            </div>
+            <div className="text-center p-3 rpg-card">
+              <div className="text-2xl rpg-title text-fantasy-green">{weeklyMeals}</div>
+              <div className="text-xs rpg-text">Meals Logged</div>
+            </div>
+            <div className="text-center p-3 rpg-card">
+              <div className="text-2xl rpg-title text-fantasy-blue">{weeklyCalories}</div>
+              <div className="text-xs rpg-text">Calories Burned</div>
+            </div>
+          </div>
+        </div>
 
         {/* Character Progress */}
         {character && (
-          <Card className="bg-slate-800 border-fantasy-gold">
-            <CardHeader>
-              <CardTitle className="text-fantasy-gold flex items-center">
-                <Target className="mr-2" />
-                Character Growth
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-light-text">Current Level</span>
-                  <span className="text-fantasy-gold font-bold text-xl">{character.level}</span>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-light-text">Total XP Earned</span>
-                  <span className="text-fantasy-blue font-bold">{character.totalXP.toLocaleString()}</span>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-light-text">XP to Next Level</span>
-                  <span className="text-fantasy-purple font-bold">
-                    {(character.nextLevelXP - character.currentXP).toLocaleString()}
-                  </span>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-light-text">Days on Journey</span>
-                  <span className="text-fantasy-green font-bold">
-                    {Math.floor((Date.now() - new Date(character.createdAt).getTime()) / (1000 * 60 * 60 * 24))}
-                  </span>
-                </div>
+          <div className="rpg-card p-4">
+            <h3 className="rpg-title text-fantasy-gold text-lg mb-4 text-center flex items-center justify-center">
+              <Target className="mr-2" />
+              Character Growth
+            </h3>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="rpg-text">Current Level</span>
+                <span className="text-fantasy-gold rpg-title text-xl">{character.level}</span>
               </div>
-            </CardContent>
-          </Card>
+              
+              <div className="flex justify-between items-center">
+                <span className="rpg-text">Total XP Earned</span>
+                <span className="text-fantasy-blue rpg-title">{character.totalXP.toLocaleString()}</span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="rpg-text">XP to Next Level</span>
+                <span className="text-fantasy-purple rpg-title">
+                  {(character.nextLevelXP - character.currentXP).toLocaleString()}
+                </span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="rpg-text">Days on Journey</span>
+                <span className="text-fantasy-green rpg-title">
+                  {Math.floor((Date.now() - new Date(character.createdAt).getTime()) / (1000 * 60 * 60 * 24))}
+                </span>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Motivation Message */}
