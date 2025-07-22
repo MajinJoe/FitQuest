@@ -10,17 +10,213 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import type { Character, UpdateCharacterProfile } from "@shared/schema";
 
-// Predefined avatar options
+// Fantasy character avatar options - pixel art style
 const AVATAR_OPTIONS = [
-  "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
-  "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
-  "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
-  "https://images.unsplash.com/photo-1581803118522-7b72a50f7e9f?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
-  "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
-  "https://images.unsplash.com/photo-1605993439219-9d09d2020fa5?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
-  "https://images.unsplash.com/photo-1594736797933-d0a9ba7a9c9f?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
-  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
+  // Knight
+  "data:image/svg+xml;base64," + btoa(`
+    <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" fill="#2D4A3E"/>
+      <!-- Helmet -->
+      <rect x="25" y="15" width="50" height="40" fill="#4A5D23"/>
+      <rect x="30" y="20" width="40" height="30" fill="#5A6D33"/>
+      <!-- Visor -->
+      <rect x="35" y="25" width="30" height="15" fill="#1A1A1A"/>
+      <rect x="40" y="28" width="4" height="3" fill="#FF6B35"/>
+      <rect x="56" y="28" width="4" height="3" fill="#FF6B35"/>
+      <!-- Plume -->
+      <rect x="45" y="10" width="10" height="8" fill="#D63031"/>
+      <!-- Body armor -->
+      <rect x="30" y="55" width="40" height="35" fill="#636E72"/>
+      <rect x="35" y="60" width="30" height="25" fill="#74B9FF"/>
+      <!-- Cross emblem -->
+      <rect x="47" y="65" width="6" height="15" fill="#FDCB6E"/>
+      <rect x="42" y="70" width="16" height="5" fill="#FDCB6E"/>
+    </svg>
+  `),
+  
+  // Wizard
+  "data:image/svg+xml;base64," + btoa(`
+    <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" fill="#1A1A2E"/>
+      <!-- Hat -->
+      <polygon points="50,10 35,50 65,50" fill="#6C5CE7"/>
+      <rect x="30" y="45" width="40" height="8" fill="#74B9FF"/>
+      <!-- Stars on hat -->
+      <circle cx="45" cy="30" r="2" fill="#FDCB6E"/>
+      <circle cx="55" cy="35" r="1.5" fill="#FDCB6E"/>
+      <!-- Face -->
+      <rect x="35" y="50" width="30" height="25" fill="#FFEAA7"/>
+      <!-- Eyes -->
+      <rect x="40" y="58" width="4" height="4" fill="#0984E3"/>
+      <rect x="56" y="58" width="4" height="4" fill="#0984E3"/>
+      <!-- Beard -->
+      <rect x="35" y="68" width="30" height="15" fill="#DDD"/>
+      <!-- Robes -->
+      <rect x="25" y="75" width="50" height="25" fill="#A29BFE"/>
+      <rect x="30" y="80" width="40" height="20" fill="#6C5CE7"/>
+      <!-- Staff -->
+      <rect x="15" y="20" width="3" height="60" fill="#8B4513"/>
+      <circle cx="16" cy="18" r="4" fill="#00B894"/>
+    </svg>
+  `),
+  
+  // Orc Warrior
+  "data:image/svg+xml;base64," + btoa(`
+    <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" fill="#2D1B1B"/>
+      <!-- Head -->
+      <rect x="30" y="20" width="40" height="35" fill="#7CB342"/>
+      <!-- Ears -->
+      <polygon points="25,30 30,25 30,40" fill="#689F38"/>
+      <polygon points="70,25 75,30 70,40" fill="#689F38"/>
+      <!-- Eyes -->
+      <rect x="35" y="30" width="6" height="6" fill="#D32F2F"/>
+      <rect x="59" y="30" width="6" height="6" fill="#D32F2F"/>
+      <!-- Tusks -->
+      <rect x="42" y="45" width="3" height="8" fill="#FFF"/>
+      <rect x="55" y="45" width="3" height="8" fill="#FFF"/>
+      <!-- Nose -->
+      <rect x="47" y="38" width="6" height="4" fill="#689F38"/>
+      <!-- Body armor -->
+      <rect x="25" y="55" width="50" height="35" fill="#424242"/>
+      <rect x="30" y="60" width="40" height="25" fill="#795548"/>
+      <!-- Spikes -->
+      <rect x="35" y="55" width="4" height="8" fill="#757575"/>
+      <rect x="45" y="55" width="4" height="8" fill="#757575"/>
+      <rect x="55" y="55" width="4" height="8" fill="#757575"/>
+    </svg>
+  `),
+  
+  // Elf Ranger
+  "data:image/svg+xml;base64," + btoa(`
+    <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" fill="#1B3A1B"/>
+      <!-- Head -->
+      <rect x="32" y="25" width="36" height="30" fill="#FFEAA7"/>
+      <!-- Pointed ears -->
+      <polygon points="28,35 32,30 32,45" fill="#FFEAA7"/>
+      <polygon points="68,30 72,35 68,45" fill="#FFEAA7"/>
+      <!-- Hair -->
+      <rect x="30" y="20" width="40" height="15" fill="#8D6E63"/>
+      <!-- Eyes -->
+      <rect x="38" y="33" width="4" height="4" fill="#4CAF50"/>
+      <rect x="58" y="33" width="4" height="4" fill="#4CAF50"/>
+      <!-- Hood -->
+      <polygon points="50,15 25,50 75,50" fill="#2E7D32"/>
+      <rect x="20" y="45" width="60" height="8" fill="#4CAF50"/>
+      <!-- Green cloak -->
+      <rect x="20" y="55" width="60" height="35" fill="#388E3C"/>
+      <rect x="25" y="60" width="50" height="25" fill="#2E7D32"/>
+      <!-- Bow -->
+      <rect x="75" y="30" width="3" height="40" fill="#8D6E63"/>
+      <path d="M77 30 Q85 50 77 70" stroke="#654321" stroke-width="2" fill="none"/>
+    </svg>
+  `),
+  
+  // Dwarf
+  "data:image/svg+xml;base64," + btoa(`
+    <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" fill="#3E2723"/>
+      <!-- Head -->
+      <rect x="30" y="30" width="40" height="25" fill="#FFEAA7"/>
+      <!-- Helmet -->
+      <rect x="25" y="25" width="50" height="20" fill="#607D8B"/>
+      <rect x="20" y="30" width="60" height="8" fill="#455A64"/>
+      <!-- Eyes -->
+      <rect x="36" y="38" width="4" height="4" fill="#1976D2"/>
+      <rect x="60" y="38" width="4" height="4" fill="#1976D2"/>
+      <!-- Nose -->
+      <rect x="47" y="42" width="6" height="4" fill="#FFE082"/>
+      <!-- Beard -->
+      <rect x="25" y="50" width="50" height="30" fill="#8D6E63"/>
+      <rect x="30" y="55" width="40" height="25" fill="#6D4C41"/>
+      <!-- Body -->
+      <rect x="30" y="80" width="40" height="20" fill="#FF5722"/>
+      <!-- Hammer -->
+      <rect x="10" y="60" width="15" height="8" fill="#9E9E9E"/>
+      <rect x="15" y="50" width="5" height="25" fill="#8D6E63"/>
+    </svg>
+  `),
+  
+  // Rogue/Assassin
+  "data:image/svg+xml;base64," + btoa(`
+    <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" fill="#0D0D0D"/>
+      <!-- Hood -->
+      <polygon points="50,10 20,55 80,55" fill="#212121"/>
+      <rect x="15" y="50" width="70" height="8" fill="#424242"/>
+      <!-- Face (partially hidden) -->
+      <rect x="35" y="40" width="30" height="20" fill="#FFE0B2"/>
+      <!-- Mask -->
+      <rect x="30" y="45" width="40" height="10" fill="#212121"/>
+      <!-- Eyes -->
+      <rect x="38" y="47" width="4" height="3" fill="#F44336"/>
+      <rect x="58" y="47" width="4" height="3" fill="#F44336"/>
+      <!-- Dark cloak -->
+      <rect x="20" y="58" width="60" height="35" fill="#424242"/>
+      <rect x="25" y="63" width="50" height="30" fill="#212121"/>
+      <!-- Daggers -->
+      <rect x="15" y="70" width="2" height="12" fill="#9E9E9E"/>
+      <rect x="83" y="70" width="2" height="12" fill="#9E9E9E"/>
+      <rect x="14" y="69" width="4" height="3" fill="#8D6E63"/>
+      <rect x="82" y="69" width="4" height="3" fill="#8D6E63"/>
+    </svg>
+  `),
+  
+  // Paladin
+  "data:image/svg+xml;base64," + btoa(`
+    <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" fill="#E8F5E8"/>
+      <!-- Helmet with wings -->
+      <rect x="25" y="20" width="50" height="35" fill="#ECEFF1"/>
+      <polygon points="20,30 25,25 25,40" fill="#FFC107"/>
+      <polygon points="75,25 80,30 75,40" fill="#FFC107"/>
+      <!-- Visor -->
+      <rect x="30" y="30" width="40" height="15" fill="#37474F"/>
+      <!-- Holy glow around head -->
+      <circle cx="50" cy="37" r="32" fill="#FFF9C4" opacity="0.3"/>
+      <!-- Armor -->
+      <rect x="25" y="55" width="50" height="35" fill="#CFD8DC"/>
+      <rect x="30" y="60" width="40" height="25" fill="#FFF"/>
+      <!-- Holy symbol -->
+      <rect x="47" y="65" width="6" height="15" fill="#FFD700"/>
+      <rect x="42" y="70" width="16" height="5" fill="#FFD700"/>
+      <circle cx="50" cy="72" r="3" fill="#FFF" opacity="0.8"/>
+      <!-- Sword -->
+      <rect x="75" y="40" width="4" height="30" fill="#9E9E9E"/>
+      <rect x="72" y="35" width="10" height="8" fill="#8D6E63"/>
+    </svg>
+  `),
+  
+  // Barbarian
+  "data:image/svg+xml;base64," + btoa(`
+    <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" fill="#5D4037"/>
+      <!-- Wild hair -->
+      <rect x="25" y="15" width="50" height="25" fill="#3E2723"/>
+      <rect x="20" y="20" width="60" height="15" fill="#5D4037"/>
+      <!-- Face -->
+      <rect x="30" y="35" width="40" height="25" fill="#FFAB91"/>
+      <!-- War paint -->
+      <rect x="32" y="40" width="8" height="3" fill="#D32F2F"/>
+      <rect x="60" y="40" width="8" height="3" fill="#D32F2F"/>
+      <rect x="45" y="37" width="10" height="3" fill="#D32F2F"/>
+      <!-- Eyes -->
+      <rect x="36" y="42" width="4" height="4" fill="#8BC34A"/>
+      <rect x="60" y="42" width="4" height="4" fill="#8BC34A"/>
+      <!-- Scars -->
+      <rect x="38" y="50" width="12" height="1" fill="#8D6E63"/>
+      <!-- Fur clothing -->
+      <rect x="20" y="60" width="60" height="30" fill="#8D6E63"/>
+      <rect x="25" y="65" width="50" height="20" fill="#A1887F"/>
+      <!-- Battle axe -->
+      <rect x="10" y="50" width="12" height="8" fill="#616161"/>
+      <rect x="14" y="45" width="4" height="25" fill="#8D6E63"/>
+    </svg>
+  `),
 ];
+
+
 
 export default function ProfileSettings() {
   const [, setLocation] = useLocation();

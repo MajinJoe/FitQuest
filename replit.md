@@ -28,10 +28,11 @@ Preferred communication style: Simple, everyday language.
 ### Key Components
 
 #### Character System
-- Character progression with levels, XP, and avatars
+- Character progression with levels, XP, and fantasy avatars
 - Fantasy-themed class system (Warrior of Wellness)
 - Visual progress bars and level-up animations
-- Character customization capabilities
+- Character customization with 8 pixel art fantasy avatars (Knight, Wizard, Orc, Elf Ranger, Dwarf, Rogue, Paladin, Barbarian)
+- SVG-based pixel art character portraits matching D&D aesthetic
 
 #### Quest System
 - Daily quests for cardio, nutrition, hydration, and strength
