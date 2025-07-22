@@ -164,101 +164,76 @@ export default function Nutrition() {
 
   return (
     <div className="max-w-sm mx-auto bg-slate-900 min-h-screen fantasy-bg">
-      <header className="p-4 glass-effect">
-        <h1 className="text-2xl font-bold text-fantasy-gold flex items-center">
-          <Apple className="mr-2" />
+      <div className="rpg-card m-4 p-4">
+        <h1 className="rpg-title text-2xl flex items-center justify-center mb-2">
+          <Apple className="mr-3 text-fantasy-green" size={28} />
           Nutrition Quest
         </h1>
-        <p className="text-gray-300">Track meals, discover foods, and level up</p>
-      </header>
+        <p className="rpg-text text-center">Track meals, discover foods, and level up</p>
+      </div>
 
       <main className="p-4 pb-20">
         {/* Today's Summary */}
-        <Card className="mb-6 bg-slate-800 border-fantasy-green">
-          <CardHeader>
-            <CardTitle className="text-fantasy-green">Today's Nutrition</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-fantasy-gold">{todayTotals.calories}</div>
-                <div className="text-xs text-gray-400">Calories</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-fantasy-blue">{todayTotals.protein}g</div>
-                <div className="text-xs text-gray-400">Protein</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-fantasy-purple">{todayTotals.carbs}g</div>
-                <div className="text-xs text-gray-400">Carbs</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-yellow-400">{todayTotals.fat}g</div>
-                <div className="text-xs text-gray-400">Fat</div>
-              </div>
+        <div className="rpg-card mb-6 p-4">
+          <h3 className="rpg-title text-fantasy-green text-lg mb-4 text-center">Today's Nutrition</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center rpg-card p-3">
+              <div className="text-2xl font-bold text-fantasy-gold rpg-title">{todayTotals.calories}</div>
+              <div className="rpg-text text-xs">Calories</div>
             </div>
-          </CardContent>
-        </Card>
+            <div className="text-center rpg-card p-3">
+              <div className="text-2xl font-bold text-fantasy-blue rpg-title">{todayTotals.protein}g</div>
+              <div className="rpg-text text-xs">Protein</div>
+            </div>
+            <div className="text-center rpg-card p-3">
+              <div className="text-2xl font-bold text-fantasy-purple rpg-title">{todayTotals.carbs}g</div>
+              <div className="rpg-text text-xs">Carbs</div>
+            </div>
+            <div className="text-center rpg-card p-3">
+              <div className="text-2xl font-bold text-yellow-600 rpg-title">{todayTotals.fat}g</div>
+              <div className="rpg-text text-xs">Fat</div>
+            </div>
+          </div>
+        </div>
 
         {/* Enhanced Food Discovery */}
-        <Card className="mb-6 bg-slate-800 border-fantasy-purple">
-          <CardHeader>
-            <CardTitle className="text-fantasy-purple">Food Discovery</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="search" className="w-full">
-              <TabsList className="grid grid-cols-4 mb-4">
-                <TabsTrigger value="search">
-                  <Search className="w-4 h-4" />
-                </TabsTrigger>
-                <TabsTrigger value="scan">
-                  <Camera className="w-4 h-4" />
-                </TabsTrigger>
-                <TabsTrigger value="popular">
-                  <TrendingUp className="w-4 h-4" />
-                </TabsTrigger>
-                <TabsTrigger value="homemade">
-                  <ChefHat className="w-4 h-4" />
-                </TabsTrigger>
-              </TabsList>
+        <div className="rpg-card mb-6 p-4">
+          <h3 className="rpg-title text-fantasy-purple text-lg mb-4 text-center">Food Discovery</h3>
+          <div className="grid grid-cols-4 gap-2 mb-4">
+            <button className="rpg-button flex flex-col items-center p-3 text-center">
+              <Search className="w-5 h-5 mb-1" />
+              <span className="text-xs rpg-text">Search</span>
+            </button>
+            <button className="rpg-button flex flex-col items-center p-3 text-center" onClick={() => setIsScannerOpen(true)}>
+              <Camera className="w-5 h-5 mb-1" />
+              <span className="text-xs rpg-text">Scan</span>
+            </button>
+            <button className="rpg-button flex flex-col items-center p-3 text-center">
+              <TrendingUp className="w-5 h-5 mb-1" />
+              <span className="text-xs rpg-text">Popular</span>
+            </button>
+            <button className="rpg-button flex flex-col items-center p-3 text-center">
+              <ChefHat className="w-5 h-5 mb-1" />
+              <span className="text-xs rpg-text">Recipe</span>
+            </button>
+          </div>
 
-              <TabsContent value="search">
-                <FoodDatabase onSelectFood={handleFoodSelection} />
-              </TabsContent>
+          <div className="rpg-card p-4 mb-4">
+            <FoodDatabase onSelectFood={handleFoodSelection} />
+          </div>
+        </div>
 
-              <TabsContent value="scan">
-                <Button 
-                  onClick={() => setIsScannerOpen(true)}
-                  className="w-full bg-fantasy-blue hover:bg-blue-600 text-white"
-                >
-                  <Camera className="w-4 h-4 mr-2" />
-                  Scan Product Barcode
-                </Button>
-                <p className="text-xs text-gray-400 mt-2 text-center">
-                  Scans real products and imports from Open Food Facts
-                </p>
-              </TabsContent>
-
-              <TabsContent value="popular">
-                <PopularFoods onSelectFood={handleFoodSelection} />
-              </TabsContent>
-
-              <TabsContent value="homemade">
-                <AddHomemadeFood onFoodAdded={handleHomemadeFoodAdded} />
-                <p className="text-xs text-gray-400 mt-2 text-center">
-                  Add your recipes to the community database
-                </p>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+        <button 
+          onClick={() => setIsDialogOpen(true)}
+          className="w-full rpg-button p-4 text-lg rounded-lg mb-6"
+        >
+          <Plus className="w-5 h-5 mr-3" />
+          Log New Meal
+        </button>
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="w-full bg-fantasy-green hover:bg-green-600 text-white">
-              <Plus className="w-4 h-4 mr-2" />
-              Log New Meal
-            </Button>
+            <div style={{ display: 'none' }} />
           </DialogTrigger>
           <DialogContent className="bg-slate-800 border-fantasy-green">
             <DialogHeader>

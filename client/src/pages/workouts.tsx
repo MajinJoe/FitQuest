@@ -183,55 +183,72 @@ export default function Workouts() {
 
   return (
     <div className="max-w-sm mx-auto bg-slate-900 min-h-screen fantasy-bg">
-      <header className="p-4 glass-effect">
-        <h1 className="text-2xl font-bold text-fantasy-purple flex items-center">
-          <Dumbbell className="mr-2" />
+      <div className="rpg-card m-4 p-4">
+        <h1 className="rpg-title text-2xl flex items-center justify-center mb-2">
+          <Dumbbell className="mr-3 text-fantasy-purple" size={28} />
           Training Grounds
         </h1>
-        <p className="text-gray-300">Build strength and earn XP</p>
-      </header>
+        <p className="rpg-text text-center">Build strength and earn XP</p>
+      </div>
 
       <main className="p-4 pb-20">
         {/* Today's Summary */}
-        <Card className="mb-6 bg-slate-800 border-fantasy-purple">
-          <CardHeader>
-            <CardTitle className="text-fantasy-purple">Today's Training</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <div className="text-2xl font-bold text-fantasy-gold">{todayTotals.workoutCount}</div>
-                <div className="text-xs text-gray-400">Workouts</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-fantasy-blue">{todayTotals.totalDuration}</div>
-                <div className="text-xs text-gray-400">Minutes</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-fantasy-green">{todayTotals.totalCalories}</div>
-                <div className="text-xs text-gray-400">Calories</div>
-              </div>
+        <div className="rpg-card mb-6 p-4">
+          <h3 className="rpg-title text-fantasy-purple text-lg mb-4 text-center">Today's Training</h3>
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="rpg-card p-3">
+              <div className="text-2xl font-bold text-fantasy-gold rpg-title">{todayTotals.workoutCount}</div>
+              <div className="rpg-text text-xs">Workouts</div>
             </div>
-          </CardContent>
-        </Card>
+            <div className="rpg-card p-3">
+              <div className="text-2xl font-bold text-fantasy-blue rpg-title">{todayTotals.totalDuration}</div>
+              <div className="rpg-text text-xs">Minutes</div>
+            </div>
+            <div className="rpg-card p-3">
+              <div className="text-2xl font-bold text-fantasy-green rpg-title">{todayTotals.totalCalories}</div>
+              <div className="rpg-text text-xs">Calories</div>
+            </div>
+          </div>
+        </div>
 
         {/* Workout Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          <TabsList className="grid w-full grid-cols-3 bg-slate-800">
-            <TabsTrigger value="log" className="text-gray-300 data-[state=active]:text-fantasy-purple">Log</TabsTrigger>
-            <TabsTrigger value="presets" className="text-gray-300 data-[state=active]:text-fantasy-purple">Presets</TabsTrigger>
-            <TabsTrigger value="history" className="text-gray-300 data-[state=active]:text-fantasy-purple">History</TabsTrigger>
-          </TabsList>
+        <div className="rpg-card mb-6 p-4">
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            <button 
+              onClick={() => setActiveTab("log")}
+              className={`rpg-button p-3 text-center ${activeTab === "log" ? "bg-fantasy-purple text-white" : ""}`}
+            >
+              <span className="rpg-text text-sm">Log</span>
+            </button>
+            <button 
+              onClick={() => setActiveTab("presets")}
+              className={`rpg-button p-3 text-center ${activeTab === "presets" ? "bg-fantasy-purple text-white" : ""}`}
+            >
+              <span className="rpg-text text-sm">Presets</span>
+            </button>
+            <button 
+              onClick={() => setActiveTab("history")}
+              className={`rpg-button p-3 text-center ${activeTab === "history" ? "bg-fantasy-purple text-white" : ""}`}
+            >
+              <span className="rpg-text text-sm">History</span>
+            </button>
+          </div>
 
           {/* Log Workout Tab */}
-          <TabsContent value="log" className="mt-4">
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="w-full mb-6 bg-fantasy-purple hover:bg-purple-600 text-white">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Log New Workout
-                </Button>
-              </DialogTrigger>
+          {activeTab === "log" && (
+            <div className="mt-4">
+              <button 
+                onClick={() => setIsDialogOpen(true)}
+                className="w-full rpg-button p-4 text-lg rounded-lg mb-6"
+              >
+                <Plus className="w-5 h-5 mr-3" />
+                Log New Workout
+              </button>
+              
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <div style={{ display: 'none' }} />
+                </DialogTrigger>
               <DialogContent className="bg-slate-800 border-fantasy-purple">
                 <DialogHeader>
                   <DialogTitle className="text-fantasy-gold">Add Workout</DialogTitle>
@@ -344,10 +361,11 @@ export default function Workouts() {
                 </Form>
               </DialogContent>
             </Dialog>
-          </TabsContent>
+            </div>
+          )}
 
           {/* Preset Workouts Tab */}
-          <TabsContent value="presets" className="mt-4">
+          {activeTab === "presets" && (
             <div className="space-y-4">
               {/* Search and Filters */}
               <div className="space-y-3">
@@ -456,10 +474,10 @@ export default function Workouts() {
                 )}
               </div>
             </div>
-          </TabsContent>
+          )}
 
           {/* History Tab */}
-          <TabsContent value="history" className="mt-4">
+          {activeTab === "history" && (
             <div className="space-y-3">
               <h2 className="text-xl font-bold text-light-text">Recent Workouts</h2>
               {workoutLogs?.slice(0, 10).map((log) => (
@@ -507,8 +525,8 @@ export default function Workouts() {
                 </div>
               )}
             </div>
-          </TabsContent>
-        </Tabs>
+          )}
+        </div>
       </main>
 
       <BottomNavigation currentPath="/workouts" />
