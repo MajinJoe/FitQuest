@@ -286,14 +286,14 @@ export default function ProfileSettings() {
 
   if (isLoading) {
     return (
-      <div className="max-w-sm mx-auto bg-slate-900 min-h-screen flex items-center justify-center">
-        <div className="text-light-text">Loading profile...</div>
+      <div className="max-w-sm mx-auto fantasy-bg min-h-screen flex items-center justify-center">
+        <div className="text-gray-700">Loading profile...</div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-sm mx-auto bg-slate-900 min-h-screen fantasy-bg">
+    <div className="max-w-sm mx-auto fantasy-bg min-h-screen">
       {/* Header */}
       <div className="rpg-card m-4 p-4">
         <div className="flex items-center gap-4">

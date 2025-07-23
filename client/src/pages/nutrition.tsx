@@ -172,7 +172,7 @@ export default function Nutrition() {
   };
 
   return (
-    <div className="max-w-sm mx-auto bg-slate-900 min-h-screen fantasy-bg">
+    <div className="max-w-sm mx-auto fantasy-bg min-h-screen">
       <div className="rpg-card m-4 p-4">
         <h1 className="rpg-title text-2xl flex items-center justify-center mb-2">
           <Apple className="mr-3 text-fantasy-green" size={28} />
@@ -427,7 +427,7 @@ export default function Nutrition() {
 
       {/* Search Food Database Modal */}
       <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden bg-slate-800 border-fantasy-purple">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden rpg-card border-fantasy-purple">
           <DialogHeader>
             <DialogTitle className="text-fantasy-gold flex items-center gap-2">
               <Search className="w-5 h-5" />
@@ -442,7 +442,7 @@ export default function Nutrition() {
 
       {/* Add Recipe Modal */}
       <Dialog open={isRecipeOpen} onOpenChange={setIsRecipeOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-slate-800 border-fantasy-purple">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rpg-card border-fantasy-purple">
           <DialogHeader>
             <DialogTitle className="text-fantasy-gold flex items-center gap-2">
               <ChefHat className="w-5 h-5" />

@@ -25,7 +25,7 @@ export default function CharacterPage() {
   const xpPercentage = (character.currentXP / character.nextLevelXP) * 100;
 
   return (
-    <div className="max-w-sm mx-auto bg-slate-900 min-h-screen fantasy-bg">
+    <div className="max-w-sm mx-auto fantasy-bg min-h-screen">
       <div className="rpg-card m-4 p-4">
         <h1 className="rpg-title text-2xl flex items-center justify-center mb-2">
           <User className="mr-3 text-fantasy-gold" size={28} />

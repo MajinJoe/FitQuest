@@ -137,11 +137,11 @@ export default function InlineFoodDatabase({ onSelectFood }: InlineFoodDatabaseP
             placeholder="Search for foods (e.g., 'Miss Vickie's', 'Panera')..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 bg-slate-700 border-fantasy-purple text-light-text"
+            className="pl-10 bg-white border-fantasy-purple text-gray-800"
           />
         </div>
         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="w-48 bg-slate-700 border-fantasy-purple text-light-text">
+          <SelectTrigger className="w-48 bg-white border-fantasy-purple text-gray-800">
             <SelectValue placeholder="Category" />
           </SelectTrigger>
           <SelectContent>
@@ -156,16 +156,16 @@ export default function InlineFoodDatabase({ onSelectFood }: InlineFoodDatabaseP
 
       {searchTerm.length >= 2 && (
         <Tabs defaultValue="local" className="w-full">
-          <TabsList className="grid grid-cols-2 mb-4 bg-slate-700">
-            <TabsTrigger value="local" className="text-light-text">Local Database</TabsTrigger>
-            <TabsTrigger value="global" className="text-light-text">Global Search</TabsTrigger>
+          <TabsList className="grid grid-cols-2 mb-4 bg-parchment-dark">
+            <TabsTrigger value="local" className="text-gray-800">Local Database</TabsTrigger>
+            <TabsTrigger value="global" className="text-gray-800">Global Search</TabsTrigger>
           </TabsList>
 
           <TabsContent value="local" className="max-h-96 overflow-y-auto space-y-2 mt-4">
             {localLoading ? (
               <div className="text-center py-8">
                 <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-                <p className="text-light-text">Searching local database...</p>
+                <p className="text-gray-600">Searching local database...</p>
               </div>
             ) : !localResults || localResults.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
@@ -183,7 +183,7 @@ export default function InlineFoodDatabase({ onSelectFood }: InlineFoodDatabaseP
             {(usdaLoading || openFoodFactsLoading) ? (
               <div className="text-center py-8">
                 <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-                <p className="text-light-text">Searching USDA & Global Databases...</p>
+                <p className="text-gray-600">Searching USDA & Global Databases...</p>
               </div>
             ) : !globalResults || globalResults.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
@@ -227,14 +227,14 @@ interface FoodResultCardProps {
 function FoodResultCard({ food, onSelect, isFromExternalSource = false, sourceType }: FoodResultCardProps) {
   return (
     <div 
-      className="flex items-center justify-between p-4 rounded-lg border border-fantasy-purple bg-slate-700 hover:bg-slate-600 cursor-pointer transition-colors"
+      className="flex items-center justify-between p-4 rounded-lg border border-fantasy-purple bg-white hover:bg-parchment cursor-pointer transition-colors"
       onClick={() => onSelect(food)}
     >
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-2">
-          <h4 className="font-medium text-light-text">{food.name}</h4>
+          <h4 className="font-medium text-gray-800">{food.name}</h4>
           {food.brand && (
-            <span className="text-xs text-gray-400 bg-slate-600 px-2 py-1 rounded">
+            <span className="text-xs text-gray-600 bg-parchment-dark px-2 py-1 rounded">
               {food.brand}
             </span>
           )}
@@ -246,7 +246,7 @@ function FoodResultCard({ food, onSelect, isFromExternalSource = false, sourceTy
           )}
         </div>
         
-        <div className="flex items-center gap-4 text-sm text-gray-300">
+        <div className="flex items-center gap-4 text-sm text-gray-600">
           <span className="text-fantasy-gold font-medium">{food.calories} cal</span>
           <span>P: {food.protein}g</span>
           <span>C: {food.carbs}g</span>
@@ -254,7 +254,7 @@ function FoodResultCard({ food, onSelect, isFromExternalSource = false, sourceTy
         </div>
         
         {food.servingSize && (
-          <div className="text-xs text-gray-400 mt-1">
+          <div className="text-xs text-gray-500 mt-1">
             Per {food.servingSize}
           </div>
         )}

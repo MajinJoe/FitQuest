@@ -40,7 +40,7 @@ export default function Home() {
   }
 
   return (
-    <div className="max-w-sm mx-auto bg-slate-900 min-h-screen fantasy-bg relative overflow-hidden">
+    <div className="max-w-sm mx-auto fantasy-bg min-h-screen relative overflow-hidden">
       {/* Background Pixel Elements */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-10 left-10 w-2 h-2 bg-fantasy-gold rounded-sm animate-ping"></div>

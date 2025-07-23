@@ -137,12 +137,12 @@ export default function InlineAddHomemadeFood({ onFoodAdded }: InlineAddHomemade
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-light-text">Food Name *</FormLabel>
+                  <FormLabel className="text-gray-800">Food Name *</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="e.g., Grandma's Chocolate Chip Cookies" 
                       {...field} 
-                      className="bg-slate-700 border-fantasy-purple text-light-text"
+                      className="bg-white border-fantasy-purple text-gray-800"
                     />
                   </FormControl>
                   <FormMessage />
@@ -156,10 +156,10 @@ export default function InlineAddHomemadeFood({ onFoodAdded }: InlineAddHomemade
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-light-text">Category *</FormLabel>
+                    <FormLabel className="text-gray-800">Category *</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="bg-slate-700 border-fantasy-purple text-light-text">
+                        <SelectTrigger className="bg-white border-fantasy-purple text-gray-800">
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                       </FormControl>
@@ -181,12 +181,12 @@ export default function InlineAddHomemadeFood({ onFoodAdded }: InlineAddHomemade
                 name="servingSize"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-light-text">Serving Size *</FormLabel>
+                    <FormLabel className="text-gray-800">Serving Size *</FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="e.g., 1 cup, 2 pieces" 
                         {...field} 
-                        className="bg-slate-700 border-fantasy-purple text-light-text"
+                        className="bg-white border-fantasy-purple text-gray-800"
                       />
                     </FormControl>
                     <FormMessage />
@@ -206,13 +206,13 @@ export default function InlineAddHomemadeFood({ onFoodAdded }: InlineAddHomemade
                 name="calories"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-light-text">Calories *</FormLabel>
+                    <FormLabel className="text-gray-800">Calories *</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
                         {...field} 
                         onChange={(e) => field.onChange(Number(e.target.value))}
-                        className="bg-slate-700 border-fantasy-purple text-light-text"
+                        className="bg-white border-fantasy-purple text-gray-800"
                       />
                     </FormControl>
                     <FormMessage />
@@ -225,14 +225,14 @@ export default function InlineAddHomemadeFood({ onFoodAdded }: InlineAddHomemade
                 name="protein"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-light-text">Protein (g) *</FormLabel>
+                    <FormLabel className="text-gray-800">Protein (g) *</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
                         step="0.1"
                         {...field} 
                         onChange={(e) => field.onChange(Number(e.target.value))}
-                        className="bg-slate-700 border-fantasy-purple text-light-text"
+                        className="bg-white border-fantasy-purple text-gray-800"
                       />
                     </FormControl>
                     <FormMessage />
@@ -245,14 +245,14 @@ export default function InlineAddHomemadeFood({ onFoodAdded }: InlineAddHomemade
                 name="carbs"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-light-text">Carbohydrates (g) *</FormLabel>
+                    <FormLabel className="text-gray-800">Carbohydrates (g) *</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
                         step="0.1"
                         {...field} 
                         onChange={(e) => field.onChange(Number(e.target.value))}
-                        className="bg-slate-700 border-fantasy-purple text-light-text"
+                        className="bg-white border-fantasy-purple text-gray-800"
                       />
                     </FormControl>
                     <FormMessage />
@@ -265,14 +265,14 @@ export default function InlineAddHomemadeFood({ onFoodAdded }: InlineAddHomemade
                 name="fat"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-light-text">Fat (g) *</FormLabel>
+                    <FormLabel className="text-gray-800">Fat (g) *</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
                         step="0.1"
                         {...field} 
                         onChange={(e) => field.onChange(Number(e.target.value))}
-                        className="bg-slate-700 border-fantasy-purple text-light-text"
+                        className="bg-white border-fantasy-purple text-gray-800"
                       />
                     </FormControl>
                     <FormMessage />
@@ -286,7 +286,7 @@ export default function InlineAddHomemadeFood({ onFoodAdded }: InlineAddHomemade
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Tag className="w-4 h-4 text-fantasy-purple" />
-              <span className="text-light-text font-medium">Tags (optional)</span>
+              <span className="text-gray-800 font-medium">Tags (optional)</span>
             </div>
             <div className="flex flex-wrap gap-2">
               {commonTags.map(tag => (
@@ -313,12 +313,12 @@ export default function InlineAddHomemadeFood({ onFoodAdded }: InlineAddHomemade
               name="ingredients"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-light-text">Ingredients (optional)</FormLabel>
+                  <FormLabel className="text-gray-800">Ingredients (optional)</FormLabel>
                   <FormControl>
                     <Textarea 
                       placeholder="List the main ingredients..."
                       {...field}
-                      className="bg-slate-700 border-fantasy-purple text-light-text"
+                      className="bg-white border-fantasy-purple text-gray-800"
                     />
                   </FormControl>
                   <FormMessage />
@@ -331,12 +331,12 @@ export default function InlineAddHomemadeFood({ onFoodAdded }: InlineAddHomemade
               name="recipe"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-light-text">Recipe/Instructions (optional)</FormLabel>
+                  <FormLabel className="text-gray-800">Recipe/Instructions (optional)</FormLabel>
                   <FormControl>
                     <Textarea 
                       placeholder="Share your recipe or cooking instructions..."
                       {...field}
-                      className="bg-slate-700 border-fantasy-purple text-light-text"
+                      className="bg-white border-fantasy-purple text-gray-800"
                     />
                   </FormControl>
                   <FormMessage />

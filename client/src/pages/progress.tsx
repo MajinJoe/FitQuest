@@ -76,7 +76,7 @@ export default function Progress() {
   const currentStreak = getActivityStreak();
 
   return (
-    <div className="max-w-sm mx-auto bg-slate-900 min-h-screen fantasy-bg">
+    <div className="max-w-sm mx-auto fantasy-bg min-h-screen">
       <header className="p-4 glass-effect">
         <h1 className="rpg-title text-2xl flex items-center">
           <TrendingUp className="mr-2" />
