@@ -123,6 +123,15 @@
   
   .rpg-text {
     font-family: 'Courier New', monospace;
+  }
+
+  /* Dialog positioning fix */
+  [data-radix-dialog-content] {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 50 !important;
     font-weight: bold;
     color: hsl(25, 30%, 25%);
     text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5);
