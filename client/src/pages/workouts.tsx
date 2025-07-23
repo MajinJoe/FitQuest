@@ -249,7 +249,7 @@ export default function Workouts() {
                 <DialogTrigger asChild>
                   <div style={{ display: 'none' }} />
                 </DialogTrigger>
-              <DialogContent className="w-[95vw] max-w-md h-[85vh] max-h-[600px] p-0 rpg-card border-fantasy-purple overflow-hidden">
+              <DialogContent className="p-0 rpg-card border-fantasy-purple overflow-hidden h-[75vh]">
                 <DialogHeader className="p-4 pb-2 border-b border-fantasy-purple/30">
                   <DialogTitle className="text-fantasy-gold rpg-title text-lg">Add Workout</DialogTitle>
                   <DialogDescription className="text-gray-700 rpg-text">

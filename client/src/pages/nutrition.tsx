@@ -256,7 +256,7 @@ export default function Nutrition() {
           <DialogTrigger asChild>
             <div style={{ display: 'none' }} />
           </DialogTrigger>
-          <DialogContent className="w-[95vw] max-w-md h-[85vh] max-h-[600px] p-0 rpg-card border-fantasy-purple overflow-hidden">
+          <DialogContent className="p-0 rpg-card border-fantasy-purple overflow-hidden h-[75vh]">
             <DialogHeader className="p-4 pb-2 border-b border-fantasy-purple/30">
               <DialogTitle className="text-fantasy-gold rpg-title text-lg">Add Meal</DialogTitle>
               <DialogDescription className="text-gray-700 rpg-text">
@@ -432,7 +432,7 @@ export default function Nutrition() {
 
       {/* Search Food Database Modal */}
       <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
-        <DialogContent className="w-[95vw] max-w-md h-[85vh] max-h-[600px] p-0 rpg-card border-fantasy-purple overflow-hidden">
+        <DialogContent className="p-0 rpg-card border-fantasy-purple overflow-hidden h-[75vh]">
           <DialogHeader className="p-4 pb-2 border-b border-fantasy-purple/30">
             <DialogTitle className="text-fantasy-gold flex items-center gap-2 rpg-title text-lg">
               <Search className="w-5 h-5" />
@@ -450,7 +450,7 @@ export default function Nutrition() {
 
       {/* Add Recipe Modal */}
       <Dialog open={isRecipeOpen} onOpenChange={setIsRecipeOpen}>
-        <DialogContent className="w-[95vw] max-w-md h-[90vh] max-h-[700px] p-0 rpg-card border-fantasy-purple overflow-hidden">
+        <DialogContent className="p-0 rpg-card border-fantasy-purple overflow-hidden h-[80vh]">
           <DialogHeader className="p-4 pb-2 border-b border-fantasy-purple/30">
             <DialogTitle className="text-fantasy-gold flex items-center gap-2 rpg-title text-lg">
               <ChefHat className="w-5 h-5" />

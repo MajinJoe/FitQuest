@@ -469,7 +469,7 @@ function ExerciseLoggingModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <Card className="w-[95vw] max-w-md h-[85vh] max-h-[600px] rpg-card border-fantasy-purple overflow-hidden flex flex-col">
+      <Card className="rpg-card border-fantasy-purple overflow-hidden h-[75vh] flex flex-col">
         <CardHeader className="pb-2 border-b border-fantasy-purple/30">
           <CardTitle className="text-fantasy-gold rpg-title text-lg">Log: {exercise.name}</CardTitle>
           <CardDescription className="text-gray-700 rpg-text">

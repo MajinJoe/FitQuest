@@ -128,10 +128,12 @@
   /* Dialog positioning fix */
   [data-radix-dialog-content] {
     position: fixed !important;
-    top: 50% !important;
+    top: 10% !important;
     left: 50% !important;
-    transform: translate(-50%, -50%) !important;
+    transform: translateX(-50%) !important;
     z-index: 50 !important;
+    width: 90vw !important;
+    max-width: 400px !important;
     font-weight: bold;
     color: hsl(25, 30%, 25%);
     text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5);
