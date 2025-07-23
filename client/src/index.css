@@ -76,7 +76,7 @@
 
 @layer utilities {
   .fantasy-bg {
-    background: linear-gradient(135deg, var(--parchment) 0%, hsl(43, 35%, 80%) 50%, var(--parchment-dark) 100%);
+    background: linear-gradient(135deg, var(--stone-gray) 0%, hsl(215, 25%, 27%) 50%, var(--dark-slate) 100%);
   }
 
   .glass-effect {
@@ -123,18 +123,6 @@
   
   .rpg-text {
     font-family: 'Courier New', monospace;
-  }
-
-  /* Dialog positioning fix */
-  [data-radix-dialog-content] {
-    position: fixed !important;
-    top: 20% !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    z-index: 50 !important;
-    width: 85vw !important;
-    max-width: 380px !important;
-    max-height: 70vh !important;
     font-weight: bold;
     color: hsl(25, 30%, 25%);
     text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5);

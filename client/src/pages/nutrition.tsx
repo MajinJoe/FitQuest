@@ -9,14 +9,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BottomNavigation from "@/components/bottom-navigation";
 import BarcodeScanner from "@/components/barcode-scanner";
 import FoodDatabase from "@/components/food-database";
-import InlineFoodDatabase from "@/components/inline-food-database";
 import AddHomemadeFood from "@/components/add-homemade-food";
-import InlineAddHomemadeFood from "@/components/inline-add-homemade";
 import PopularFoods from "@/components/popular-foods";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -34,9 +32,7 @@ const nutritionSchema = z.object({
 export default function Nutrition() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isRecipeOpen, setIsRecipeOpen] = useState(false);
-  const [activeDiscoveryTab, setActiveDiscoveryTab] = useState<'popular' | null>(null);
+  const [activeDiscoveryTab, setActiveDiscoveryTab] = useState<'search' | 'popular' | 'recipe' | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -141,15 +137,11 @@ export default function Nutrition() {
       description: `${food.name} nutrition data loaded${food.isHomemade ? ' (homemade recipe)' : ''}`,
     });
     
-    // Close search modal and open meal dialog
-    setIsSearchOpen(false);
     setIsDialogOpen(true);
   };
 
   // Handle newly added homemade food
   const handleHomemadeFoodAdded = (food: FoodDatabaseItem) => {
-    // Close recipe modal first
-    setIsRecipeOpen(false);
     handleFoodSelection(food);
     toast({
       title: "Homemade Food Added!",
@@ -172,7 +164,7 @@ export default function Nutrition() {
   };
 
   return (
-    <div className="max-w-sm mx-auto fantasy-bg min-h-screen">
+    <div className="max-w-sm mx-auto bg-slate-900 min-h-screen fantasy-bg">
       <div className="rpg-card m-4 p-4">
         <h1 className="rpg-title text-2xl flex items-center justify-center mb-2">
           <Apple className="mr-3 text-fantasy-green" size={28} />
@@ -210,8 +202,8 @@ export default function Nutrition() {
           <h3 className="rpg-title text-fantasy-purple text-lg mb-4 text-center">Food Discovery</h3>
           <div className="grid grid-cols-4 gap-2 mb-4">
             <button 
-              className="rpg-button flex flex-col items-center p-3 text-center"
-              onClick={() => setIsSearchOpen(true)}
+              className={`rpg-button flex flex-col items-center p-3 text-center ${activeDiscoveryTab === 'search' ? 'bg-fantasy-gold/20 border-fantasy-gold' : ''}`}
+              onClick={() => setActiveDiscoveryTab(activeDiscoveryTab === 'search' ? null : 'search')}
             >
               <Search className="w-5 h-5 mb-1" />
               <span className="text-xs rpg-text">Search</span>
@@ -228,18 +220,30 @@ export default function Nutrition() {
               <span className="text-xs rpg-text">Popular</span>
             </button>
             <button 
-              className="rpg-button flex flex-col items-center p-3 text-center"
-              onClick={() => setIsRecipeOpen(true)}
+              className={`rpg-button flex flex-col items-center p-3 text-center ${activeDiscoveryTab === 'recipe' ? 'bg-fantasy-gold/20 border-fantasy-gold' : ''}`}
+              onClick={() => setActiveDiscoveryTab(activeDiscoveryTab === 'recipe' ? null : 'recipe')}
             >
               <ChefHat className="w-5 h-5 mb-1" />
               <span className="text-xs rpg-text">Recipe</span>
             </button>
           </div>
 
-          {/* Popular foods content panel (only one that shows inline) */}
+          {/* Content panels for each tab */}
+          {activeDiscoveryTab === 'search' && (
+            <div className="rpg-card p-4 mb-4">
+              <FoodDatabase onSelectFood={handleFoodSelection} />
+            </div>
+          )}
+          
           {activeDiscoveryTab === 'popular' && (
             <div className="rpg-card p-4 mb-4">
               <PopularFoods onSelectFood={handleFoodSelection} />
+            </div>
+          )}
+          
+          {activeDiscoveryTab === 'recipe' && (
+            <div className="rpg-card p-4 mb-4">
+              <AddHomemadeFood onFoodAdded={handleHomemadeFoodAdded} />
             </div>
           )}
         </div>
@@ -256,22 +260,18 @@ export default function Nutrition() {
           <DialogTrigger asChild>
             <div style={{ display: 'none' }} />
           </DialogTrigger>
-          <DialogContent className="p-0 rpg-card border-fantasy-purple overflow-hidden h-[75vh]">
-            <DialogHeader className="p-4 pb-2 border-b border-fantasy-purple/30">
-              <DialogTitle className="text-fantasy-gold rpg-title text-lg">Add Meal</DialogTitle>
-              <DialogDescription className="text-gray-700 rpg-text">
-                Log your meal to track nutrition and gain XP
-              </DialogDescription>
+          <DialogContent className="bg-slate-800 border-fantasy-green">
+            <DialogHeader>
+              <DialogTitle className="text-fantasy-gold">Add Meal</DialogTitle>
             </DialogHeader>
-            <div className="p-4 overflow-y-auto flex-1">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
                   name="foodName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">Food Name</FormLabel>
+                      <FormLabel className="text-light-text">Food Name</FormLabel>
                       <FormControl>
                         <Input placeholder="e.g., Grilled chicken salad" {...field} />
                       </FormControl>
@@ -285,7 +285,7 @@ export default function Nutrition() {
                   name="mealType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">Meal Type</FormLabel>
+                      <FormLabel className="text-light-text">Meal Type</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -310,7 +310,7 @@ export default function Nutrition() {
                     name="calories"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-700">Calories</FormLabel>
+                        <FormLabel className="text-light-text">Calories</FormLabel>
                         <FormControl>
                           <Input 
                             type="number" 
@@ -328,7 +328,7 @@ export default function Nutrition() {
                     name="protein"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-700">Protein (g)</FormLabel>
+                        <FormLabel className="text-light-text">Protein (g)</FormLabel>
                         <FormControl>
                           <Input 
                             type="number" 
@@ -348,7 +348,7 @@ export default function Nutrition() {
                     name="carbs"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-700">Carbs (g)</FormLabel>
+                        <FormLabel className="text-light-text">Carbs (g)</FormLabel>
                         <FormControl>
                           <Input 
                             type="number" 
@@ -366,7 +366,7 @@ export default function Nutrition() {
                     name="fat"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-700">Fat (g)</FormLabel>
+                        <FormLabel className="text-light-text">Fat (g)</FormLabel>
                         <FormControl>
                           <Input 
                             type="number" 
@@ -387,9 +387,8 @@ export default function Nutrition() {
                 >
                   {nutritionMutation.isPending ? "Logging..." : "Log Meal & Gain XP"}
                 </Button>
-                </form>
-              </Form>
-            </div>
+              </form>
+            </Form>
           </DialogContent>
         </Dialog>
 
@@ -429,42 +428,6 @@ export default function Nutrition() {
         onClose={() => setIsScannerOpen(false)} 
         onScanResult={handleBarcodeResult}
       />
-
-      {/* Search Food Database Modal */}
-      <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
-        <DialogContent className="p-0 rpg-card border-fantasy-purple overflow-hidden h-[75vh]">
-          <DialogHeader className="p-4 pb-2 border-b border-fantasy-purple/30">
-            <DialogTitle className="text-fantasy-gold flex items-center gap-2 rpg-title text-lg">
-              <Search className="w-5 h-5" />
-              Search Food Database
-            </DialogTitle>
-            <DialogDescription className="text-gray-700 rpg-text">
-              Find nutrition information for thousands of foods
-            </DialogDescription>
-          </DialogHeader>
-          <div className="p-4 overflow-y-auto flex-1">
-            <InlineFoodDatabase onSelectFood={handleFoodSelection} />
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Add Recipe Modal */}
-      <Dialog open={isRecipeOpen} onOpenChange={setIsRecipeOpen}>
-        <DialogContent className="p-0 rpg-card border-fantasy-purple overflow-hidden h-[80vh]">
-          <DialogHeader className="p-4 pb-2 border-b border-fantasy-purple/30">
-            <DialogTitle className="text-fantasy-gold flex items-center gap-2 rpg-title text-lg">
-              <ChefHat className="w-5 h-5" />
-              Add Homemade Recipe
-            </DialogTitle>
-            <DialogDescription className="text-gray-700 rpg-text">
-              Create your own recipe with custom nutrition info
-            </DialogDescription>
-          </DialogHeader>
-          <div className="p-4 overflow-y-auto flex-1">
-            <InlineAddHomemadeFood onFoodAdded={handleHomemadeFoodAdded} />
-          </div>
-        </DialogContent>
-      </Dialog>
 
       <BottomNavigation currentPath="/nutrition" />
     </div>
