@@ -32,6 +32,7 @@ const nutritionSchema = z.object({
 export default function Nutrition() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [activeDiscoveryTab, setActiveDiscoveryTab] = useState<'search' | 'popular' | 'recipe' | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -200,7 +201,10 @@ export default function Nutrition() {
         <div className="rpg-card mb-6 p-4">
           <h3 className="rpg-title text-fantasy-purple text-lg mb-4 text-center">Food Discovery</h3>
           <div className="grid grid-cols-4 gap-2 mb-4">
-            <button className="rpg-button flex flex-col items-center p-3 text-center">
+            <button 
+              className={`rpg-button flex flex-col items-center p-3 text-center ${activeDiscoveryTab === 'search' ? 'bg-fantasy-gold/20 border-fantasy-gold' : ''}`}
+              onClick={() => setActiveDiscoveryTab(activeDiscoveryTab === 'search' ? null : 'search')}
+            >
               <Search className="w-5 h-5 mb-1" />
               <span className="text-xs rpg-text">Search</span>
             </button>
@@ -208,19 +212,40 @@ export default function Nutrition() {
               <Camera className="w-5 h-5 mb-1" />
               <span className="text-xs rpg-text">Scan</span>
             </button>
-            <button className="rpg-button flex flex-col items-center p-3 text-center">
+            <button 
+              className={`rpg-button flex flex-col items-center p-3 text-center ${activeDiscoveryTab === 'popular' ? 'bg-fantasy-gold/20 border-fantasy-gold' : ''}`}
+              onClick={() => setActiveDiscoveryTab(activeDiscoveryTab === 'popular' ? null : 'popular')}
+            >
               <TrendingUp className="w-5 h-5 mb-1" />
               <span className="text-xs rpg-text">Popular</span>
             </button>
-            <button className="rpg-button flex flex-col items-center p-3 text-center">
+            <button 
+              className={`rpg-button flex flex-col items-center p-3 text-center ${activeDiscoveryTab === 'recipe' ? 'bg-fantasy-gold/20 border-fantasy-gold' : ''}`}
+              onClick={() => setActiveDiscoveryTab(activeDiscoveryTab === 'recipe' ? null : 'recipe')}
+            >
               <ChefHat className="w-5 h-5 mb-1" />
               <span className="text-xs rpg-text">Recipe</span>
             </button>
           </div>
 
-          <div className="rpg-card p-4 mb-4">
-            <FoodDatabase onSelectFood={handleFoodSelection} />
-          </div>
+          {/* Content panels for each tab */}
+          {activeDiscoveryTab === 'search' && (
+            <div className="rpg-card p-4 mb-4">
+              <FoodDatabase onSelectFood={handleFoodSelection} />
+            </div>
+          )}
+          
+          {activeDiscoveryTab === 'popular' && (
+            <div className="rpg-card p-4 mb-4">
+              <PopularFoods onSelectFood={handleFoodSelection} />
+            </div>
+          )}
+          
+          {activeDiscoveryTab === 'recipe' && (
+            <div className="rpg-card p-4 mb-4">
+              <AddHomemadeFood onFoodAdded={handleHomemadeFoodAdded} />
+            </div>
+          )}
         </div>
 
         <button 
