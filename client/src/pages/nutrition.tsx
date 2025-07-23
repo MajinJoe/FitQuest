@@ -256,18 +256,22 @@ export default function Nutrition() {
           <DialogTrigger asChild>
             <div style={{ display: 'none' }} />
           </DialogTrigger>
-          <DialogContent className="bg-slate-800 border-fantasy-green">
-            <DialogHeader>
-              <DialogTitle className="text-fantasy-gold">Add Meal</DialogTitle>
+          <DialogContent className="w-[95vw] max-w-md h-[85vh] max-h-[600px] p-0 rpg-card border-fantasy-purple overflow-hidden">
+            <DialogHeader className="p-4 pb-2 border-b border-fantasy-purple/30">
+              <DialogTitle className="text-fantasy-gold rpg-title text-lg">Add Meal</DialogTitle>
+              <DialogDescription className="text-gray-700 rpg-text">
+                Log your meal to track nutrition and gain XP
+              </DialogDescription>
             </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="p-4 overflow-y-auto flex-1">
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
                   name="foodName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-light-text">Food Name</FormLabel>
+                      <FormLabel className="text-gray-700">Food Name</FormLabel>
                       <FormControl>
                         <Input placeholder="e.g., Grilled chicken salad" {...field} />
                       </FormControl>
@@ -281,7 +285,7 @@ export default function Nutrition() {
                   name="mealType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-light-text">Meal Type</FormLabel>
+                      <FormLabel className="text-gray-700">Meal Type</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -306,7 +310,7 @@ export default function Nutrition() {
                     name="calories"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-light-text">Calories</FormLabel>
+                        <FormLabel className="text-gray-700">Calories</FormLabel>
                         <FormControl>
                           <Input 
                             type="number" 
@@ -324,7 +328,7 @@ export default function Nutrition() {
                     name="protein"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-light-text">Protein (g)</FormLabel>
+                        <FormLabel className="text-gray-700">Protein (g)</FormLabel>
                         <FormControl>
                           <Input 
                             type="number" 
@@ -344,7 +348,7 @@ export default function Nutrition() {
                     name="carbs"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-light-text">Carbs (g)</FormLabel>
+                        <FormLabel className="text-gray-700">Carbs (g)</FormLabel>
                         <FormControl>
                           <Input 
                             type="number" 
@@ -362,7 +366,7 @@ export default function Nutrition() {
                     name="fat"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-light-text">Fat (g)</FormLabel>
+                        <FormLabel className="text-gray-700">Fat (g)</FormLabel>
                         <FormControl>
                           <Input 
                             type="number" 
@@ -383,8 +387,9 @@ export default function Nutrition() {
                 >
                   {nutritionMutation.isPending ? "Logging..." : "Log Meal & Gain XP"}
                 </Button>
-              </form>
-            </Form>
+                </form>
+              </Form>
+            </div>
           </DialogContent>
         </Dialog>
 
@@ -427,14 +432,17 @@ export default function Nutrition() {
 
       {/* Search Food Database Modal */}
       <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden rpg-card border-fantasy-purple">
-          <DialogHeader>
-            <DialogTitle className="text-fantasy-gold flex items-center gap-2">
+        <DialogContent className="w-[95vw] max-w-md h-[85vh] max-h-[600px] p-0 rpg-card border-fantasy-purple overflow-hidden">
+          <DialogHeader className="p-4 pb-2 border-b border-fantasy-purple/30">
+            <DialogTitle className="text-fantasy-gold flex items-center gap-2 rpg-title text-lg">
               <Search className="w-5 h-5" />
               Search Food Database
             </DialogTitle>
+            <DialogDescription className="text-gray-700 rpg-text">
+              Find nutrition information for thousands of foods
+            </DialogDescription>
           </DialogHeader>
-          <div className="mt-4">
+          <div className="p-4 overflow-y-auto flex-1">
             <InlineFoodDatabase onSelectFood={handleFoodSelection} />
           </div>
         </DialogContent>
@@ -442,14 +450,17 @@ export default function Nutrition() {
 
       {/* Add Recipe Modal */}
       <Dialog open={isRecipeOpen} onOpenChange={setIsRecipeOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rpg-card border-fantasy-purple">
-          <DialogHeader>
-            <DialogTitle className="text-fantasy-gold flex items-center gap-2">
+        <DialogContent className="w-[95vw] max-w-md h-[90vh] max-h-[700px] p-0 rpg-card border-fantasy-purple overflow-hidden">
+          <DialogHeader className="p-4 pb-2 border-b border-fantasy-purple/30">
+            <DialogTitle className="text-fantasy-gold flex items-center gap-2 rpg-title text-lg">
               <ChefHat className="w-5 h-5" />
               Add Homemade Recipe
             </DialogTitle>
+            <DialogDescription className="text-gray-700 rpg-text">
+              Create your own recipe with custom nutrition info
+            </DialogDescription>
           </DialogHeader>
-          <div className="mt-4">
+          <div className="p-4 overflow-y-auto flex-1">
             <InlineAddHomemadeFood onFoodAdded={handleHomemadeFoodAdded} />
           </div>
         </DialogContent>

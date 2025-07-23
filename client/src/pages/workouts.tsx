@@ -249,21 +249,22 @@ export default function Workouts() {
                 <DialogTrigger asChild>
                   <div style={{ display: 'none' }} />
                 </DialogTrigger>
-              <DialogContent className="bg-slate-800 border-fantasy-purple">
-                <DialogHeader>
-                  <DialogTitle className="text-fantasy-gold">Add Workout</DialogTitle>
-                  <DialogDescription className="text-gray-300">
+              <DialogContent className="w-[95vw] max-w-md h-[85vh] max-h-[600px] p-0 rpg-card border-fantasy-purple overflow-hidden">
+                <DialogHeader className="p-4 pb-2 border-b border-fantasy-purple/30">
+                  <DialogTitle className="text-fantasy-gold rpg-title text-lg">Add Workout</DialogTitle>
+                  <DialogDescription className="text-gray-700 rpg-text">
                     Log your completed workout to earn XP and track your progress.
                   </DialogDescription>
                 </DialogHeader>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <div className="p-4 overflow-y-auto flex-1">
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     <FormField
                       control={form.control}
                       name="workoutType"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-light-text">Workout Type</FormLabel>
+                          <FormLabel className="text-gray-700">Workout Type</FormLabel>
                           <FormControl>
                             <Input placeholder="e.g., Running, Weight Training, Yoga" {...field} />
                           </FormControl>
@@ -278,7 +279,7 @@ export default function Workouts() {
                         name="duration"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-light-text">Duration (min)</FormLabel>
+                            <FormLabel className="text-gray-700">Duration (min)</FormLabel>
                             <FormControl>
                               <Input 
                                 type="number" 
@@ -296,7 +297,7 @@ export default function Workouts() {
                         name="caloriesBurned"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-light-text">Calories Burned</FormLabel>
+                            <FormLabel className="text-gray-700">Calories Burned</FormLabel>
                             <FormControl>
                               <Input 
                                 type="number" 
@@ -315,7 +316,7 @@ export default function Workouts() {
                       name="intensity"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-light-text">Intensity</FormLabel>
+                          <FormLabel className="text-gray-700">Intensity</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
@@ -338,7 +339,7 @@ export default function Workouts() {
                       name="notes"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-light-text">Notes (optional)</FormLabel>
+                          <FormLabel className="text-gray-700">Notes (optional)</FormLabel>
                           <FormControl>
                             <Textarea 
                               placeholder="How did it feel? Any achievements?"
@@ -357,8 +358,9 @@ export default function Workouts() {
                     >
                       {workoutMutation.isPending ? "Logging..." : "Complete Workout"}
                     </Button>
-                  </form>
-                </Form>
+                    </form>
+                  </Form>
+                </div>
               </DialogContent>
             </Dialog>
             </div>
@@ -375,7 +377,7 @@ export default function Workouts() {
                     placeholder="Search workouts..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-slate-800 border-gray-700 text-light-text"
+                    className="pl-10 bg-slate-800 border-gray-700 text-gray-700"
                   />
                 </div>
                 
@@ -479,7 +481,7 @@ export default function Workouts() {
           {/* History Tab */}
           {activeTab === "history" && (
             <div className="space-y-3">
-              <h2 className="text-xl font-bold text-light-text">Recent Workouts</h2>
+              <h2 className="text-xl font-bold text-gray-700">Recent Workouts</h2>
               {workoutLogs?.slice(0, 10).map((log) => (
                 <Card key={log.id} className="bg-slate-800 border-gray-700">
                   <CardContent className="p-4">

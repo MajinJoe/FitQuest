@@ -16,8 +16,8 @@ export default function CharacterPage() {
 
   if (!character) {
     return (
-      <div className="max-w-sm mx-auto bg-slate-900 min-h-screen flex items-center justify-center">
-        <div className="text-light-text">Loading character...</div>
+      <div className="max-w-sm mx-auto fantasy-bg min-h-screen flex items-center justify-center">
+        <div className="text-gray-700">Loading character...</div>
       </div>
     );
   }

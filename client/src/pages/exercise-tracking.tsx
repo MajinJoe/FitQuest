@@ -469,45 +469,45 @@ function ExerciseLoggingModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-md bg-slate-800 border-slate-700">
-        <CardHeader>
-          <CardTitle className="text-light-text">Log: {exercise.name}</CardTitle>
-          <CardDescription className="text-gray-400">
+      <Card className="w-[95vw] max-w-md h-[85vh] max-h-[600px] rpg-card border-fantasy-purple overflow-hidden flex flex-col">
+        <CardHeader className="pb-2 border-b border-fantasy-purple/30">
+          <CardTitle className="text-fantasy-gold rpg-title text-lg">Log: {exercise.name}</CardTitle>
+          <CardDescription className="text-gray-700 rpg-text">
             {exercise.trackingType === "reps_sets" ? "Enter reps, sets, and weight" :
              exercise.trackingType === "time_distance" ? "Enter time and distance" : "Enter duration"}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1 overflow-y-auto p-4">
           <form onSubmit={handleSubmit} className="space-y-4">
             {exercise.trackingType === "reps_sets" && (
               <>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <Label htmlFor="sets" className="text-gray-300">Sets</Label>
+                    <Label htmlFor="sets" className="text-gray-700">Sets</Label>
                     <Input
                       id="sets"
                       type="number"
                       value={formData.sets || ""}
                       onChange={(e) => setFormData(prev => ({ ...prev, sets: parseInt(e.target.value) }))}
-                      className="bg-slate-700 border-slate-600 text-gray-200"
+                      className="bg-white border-fantasy-purple text-gray-800"
                       required
                     />
                   </div>
                   <div>
-                    <Label htmlFor="reps" className="text-gray-300">Reps</Label>
+                    <Label htmlFor="reps" className="text-gray-700">Reps</Label>
                     <Input
                       id="reps"
                       type="text"
                       value={formData.reps || ""}
                       onChange={(e) => setFormData(prev => ({ ...prev, reps: e.target.value }))}
                       placeholder="e.g. 12,10,8"
-                      className="bg-slate-700 border-slate-600 text-gray-200 placeholder-gray-500"
+                      className="bg-white border-fantasy-purple text-gray-800 placeholder-gray-500"
                       required
                     />
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="weight" className="text-gray-300">Weight (lbs)</Label>
+                  <Label htmlFor="weight" className="text-gray-700">Weight (lbs)</Label>
                   <Input
                     id="weight"
                     type="number"
@@ -515,7 +515,7 @@ function ExerciseLoggingModal({
                     value={formData.weight || ""}
                     onChange={(e) => setFormData(prev => ({ ...prev, weight: parseFloat(e.target.value) }))}
                     placeholder="Optional"
-                    className="bg-slate-700 border-slate-600 text-gray-200 placeholder-gray-500"
+                    className="bg-white border-fantasy-purple text-gray-800 placeholder-gray-500"
                   />
                 </div>
               </>
@@ -524,18 +524,18 @@ function ExerciseLoggingModal({
             {exercise.trackingType === "time_distance" && (
               <>
                 <div>
-                  <Label htmlFor="duration" className="text-gray-300">Duration (minutes)</Label>
+                  <Label htmlFor="duration" className="text-gray-700">Duration (minutes)</Label>
                   <Input
                     id="duration"
                     type="number"
                     value={formData.duration || ""}
                     onChange={(e) => setFormData(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
-                    className="bg-slate-700 border-slate-600 text-gray-200"
+                    className="bg-white border-fantasy-purple text-gray-800"
                     required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="distance" className="text-gray-300">Distance (miles)</Label>
+                  <Label htmlFor="distance" className="text-gray-700">Distance (miles)</Label>
                   <Input
                     id="distance"
                     type="number"
@@ -543,7 +543,7 @@ function ExerciseLoggingModal({
                     value={formData.distance || ""}
                     onChange={(e) => setFormData(prev => ({ ...prev, distance: parseFloat(e.target.value) }))}
                     placeholder="Optional"
-                    className="bg-slate-700 border-slate-600 text-gray-200 placeholder-gray-500"
+                    className="bg-white border-fantasy-purple text-gray-800 placeholder-gray-500"
                   />
                 </div>
               </>
@@ -551,31 +551,31 @@ function ExerciseLoggingModal({
 
             {exercise.trackingType === "time_only" && (
               <div>
-                <Label htmlFor="duration" className="text-gray-300">Duration (minutes)</Label>
+                <Label htmlFor="duration" className="text-gray-700">Duration (minutes)</Label>
                 <Input
                   id="duration"
                   type="number"
                   value={formData.duration || ""}
                   onChange={(e) => setFormData(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
-                  className="bg-slate-700 border-slate-600 text-gray-200"
+                  className="bg-white border-fantasy-purple text-gray-800"
                   required
                 />
               </div>
             )}
 
             <div>
-              <Label htmlFor="notes" className="text-gray-300">Notes (optional)</Label>
+              <Label htmlFor="notes" className="text-gray-700">Notes (optional)</Label>
               <Input
                 id="notes"
                 value={formData.notes || ""}
                 onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                 placeholder="How did it feel?"
-                className="bg-slate-700 border-slate-600 text-gray-200 placeholder-gray-500"
+                className="bg-white border-fantasy-purple text-gray-800 placeholder-gray-500"
               />
             </div>
 
             <div className="flex gap-2">
-              <Button type="button" variant="outline" onClick={onClose} className="flex-1 border-gray-600 text-gray-300 hover:bg-slate-700">
+              <Button type="button" variant="outline" onClick={onClose} className="flex-1 border-gray-600 text-gray-700 hover:bg-slate-700">
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading} className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white">
