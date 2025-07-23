@@ -152,7 +152,7 @@ export default function ExerciseTracking() {
   const displayedExercises = searchQuery.trim() ? searchResults : exercises;
 
   return (
-    <div className="max-w-sm mx-auto bg-slate-900 min-h-screen relative overflow-hidden">
+    <div className="max-w-sm mx-auto fantasy-bg min-h-screen relative overflow-hidden">
       {/* Background Fantasy Elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-10 left-10 w-2 h-2 bg-fantasy-gold rounded-full animate-ping"></div>
