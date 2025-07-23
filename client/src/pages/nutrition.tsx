@@ -14,7 +14,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BottomNavigation from "@/components/bottom-navigation";
 import BarcodeScanner from "@/components/barcode-scanner";
 import FoodDatabase from "@/components/food-database";
+import InlineFoodDatabase from "@/components/inline-food-database";
 import AddHomemadeFood from "@/components/add-homemade-food";
+import InlineAddHomemadeFood from "@/components/inline-add-homemade";
 import PopularFoods from "@/components/popular-foods";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -32,7 +34,9 @@ const nutritionSchema = z.object({
 export default function Nutrition() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
-  const [activeDiscoveryTab, setActiveDiscoveryTab] = useState<'search' | 'popular' | 'recipe' | null>(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isRecipeOpen, setIsRecipeOpen] = useState(false);
+  const [activeDiscoveryTab, setActiveDiscoveryTab] = useState<'popular' | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -137,11 +141,15 @@ export default function Nutrition() {
       description: `${food.name} nutrition data loaded${food.isHomemade ? ' (homemade recipe)' : ''}`,
     });
     
+    // Close search modal and open meal dialog
+    setIsSearchOpen(false);
     setIsDialogOpen(true);
   };
 
   // Handle newly added homemade food
   const handleHomemadeFoodAdded = (food: FoodDatabaseItem) => {
+    // Close recipe modal first
+    setIsRecipeOpen(false);
     handleFoodSelection(food);
     toast({
       title: "Homemade Food Added!",
@@ -202,8 +210,8 @@ export default function Nutrition() {
           <h3 className="rpg-title text-fantasy-purple text-lg mb-4 text-center">Food Discovery</h3>
           <div className="grid grid-cols-4 gap-2 mb-4">
             <button 
-              className={`rpg-button flex flex-col items-center p-3 text-center ${activeDiscoveryTab === 'search' ? 'bg-fantasy-gold/20 border-fantasy-gold' : ''}`}
-              onClick={() => setActiveDiscoveryTab(activeDiscoveryTab === 'search' ? null : 'search')}
+              className="rpg-button flex flex-col items-center p-3 text-center"
+              onClick={() => setIsSearchOpen(true)}
             >
               <Search className="w-5 h-5 mb-1" />
               <span className="text-xs rpg-text">Search</span>
@@ -220,30 +228,18 @@ export default function Nutrition() {
               <span className="text-xs rpg-text">Popular</span>
             </button>
             <button 
-              className={`rpg-button flex flex-col items-center p-3 text-center ${activeDiscoveryTab === 'recipe' ? 'bg-fantasy-gold/20 border-fantasy-gold' : ''}`}
-              onClick={() => setActiveDiscoveryTab(activeDiscoveryTab === 'recipe' ? null : 'recipe')}
+              className="rpg-button flex flex-col items-center p-3 text-center"
+              onClick={() => setIsRecipeOpen(true)}
             >
               <ChefHat className="w-5 h-5 mb-1" />
               <span className="text-xs rpg-text">Recipe</span>
             </button>
           </div>
 
-          {/* Content panels for each tab */}
-          {activeDiscoveryTab === 'search' && (
-            <div className="rpg-card p-4 mb-4">
-              <FoodDatabase onSelectFood={handleFoodSelection} />
-            </div>
-          )}
-          
+          {/* Popular foods content panel (only one that shows inline) */}
           {activeDiscoveryTab === 'popular' && (
             <div className="rpg-card p-4 mb-4">
               <PopularFoods onSelectFood={handleFoodSelection} />
-            </div>
-          )}
-          
-          {activeDiscoveryTab === 'recipe' && (
-            <div className="rpg-card p-4 mb-4">
-              <AddHomemadeFood onFoodAdded={handleHomemadeFoodAdded} />
             </div>
           )}
         </div>
@@ -428,6 +424,36 @@ export default function Nutrition() {
         onClose={() => setIsScannerOpen(false)} 
         onScanResult={handleBarcodeResult}
       />
+
+      {/* Search Food Database Modal */}
+      <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden bg-slate-800 border-fantasy-purple">
+          <DialogHeader>
+            <DialogTitle className="text-fantasy-gold flex items-center gap-2">
+              <Search className="w-5 h-5" />
+              Search Food Database
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <InlineFoodDatabase onSelectFood={handleFoodSelection} />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Recipe Modal */}
+      <Dialog open={isRecipeOpen} onOpenChange={setIsRecipeOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-slate-800 border-fantasy-purple">
+          <DialogHeader>
+            <DialogTitle className="text-fantasy-gold flex items-center gap-2">
+              <ChefHat className="w-5 h-5" />
+              Add Homemade Recipe
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <InlineAddHomemadeFood onFoodAdded={handleHomemadeFoodAdded} />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <BottomNavigation currentPath="/nutrition" />
     </div>
