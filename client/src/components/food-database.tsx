@@ -55,15 +55,21 @@ export default function FoodDatabase({ onSelectFood }: FoodDatabaseProps) {
     staleTime: 10 * 60 * 1000,
   });
 
-  // Combine external results with USDA taking priority
+  // Combine external results with USDA taking priority and filter out null entries
   const globalResults = [
     ...(usdaResults || []),
     ...(openFoodFactsResults || []).filter(off => 
+      off && // Filter out null/undefined entries
+      off.name && // Ensure name exists
+      off.name.trim().length > 0 && // Ensure name is not empty
       !(usdaResults || []).some(usda => 
+        usda && usda.name && // Ensure usda item is valid
         usda.name.toLowerCase().includes(off.name.toLowerCase().substring(0, 10))
       )
     )
-  ].slice(0, 20);
+  ]
+  .filter(item => item && item.name && item.name.trim().length > 0) // Final safety filter
+  .slice(0, 20);
 
   const categories = [
     { value: "all", label: "All Categories" },
@@ -219,7 +225,7 @@ export default function FoodDatabase({ onSelectFood }: FoodDatabaseProps) {
   );
 }
 
-// Separate component for food result cards
+// Separate component for food result cards with defensive programming
 function FoodResultCard({ 
   food, 
   onSelect, 
@@ -231,69 +237,86 @@ function FoodResultCard({
   isFromExternalSource?: boolean;
   sourceType?: string;
 }) {
+  // Defensive check - don't render if essential data is missing
+  if (!food || !food.name || food.name.trim().length === 0) {
+    console.warn('Skipping food item with missing name:', food);
+    return null;
+  }
+
+  // Ensure nutrition values are numbers and not negative
+  const safeCalories = Math.max(0, parseInt(food.calories) || 0);
+  const safeProtein = Math.max(0, parseInt(food.protein) || 0);
+  const safeCarbs = Math.max(0, parseInt(food.carbs) || 0);
+  const safeFat = Math.max(0, parseInt(food.fat) || 0);
+  const safeFiber = food.fiber ? Math.max(0, parseInt(food.fiber) || 0) : null;
+  const safeSugar = food.sugar ? Math.max(0, parseInt(food.sugar) || 0) : null;
+  const safeSodium = food.sodium ? Math.max(0, parseInt(food.sodium) || 0) : null;
+
   return (
-    <Card className="hover:bg-gray-50 cursor-pointer transition-colors" onClick={() => onSelect(food)}>
+    <Card className="rpg-card hover:bg-parchment/50 cursor-pointer transition-colors" onClick={() => onSelect(food)}>
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-2">
           <div className="flex-1">
-            <h3 className="font-semibold text-gray-900">{food.name}</h3>
-            {food.brand && (
-              <p className="text-sm text-gray-600 font-medium">{food.brand}</p>
+            <h3 className="font-semibold rpg-text">{food.name.trim()}</h3>
+            {food.brand && food.brand.trim() && (
+              <p className="text-sm rpg-text opacity-80 font-medium">{food.brand.trim()}</p>
             )}
-            <p className="text-xs text-gray-500">{food.servingSize}</p>
+            <p className="text-xs rpg-text opacity-60">
+              {food.servingSize && food.servingSize.trim() ? food.servingSize.trim() : "100g"}
+            </p>
           </div>
           <div className="flex items-center gap-2">
             {isFromExternalSource && (
-              <Badge variant="default" className="text-xs">
+              <Badge variant="default" className="text-xs bg-fantasy-blue text-white">
                 <Globe className="w-3 h-3 mr-1" />
                 {sourceType}
               </Badge>
             )}
             {food.verified && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-xs bg-fantasy-green text-white">
                 <Check className="w-3 h-3 mr-1" />
                 Verified
               </Badge>
             )}
-            <Badge variant="outline" className="text-xs capitalize">
-              {food.category}
+            <Badge variant="outline" className="text-xs capitalize border-wood-brown text-wood-dark">
+              {food.category || "food"}
             </Badge>
           </div>
         </div>
         
         <div className="grid grid-cols-4 gap-4 text-sm">
           <div className="text-center">
-            <p className="font-semibold text-orange-600">{food.calories}</p>
-            <p className="text-xs text-gray-500">calories</p>
+            <p className="font-bold text-fantasy-gold rpg-text">{safeCalories}</p>
+            <p className="text-xs rpg-text opacity-60">calories</p>
           </div>
           <div className="text-center">
-            <p className="font-semibold text-blue-600">{food.protein}g</p>
-            <p className="text-xs text-gray-500">protein</p>
+            <p className="font-bold text-fantasy-blue rpg-text">{safeProtein}g</p>
+            <p className="text-xs rpg-text opacity-60">protein</p>
           </div>
           <div className="text-center">
-            <p className="font-semibold text-yellow-600">{food.carbs}g</p>
-            <p className="text-xs text-gray-500">carbs</p>
+            <p className="font-bold text-fantasy-purple rpg-text">{safeCarbs}g</p>
+            <p className="text-xs rpg-text opacity-60">carbs</p>
           </div>
           <div className="text-center">
-            <p className="font-semibold text-purple-600">{food.fat}g</p>
-            <p className="text-xs text-gray-500">fat</p>
+            <p className="font-bold text-yellow-600 rpg-text">{safeFat}g</p>
+            <p className="text-xs rpg-text opacity-60">fat</p>
           </div>
         </div>
         
-        {(food.fiber || food.sugar || food.sodium) && (
-          <div className="mt-3 pt-3 border-t border-gray-100">
-            <div className="flex gap-4 text-xs text-gray-600">
-              {food.fiber ? <span>Fiber: {food.fiber}g</span> : null}
-              {food.sugar ? <span>Sugar: {food.sugar}g</span> : null}
-              {food.sodium ? <span>Sodium: {food.sodium}mg</span> : null}
+        {(safeFiber || safeSugar || safeSodium) && (
+          <div className="mt-3 pt-3 border-t border-wood-brown/20">
+            <div className="flex gap-4 text-xs rpg-text opacity-70">
+              {safeFiber ? <span>Fiber: {safeFiber}g</span> : null}
+              {safeSugar ? <span>Sugar: {safeSugar}g</span> : null}
+              {safeSodium ? <span>Sodium: {safeSodium}mg</span> : null}
             </div>
           </div>
         )}
 
-        {isFromExternalSource && food.ingredients && (
-          <div className="mt-2 pt-2 border-t border-gray-100">
-            <p className="text-xs text-gray-600 line-clamp-2">
-              <span className="font-medium">Ingredients:</span> {food.ingredients}
+        {isFromExternalSource && food.ingredients && food.ingredients.trim() && (
+          <div className="mt-2 pt-2 border-t border-wood-brown/20">
+            <p className="text-xs rpg-text opacity-70 line-clamp-2">
+              <span className="font-medium">Ingredients:</span> {food.ingredients.trim()}
             </p>
           </div>
         )}
