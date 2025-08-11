@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -129,14 +128,14 @@ export default function AddHomemadeFood({ onFoodAdded }: AddHomemadeFoodProps) {
   };
 
   return (
-    <div>
-      <div className="text-center mb-6">
-        <p className="rpg-text opacity-70">Share your homemade recipes with the community!</p>
-        <p className="text-xs rpg-text opacity-60 mt-1">Earn +25 XP for each contribution</p>
+    <div className="space-y-6">
+      <div className="text-center">
+        <p className="rpg-text opacity-70 mb-2">Share your homemade recipes with the community!</p>
+        <p className="text-xs rpg-text opacity-60">Earn +25 XP for each contribution</p>
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
@@ -144,9 +143,9 @@ export default function AddHomemadeFood({ onFoodAdded }: AddHomemadeFoodProps) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="rpg-text">Food Name</FormLabel>
+                  <FormLabel className="rpg-text font-semibold">Food Name</FormLabel>
                   <FormControl>
-                    <Input {...field} className="bg-parchment/10" placeholder="My Special Recipe" />
+                    <Input {...field} className="bg-parchment/50 border-wood-light rpg-input" placeholder="My Special Recipe" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -158,9 +157,9 @@ export default function AddHomemadeFood({ onFoodAdded }: AddHomemadeFoodProps) {
               name="servingSize"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="rpg-text">Serving Size</FormLabel>
+                  <FormLabel className="rpg-text font-semibold">Serving Size</FormLabel>
                   <FormControl>
-                    <Input {...field} className="bg-parchment/10" placeholder="1 cup, 100g, etc." />
+                    <Input {...field} className="bg-parchment/50 border-wood-light rpg-input" placeholder="1 cup, 100g, etc." />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -173,10 +172,10 @@ export default function AddHomemadeFood({ onFoodAdded }: AddHomemadeFoodProps) {
             name="category"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="rpg-text">Category</FormLabel>
+                <FormLabel className="rpg-text font-semibold">Category</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger className="bg-parchment/10">
+                    <SelectTrigger className="bg-parchment/50 border-wood-light">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                   </FormControl>
@@ -194,18 +193,18 @@ export default function AddHomemadeFood({ onFoodAdded }: AddHomemadeFoodProps) {
           />
 
           {/* Nutrition Info */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <FormField
               control={form.control}
               name="calories"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="rpg-text">Calories</FormLabel>
+                  <FormLabel className="rpg-text font-semibold">Calories</FormLabel>
                   <FormControl>
                     <Input 
                       type="number" 
                       {...field}
-                      className="bg-parchment/10"
+                      className="bg-parchment/50 border-wood-light rpg-input"
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
                   </FormControl>
@@ -219,12 +218,12 @@ export default function AddHomemadeFood({ onFoodAdded }: AddHomemadeFoodProps) {
               name="protein"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="rpg-text">Protein (g)</FormLabel>
+                  <FormLabel className="rpg-text font-semibold">Protein (g)</FormLabel>
                   <FormControl>
                     <Input 
                       type="number" 
                       {...field}
-                      className="bg-parchment/10"
+                      className="bg-parchment/50 border-wood-light rpg-input"
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
                   </FormControl>
@@ -238,12 +237,12 @@ export default function AddHomemadeFood({ onFoodAdded }: AddHomemadeFoodProps) {
               name="carbs"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="rpg-text">Carbs (g)</FormLabel>
+                  <FormLabel className="rpg-text font-semibold">Carbs (g)</FormLabel>
                   <FormControl>
                     <Input 
                       type="number" 
                       {...field}
-                      className="bg-parchment/10"
+                      className="bg-parchment/50 border-wood-light rpg-input"
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
                   </FormControl>
@@ -257,12 +256,72 @@ export default function AddHomemadeFood({ onFoodAdded }: AddHomemadeFoodProps) {
               name="fat"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="rpg-text">Fat (g)</FormLabel>
+                  <FormLabel className="rpg-text font-semibold">Fat (g)</FormLabel>
                   <FormControl>
                     <Input 
                       type="number" 
                       {...field}
-                      className="bg-parchment/10"
+                      className="bg-parchment/50 border-wood-light rpg-input"
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* Optional Nutrition */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <FormField
+              control={form.control}
+              name="fiber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="rpg-text font-semibold">Fiber (g) - Optional</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      {...field}
+                      className="bg-parchment/50 border-wood-light rpg-input"
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="sugar"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="rpg-text font-semibold">Sugar (g) - Optional</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      {...field}
+                      className="bg-parchment/50 border-wood-light rpg-input"
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="sodium"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="rpg-text font-semibold">Sodium (mg) - Optional</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      {...field}
+                      className="bg-parchment/50 border-wood-light rpg-input"
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
                   </FormControl>
@@ -274,8 +333,8 @@ export default function AddHomemadeFood({ onFoodAdded }: AddHomemadeFoodProps) {
 
           {/* Tags */}
           <div>
-            <label className="rpg-text text-sm font-medium">Tags (Optional)</label>
-            <div className="flex flex-wrap gap-2 mt-2">
+            <label className="rpg-text text-sm font-semibold">Tags (Optional)</label>
+            <div className="flex flex-wrap gap-2 mt-3">
               {commonTags.map((tag) => (
                 <button
                   key={tag}
@@ -284,7 +343,7 @@ export default function AddHomemadeFood({ onFoodAdded }: AddHomemadeFoodProps) {
                   className={`px-3 py-1 text-xs rounded-full border transition-colors ${
                     selectedTags.includes(tag)
                       ? 'bg-fantasy-purple text-white border-fantasy-purple'
-                      : 'rpg-button text-xs'
+                      : 'rpg-button text-xs bg-parchment/30 border-wood-light hover:bg-fantasy-purple/20'
                   }`}
                 >
                   {tag}
@@ -299,13 +358,12 @@ export default function AddHomemadeFood({ onFoodAdded }: AddHomemadeFoodProps) {
             name="recipe"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="rpg-text">Recipe (Optional)</FormLabel>
+                <FormLabel className="rpg-text font-semibold">Recipe (Optional)</FormLabel>
                 <FormControl>
                   <Textarea 
-                    {...field} 
-                    className="bg-parchment/10"
-                    placeholder="Share your recipe steps..."
-                    rows={3}
+                    {...field}
+                    className="bg-parchment/50 border-wood-light rpg-input min-h-[100px]"
+                    placeholder="Step-by-step cooking instructions..."
                   />
                 </FormControl>
                 <FormMessage />
@@ -313,13 +371,45 @@ export default function AddHomemadeFood({ onFoodAdded }: AddHomemadeFoodProps) {
             )}
           />
 
-          <Button 
-            type="submit" 
-            className="w-full rpg-button bg-fantasy-gold hover:bg-fantasy-gold/80 text-wood-dark" 
-            disabled={createFoodMutation.isPending}
-          >
-            {createFoodMutation.isPending ? "Adding Recipe..." : "Add Recipe & Earn 25 XP"}
-          </Button>
+          {/* Ingredients */}
+          <FormField
+            control={form.control}
+            name="ingredients"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="rpg-text font-semibold">Ingredients (Optional)</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    {...field}
+                    className="bg-parchment/50 border-wood-light rpg-input min-h-[80px]"
+                    placeholder="List of ingredients used..."
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Submit Button */}
+          <div className="flex justify-end pt-4">
+            <Button 
+              type="submit" 
+              disabled={createFoodMutation.isPending}
+              className="rpg-button bg-fantasy-green hover:bg-fantasy-green/80 text-white font-bold px-8"
+            >
+              {createFoodMutation.isPending ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add to Database (+25 XP)
+                </>
+              )}
+            </Button>
+          </div>
         </form>
       </Form>
     </div>
