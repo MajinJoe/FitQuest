@@ -5,7 +5,6 @@ import type { FoodDatabaseItem } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,7 +15,6 @@ interface FoodDatabaseProps {
 }
 
 export default function FoodDatabase({ onSelectFood }: FoodDatabaseProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
@@ -55,21 +53,15 @@ export default function FoodDatabase({ onSelectFood }: FoodDatabaseProps) {
     staleTime: 10 * 60 * 1000,
   });
 
-  // Combine external results with USDA taking priority and filter out null entries
+  // Combine external results with USDA taking priority
   const globalResults = [
     ...(usdaResults || []),
     ...(openFoodFactsResults || []).filter(off => 
-      off && // Filter out null/undefined entries
-      off.name && // Ensure name exists
-      off.name.trim().length > 0 && // Ensure name is not empty
       !(usdaResults || []).some(usda => 
-        usda && usda.name && // Ensure usda item is valid
         usda.name.toLowerCase().includes(off.name.toLowerCase().substring(0, 10))
       )
     )
-  ]
-  .filter(item => item && item.name && item.name.trim().length > 0) // Final safety filter
-  .slice(0, 20);
+  ].slice(0, 20);
 
   const categories = [
     { value: "all", label: "All Categories" },
@@ -110,122 +102,106 @@ export default function FoodDatabase({ onSelectFood }: FoodDatabaseProps) {
       onSelectFood(food);
     }
     
-    setIsOpen(false);
     setSearchTerm("");
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="w-full">
-          <Database className="w-4 h-4 mr-2" />
-          Search Food Database
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Apple className="w-5 h-5 text-green-500" />
-            Food Database Search
-          </DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-4">
-          {/* Search Controls */}
-          <div className="flex gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Search for foods (e.g., 'Miss Vickie's', 'Panera')..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map(category => (
-                  <SelectItem key={category.value} value={category.value}>
-                    {category.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Search Results with Tabs */}
-          {searchTerm.length < 2 ? (
-            <div className="text-center py-8 text-gray-500">
-              <Database className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-              <p>Enter at least 2 characters to search</p>
-              <p className="text-sm mt-1">Search local database + Open Food Facts</p>
-            </div>
-          ) : (
-            <Tabs defaultValue="local" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="local" className="flex items-center gap-2">
-                  <Database className="w-4 h-4" />
-                  Local ({localResults?.length || 0})
-                </TabsTrigger>
-                <TabsTrigger value="global" className="flex items-center gap-2">
-                  <Globe className="w-4 h-4" />
-                  Global ({globalResults?.length || 0})
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="local" className="max-h-96 overflow-y-auto space-y-2 mt-4">
-                {localLoading ? (
-                  <div className="text-center py-8">
-                    <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-                    <p>Searching local database...</p>
-                  </div>
-                ) : !localResults || localResults.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <p>No local foods found</p>
-                    <p className="text-sm mt-1">Try the Global tab for worldwide products</p>
-                  </div>
-                ) : (
-                  localResults.map((food) => (
-                    <FoodResultCard key={food.id} food={food} onSelect={handleFoodSelect} />
-                  ))
-                )}
-              </TabsContent>
-
-              <TabsContent value="global" className="max-h-96 overflow-y-auto space-y-2 mt-4">
-                {(usdaLoading || openFoodFactsLoading) ? (
-                  <div className="text-center py-8">
-                    <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-                    <p>Searching USDA & Global Databases...</p>
-                  </div>
-                ) : !globalResults || globalResults.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <p>No global foods found</p>
-                    <p className="text-sm mt-1">Try different search terms</p>
-                  </div>
-                ) : (
-                  globalResults.map((food, index) => (
-                    <FoodResultCard 
-                      key={`global_${index}`} 
-                      food={food} 
-                      onSelect={handleFoodSelect}
-                      isFromExternalSource={true}
-                      sourceType={food.isFromUSDA ? "USDA" : "Open Food Facts"}
-                    />
-                  ))
-                )}
-              </TabsContent>
-            </Tabs>
-          )}
+    <div className="space-y-4 h-full flex flex-col">
+      {/* Search Controls */}
+      <div className="flex gap-3 flex-shrink-0">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Input
+            placeholder="Search for foods (e.g., 'Miss Vickie's', 'Panera')..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 bg-parchment/10"
+          />
         </div>
-      </DialogContent>
-    </Dialog>
+        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <SelectTrigger className="w-48 bg-parchment/10">
+            <SelectValue placeholder="Category" />
+          </SelectTrigger>
+          <SelectContent>
+            {categories.map(category => (
+              <SelectItem key={category.value} value={category.value}>
+                {category.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Search Results with Tabs */}
+      <div className="flex-1 min-h-0">
+        {searchTerm.length < 2 ? (
+          <div className="text-center py-12 rpg-text opacity-70">
+            <Database className="w-16 h-16 mx-auto mb-6 text-fantasy-blue/50" />
+            <p className="text-lg mb-2">Enter at least 2 characters to search</p>
+            <p className="text-sm">Search local database + USDA + Open Food Facts</p>
+          </div>
+        ) : (
+          <Tabs defaultValue="local" className="w-full h-full flex flex-col">
+            <TabsList className="grid w-full grid-cols-2 flex-shrink-0">
+              <TabsTrigger value="local" className="flex items-center gap-2 rpg-button">
+                <Database className="w-4 h-4" />
+                Local ({localResults?.length || 0})
+              </TabsTrigger>
+              <TabsTrigger value="global" className="flex items-center gap-2 rpg-button">
+                <Globe className="w-4 h-4" />
+                Global ({globalResults?.length || 0})
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="local" className="space-y-2 mt-4 flex-1 overflow-y-auto pr-2">
+              {localLoading ? (
+                <div className="text-center py-12">
+                  <Loader2 className="w-10 h-10 animate-spin mx-auto mb-4 text-fantasy-blue" />
+                  <p className="rpg-text">Searching local database...</p>
+                </div>
+              ) : !localResults || localResults.length === 0 ? (
+                <div className="text-center py-12 rpg-text opacity-70">
+                  <p className="text-lg mb-2">No local foods found</p>
+                  <p className="text-sm">Try the Global tab for worldwide products</p>
+                </div>
+              ) : (
+                localResults.map((food) => (
+                  <FoodResultCard key={food.id} food={food} onSelect={handleFoodSelect} />
+                ))
+              )}
+            </TabsContent>
+
+            <TabsContent value="global" className="space-y-2 mt-4 flex-1 overflow-y-auto pr-2">
+              {(usdaLoading || openFoodFactsLoading) ? (
+                <div className="text-center py-12">
+                  <Loader2 className="w-10 h-10 animate-spin mx-auto mb-4 text-fantasy-green" />
+                  <p className="rpg-text">Searching USDA & Global Databases...</p>
+                </div>
+              ) : !globalResults || globalResults.length === 0 ? (
+                <div className="text-center py-12 rpg-text opacity-70">
+                  <p className="text-lg mb-2">No global foods found</p>
+                  <p className="text-sm">Try different search terms</p>
+                </div>
+              ) : (
+                globalResults.map((food, index) => (
+                  <FoodResultCard 
+                    key={`global_${index}`} 
+                    food={food} 
+                    onSelect={handleFoodSelect}
+                    isFromExternalSource={true}
+                    sourceType={food.isFromUSDA ? "USDA" : "Open Food Facts"}
+                  />
+                ))
+              )}
+            </TabsContent>
+          </Tabs>
+        )}
+      </div>
+    </div>
   );
 }
 
-// Separate component for food result cards with defensive programming
+// Enhanced FoodResultCard with RPG styling and defensive programming
 function FoodResultCard({ 
   food, 
   onSelect, 
@@ -248,78 +224,58 @@ function FoodResultCard({
   const safeProtein = Math.max(0, parseInt(food.protein) || 0);
   const safeCarbs = Math.max(0, parseInt(food.carbs) || 0);
   const safeFat = Math.max(0, parseInt(food.fat) || 0);
-  const safeFiber = food.fiber ? Math.max(0, parseInt(food.fiber) || 0) : null;
-  const safeSugar = food.sugar ? Math.max(0, parseInt(food.sugar) || 0) : null;
-  const safeSodium = food.sodium ? Math.max(0, parseInt(food.sodium) || 0) : null;
 
   return (
-    <Card className="rpg-card hover:bg-parchment/50 cursor-pointer transition-colors" onClick={() => onSelect(food)}>
+    <Card className="rpg-card hover:bg-fantasy-gold/10 cursor-pointer transition-all duration-200 border-wood-light/20 hover:border-fantasy-gold/50" 
+          onClick={() => onSelect(food)}>
       <CardContent className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <div className="flex-1">
-            <h3 className="font-semibold rpg-text">{food.name.trim()}</h3>
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex-1 min-w-0">
+            <h3 className="rpg-text font-bold truncate text-lg">{food.name.trim()}</h3>
             {food.brand && food.brand.trim() && (
-              <p className="text-sm rpg-text opacity-80 font-medium">{food.brand.trim()}</p>
+              <p className="text-sm text-fantasy-blue font-semibold truncate">{food.brand.trim()}</p>
             )}
-            <p className="text-xs rpg-text opacity-60">
+            <p className="text-xs rpg-text opacity-60 mt-1">
               {food.servingSize && food.servingSize.trim() ? food.servingSize.trim() : "100g"}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0 ml-3">
             {isFromExternalSource && (
-              <Badge variant="default" className="text-xs bg-fantasy-blue text-white">
+              <Badge variant="default" className="text-xs font-semibold bg-fantasy-purple">
                 <Globe className="w-3 h-3 mr-1" />
                 {sourceType}
               </Badge>
             )}
             {food.verified && (
-              <Badge variant="secondary" className="text-xs bg-fantasy-green text-white">
+              <Badge variant="secondary" className="text-xs bg-fantasy-green">
                 <Check className="w-3 h-3 mr-1" />
                 Verified
               </Badge>
             )}
-            <Badge variant="outline" className="text-xs capitalize border-wood-brown text-wood-dark">
+            <Badge variant="outline" className="text-xs capitalize font-medium border-wood-light">
               {food.category || "food"}
             </Badge>
           </div>
         </div>
         
-        <div className="grid grid-cols-4 gap-4 text-sm">
-          <div className="text-center">
-            <p className="font-bold text-fantasy-gold rpg-text">{safeCalories}</p>
-            <p className="text-xs rpg-text opacity-60">calories</p>
+        <div className="grid grid-cols-4 gap-3 text-sm">
+          <div className="text-center p-2 bg-fantasy-gold/20 rounded-lg">
+            <p className="font-bold text-fantasy-gold text-lg">{safeCalories}</p>
+            <p className="text-xs rpg-text opacity-70 font-medium">calories</p>
           </div>
-          <div className="text-center">
-            <p className="font-bold text-fantasy-blue rpg-text">{safeProtein}g</p>
-            <p className="text-xs rpg-text opacity-60">protein</p>
+          <div className="text-center p-2 bg-fantasy-blue/20 rounded-lg">
+            <p className="font-bold text-fantasy-blue text-lg">{safeProtein}g</p>
+            <p className="text-xs rpg-text opacity-70 font-medium">protein</p>
           </div>
-          <div className="text-center">
-            <p className="font-bold text-fantasy-purple rpg-text">{safeCarbs}g</p>
-            <p className="text-xs rpg-text opacity-60">carbs</p>
+          <div className="text-center p-2 bg-fantasy-green/20 rounded-lg">
+            <p className="font-bold text-fantasy-green text-lg">{safeCarbs}g</p>
+            <p className="text-xs rpg-text opacity-70 font-medium">carbs</p>
           </div>
-          <div className="text-center">
-            <p className="font-bold text-yellow-600 rpg-text">{safeFat}g</p>
-            <p className="text-xs rpg-text opacity-60">fat</p>
+          <div className="text-center p-2 bg-fantasy-purple/20 rounded-lg">
+            <p className="font-bold text-fantasy-purple text-lg">{safeFat}g</p>
+            <p className="text-xs rpg-text opacity-70 font-medium">fat</p>
           </div>
         </div>
-        
-        {(safeFiber || safeSugar || safeSodium) && (
-          <div className="mt-3 pt-3 border-t border-wood-brown/20">
-            <div className="flex gap-4 text-xs rpg-text opacity-70">
-              {safeFiber ? <span>Fiber: {safeFiber}g</span> : null}
-              {safeSugar ? <span>Sugar: {safeSugar}g</span> : null}
-              {safeSodium ? <span>Sodium: {safeSodium}mg</span> : null}
-            </div>
-          </div>
-        )}
-
-        {isFromExternalSource && food.ingredients && food.ingredients.trim() && (
-          <div className="mt-2 pt-2 border-t border-wood-brown/20">
-            <p className="text-xs rpg-text opacity-70 line-clamp-2">
-              <span className="font-medium">Ingredients:</span> {food.ingredients.trim()}
-            </p>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

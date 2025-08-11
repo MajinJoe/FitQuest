@@ -251,8 +251,8 @@ export default function Nutrition() {
           <DialogTrigger asChild>
             <div style={{ display: 'none' }} />
           </DialogTrigger>
-          <DialogContent className="rpg-card border-fantasy-green max-w-md">
-            <DialogHeader>
+          <DialogContent className="rpg-card border-fantasy-green w-[90vw] max-w-md h-auto max-h-[80vh] overflow-hidden flex flex-col">
+            <DialogHeader className="flex-shrink-0 pb-4">
               <DialogTitle className="rpg-title text-fantasy-gold text-center">Add Meal</DialogTitle>
               <DialogDescription className="rpg-text text-center opacity-70">
                 Log your meal and gain XP for healthy eating
@@ -388,8 +388,8 @@ export default function Nutrition() {
 
         {/* Food Search Dialog */}
         <Dialog open={isSearchDialogOpen} onOpenChange={setIsSearchDialogOpen}>
-          <DialogContent className="rpg-card border-fantasy-blue max-w-4xl max-h-[80vh] overflow-hidden">
-            <DialogHeader>
+          <DialogContent className="rpg-card border-fantasy-blue w-[95vw] max-w-4xl h-[85vh] max-h-[600px] overflow-hidden flex flex-col">
+            <DialogHeader className="flex-shrink-0 pb-4">
               <DialogTitle className="rpg-title text-fantasy-blue text-center flex items-center justify-center gap-2">
                 <Search className="w-6 h-6" />
                 Food Database Search
@@ -398,7 +398,7 @@ export default function Nutrition() {
                 Search through thousands of foods from USDA and global databases
               </DialogDescription>
             </DialogHeader>
-            <div className="mt-4">
+            <div className="flex-1 min-h-0">
               <FoodDatabase onSelectFood={handleFoodSelection} />
             </div>
           </DialogContent>
@@ -406,8 +406,8 @@ export default function Nutrition() {
 
         {/* Popular Foods Dialog */}
         <Dialog open={isPopularDialogOpen} onOpenChange={setIsPopularDialogOpen}>
-          <DialogContent className="rpg-card border-fantasy-green max-w-2xl max-h-[80vh] overflow-hidden">
-            <DialogHeader>
+          <DialogContent className="rpg-card border-fantasy-green w-[90vw] max-w-2xl h-[75vh] max-h-[500px] overflow-hidden flex flex-col">
+            <DialogHeader className="flex-shrink-0 pb-4">
               <DialogTitle className="rpg-title text-fantasy-green text-center flex items-center justify-center gap-2">
                 <TrendingUp className="w-6 h-6" />
                 Popular Foods
@@ -416,7 +416,7 @@ export default function Nutrition() {
                 Quick access to foods commonly used by the community
               </DialogDescription>
             </DialogHeader>
-            <div className="mt-4 max-h-96 overflow-y-auto">
+            <div className="flex-1 min-h-0 overflow-y-auto">
               <PopularFoods onSelectFood={handleFoodSelection} />
             </div>
           </DialogContent>
@@ -424,8 +424,8 @@ export default function Nutrition() {
 
         {/* Recipe Creator Dialog */}
         <Dialog open={isRecipeDialogOpen} onOpenChange={setIsRecipeDialogOpen}>
-          <DialogContent className="rpg-card border-fantasy-purple max-w-3xl max-h-[80vh] overflow-hidden">
-            <DialogHeader>
+          <DialogContent className="rpg-card border-fantasy-purple w-[95vw] max-w-3xl h-[85vh] max-h-[600px] overflow-hidden flex flex-col">
+            <DialogHeader className="flex-shrink-0 pb-4">
               <DialogTitle className="rpg-title text-fantasy-purple text-center flex items-center justify-center gap-2">
                 <ChefHat className="w-6 h-6" />
                 Create Recipe
@@ -434,7 +434,7 @@ export default function Nutrition() {
                 Share your homemade recipes with the community and earn 25 XP
               </DialogDescription>
             </DialogHeader>
-            <div className="mt-4 max-h-96 overflow-y-auto">
+            <div className="flex-1 min-h-0 overflow-y-auto">
               <AddHomemadeFood onFoodAdded={handleHomemadeFoodAdded} />
             </div>
           </DialogContent>
