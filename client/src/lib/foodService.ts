@@ -3,9 +3,9 @@ import type { FoodDatabaseItem } from "@shared/schema";
 // USDA Food Database Central API
 export async function searchUSDAFoodDatabase(query: string): Promise<any[]> {
   try {
-    // USDA FoodData Central API - public access, no key required for basic search
+    // USDA FoodData Central API - using active API key for enhanced access
     const searchResponse = await fetch(
-      `https://api.nal.usda.gov/fdc/v1/foods/search?query=${encodeURIComponent(query)}&dataType=Foundation,SR%20Legacy&pageSize=20&api_key=DEMO_KEY`
+      `https://api.nal.usda.gov/fdc/v1/foods/search?query=${encodeURIComponent(query)}&dataType=Foundation,SR%20Legacy&pageSize=20&api_key=X5InxpgSHUkITLOdwDmAZRFBhgi0ND4QtQXCWFwS`
     );
 
     if (!searchResponse.ok) {
