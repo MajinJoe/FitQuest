@@ -17,99 +17,74 @@ export default function PopularFoods({ onSelectFood }: PopularFoodsProps) {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-green-500" />
-            Popular Foods
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="animate-pulse">
-                <div className="h-16 bg-gray-200 rounded"></div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="rpg-card p-4">
+        <div className="space-y-2">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="h-16 bg-parchment/30 rounded rpg-card"></div>
+            </div>
+          ))}
+        </div>
+      </div>
     );
   }
 
   if (!popularFoods || popularFoods.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-green-500" />
-            Popular Foods
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-500 text-center py-8">No popular foods yet</p>
-        </CardContent>
-      </Card>
+      <div className="text-center py-8 rpg-text">
+        <p>No popular foods yet</p>
+        <p className="text-sm mt-1">Share some recipes to build the community!</p>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-green-500" />
-          Popular Foods
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          {popularFoods.slice(0, 8).map((food) => (
-            <div 
-              key={food.id} 
-              className="flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors"
-              onClick={() => onSelectFood(food)}
-            >
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-medium text-sm">{food.name}</h4>
-                  {food.isHomemade && (
-                    <ChefHat className="w-3 h-3 text-orange-500" />
-                  )}
-                  {food.brand && (
-                    <span className="text-xs text-gray-500">• {food.brand}</span>
-                  )}
-                </div>
-                
-                <div className="flex items-center gap-3 text-xs text-gray-600">
-                  <span>{food.calories} cal</span>
-                  <span>{food.protein}g protein</span>
-                  <div className="flex items-center gap-1">
-                    <Users className="w-3 h-3" />
-                    <span>{food.usageCount}</span>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-2 mt-2">
-                  <Badge variant="outline" className="text-xs capitalize">
-                    {food.category}
-                  </Badge>
-                  {food.tags?.slice(0, 2).map(tag => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="text-right">
-                <Button size="sm" variant="ghost">
-                  Use
-                </Button>
+    <div className="space-y-3">
+      {popularFoods.slice(0, 8).map((food) => (
+        <div 
+          key={food.id} 
+          className="rpg-card p-3 hover:bg-parchment/50 cursor-pointer transition-colors flex items-center justify-between"
+          onClick={() => onSelectFood(food)}
+        >
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <h4 className="font-medium text-sm rpg-text">{food.name}</h4>
+              {food.isHomemade && (
+                <ChefHat className="w-3 h-3 text-fantasy-gold" />
+              )}
+              {food.brand && (
+                <span className="text-xs rpg-text opacity-60">• {food.brand}</span>
+              )}
+            </div>
+            
+            <div className="flex items-center gap-3 text-xs rpg-text opacity-70">
+              <span className="text-fantasy-gold">{food.calories} cal</span>
+              <span className="text-fantasy-blue">{food.protein}g protein</span>
+              <div className="flex items-center gap-1">
+                <Users className="w-3 h-3" />
+                <span>{food.usageCount || 0}</span>
               </div>
             </div>
-          ))}
+            
+            <div className="flex items-center gap-2 mt-2">
+              <Badge variant="outline" className="text-xs capitalize border-wood-brown text-wood-dark">
+                {food.category}
+              </Badge>
+              {food.tags?.slice(0, 2).map(tag => (
+                <Badge key={tag} variant="secondary" className="text-xs bg-fantasy-purple/20 text-fantasy-purple">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </div>
+          
+          <div className="text-right">
+            <Button size="sm" variant="ghost" className="rpg-button text-xs">
+              Use
+            </Button>
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      ))}
+    </div>
   );
 }

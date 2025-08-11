@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BottomNavigation from "@/components/bottom-navigation";
 import BarcodeScanner from "@/components/barcode-scanner";
@@ -32,7 +32,9 @@ const nutritionSchema = z.object({
 export default function Nutrition() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
-  const [activeDiscoveryTab, setActiveDiscoveryTab] = useState<'search' | 'popular' | 'recipe' | null>(null);
+  const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
+  const [isPopularDialogOpen, setIsPopularDialogOpen] = useState(false);
+  const [isRecipeDialogOpen, setIsRecipeDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -132,6 +134,11 @@ export default function Nutrition() {
     // Track food usage for analytics
     fetch(`/api/food/${food.id}/use`, { method: 'POST' }).catch(console.error);
     
+    // Close all discovery dialogs
+    setIsSearchDialogOpen(false);
+    setIsPopularDialogOpen(false);
+    setIsRecipeDialogOpen(false);
+    
     toast({
       title: "Food Selected!",
       description: `${food.name} nutrition data loaded${food.isHomemade ? ' (homemade recipe)' : ''}`,
@@ -200,52 +207,36 @@ export default function Nutrition() {
         {/* Enhanced Food Discovery */}
         <div className="rpg-card mb-6 p-4">
           <h3 className="rpg-title text-fantasy-purple text-lg mb-4 text-center">Food Discovery</h3>
-          <div className="grid grid-cols-4 gap-2 mb-4">
+          <div className="grid grid-cols-4 gap-2">
             <button 
-              className={`rpg-button flex flex-col items-center p-3 text-center ${activeDiscoveryTab === 'search' ? 'bg-fantasy-gold/20 border-fantasy-gold' : ''}`}
-              onClick={() => setActiveDiscoveryTab(activeDiscoveryTab === 'search' ? null : 'search')}
+              className="rpg-button flex flex-col items-center p-3 text-center"
+              onClick={() => setIsSearchDialogOpen(true)}
             >
               <Search className="w-5 h-5 mb-1" />
               <span className="text-xs rpg-text">Search</span>
             </button>
-            <button className="rpg-button flex flex-col items-center p-3 text-center" onClick={() => setIsScannerOpen(true)}>
+            <button 
+              className="rpg-button flex flex-col items-center p-3 text-center" 
+              onClick={() => setIsScannerOpen(true)}
+            >
               <Camera className="w-5 h-5 mb-1" />
               <span className="text-xs rpg-text">Scan</span>
             </button>
             <button 
-              className={`rpg-button flex flex-col items-center p-3 text-center ${activeDiscoveryTab === 'popular' ? 'bg-fantasy-gold/20 border-fantasy-gold' : ''}`}
-              onClick={() => setActiveDiscoveryTab(activeDiscoveryTab === 'popular' ? null : 'popular')}
+              className="rpg-button flex flex-col items-center p-3 text-center"
+              onClick={() => setIsPopularDialogOpen(true)}
             >
               <TrendingUp className="w-5 h-5 mb-1" />
               <span className="text-xs rpg-text">Popular</span>
             </button>
             <button 
-              className={`rpg-button flex flex-col items-center p-3 text-center ${activeDiscoveryTab === 'recipe' ? 'bg-fantasy-gold/20 border-fantasy-gold' : ''}`}
-              onClick={() => setActiveDiscoveryTab(activeDiscoveryTab === 'recipe' ? null : 'recipe')}
+              className="rpg-button flex flex-col items-center p-3 text-center"
+              onClick={() => setIsRecipeDialogOpen(true)}
             >
               <ChefHat className="w-5 h-5 mb-1" />
               <span className="text-xs rpg-text">Recipe</span>
             </button>
           </div>
-
-          {/* Content panels for each tab */}
-          {activeDiscoveryTab === 'search' && (
-            <div className="rpg-card p-4 mb-4">
-              <FoodDatabase onSelectFood={handleFoodSelection} />
-            </div>
-          )}
-          
-          {activeDiscoveryTab === 'popular' && (
-            <div className="rpg-card p-4 mb-4">
-              <PopularFoods onSelectFood={handleFoodSelection} />
-            </div>
-          )}
-          
-          {activeDiscoveryTab === 'recipe' && (
-            <div className="rpg-card p-4 mb-4">
-              <AddHomemadeFood onFoodAdded={handleHomemadeFoodAdded} />
-            </div>
-          )}
         </div>
 
         <button 
@@ -260,9 +251,12 @@ export default function Nutrition() {
           <DialogTrigger asChild>
             <div style={{ display: 'none' }} />
           </DialogTrigger>
-          <DialogContent className="bg-slate-800 border-fantasy-green">
+          <DialogContent className="rpg-card border-fantasy-green max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-fantasy-gold">Add Meal</DialogTitle>
+              <DialogTitle className="rpg-title text-fantasy-gold text-center">Add Meal</DialogTitle>
+              <DialogDescription className="rpg-text text-center opacity-70">
+                Log your meal and gain XP for healthy eating
+              </DialogDescription>
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -389,6 +383,60 @@ export default function Nutrition() {
                 </Button>
               </form>
             </Form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Food Search Dialog */}
+        <Dialog open={isSearchDialogOpen} onOpenChange={setIsSearchDialogOpen}>
+          <DialogContent className="rpg-card border-fantasy-blue max-w-4xl max-h-[80vh] overflow-hidden">
+            <DialogHeader>
+              <DialogTitle className="rpg-title text-fantasy-blue text-center flex items-center justify-center gap-2">
+                <Search className="w-6 h-6" />
+                Food Database Search
+              </DialogTitle>
+              <DialogDescription className="rpg-text text-center opacity-70">
+                Search through thousands of foods from USDA and global databases
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-4">
+              <FoodDatabase onSelectFood={handleFoodSelection} />
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Popular Foods Dialog */}
+        <Dialog open={isPopularDialogOpen} onOpenChange={setIsPopularDialogOpen}>
+          <DialogContent className="rpg-card border-fantasy-green max-w-2xl max-h-[80vh] overflow-hidden">
+            <DialogHeader>
+              <DialogTitle className="rpg-title text-fantasy-green text-center flex items-center justify-center gap-2">
+                <TrendingUp className="w-6 h-6" />
+                Popular Foods
+              </DialogTitle>
+              <DialogDescription className="rpg-text text-center opacity-70">
+                Quick access to foods commonly used by the community
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-4 max-h-96 overflow-y-auto">
+              <PopularFoods onSelectFood={handleFoodSelection} />
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Recipe Creator Dialog */}
+        <Dialog open={isRecipeDialogOpen} onOpenChange={setIsRecipeDialogOpen}>
+          <DialogContent className="rpg-card border-fantasy-purple max-w-3xl max-h-[80vh] overflow-hidden">
+            <DialogHeader>
+              <DialogTitle className="rpg-title text-fantasy-purple text-center flex items-center justify-center gap-2">
+                <ChefHat className="w-6 h-6" />
+                Create Recipe
+              </DialogTitle>
+              <DialogDescription className="rpg-text text-center opacity-70">
+                Share your homemade recipes with the community and earn 25 XP
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-4 max-h-96 overflow-y-auto">
+              <AddHomemadeFood onFoodAdded={handleHomemadeFoodAdded} />
+            </div>
           </DialogContent>
         </Dialog>
 

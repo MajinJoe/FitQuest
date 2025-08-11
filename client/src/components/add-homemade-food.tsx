@@ -38,7 +38,6 @@ interface AddHomemadeFoodProps {
 }
 
 export default function AddHomemadeFood({ onFoodAdded }: AddHomemadeFoodProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -92,7 +91,6 @@ export default function AddHomemadeFood({ onFoodAdded }: AddHomemadeFoodProps) {
       onFoodAdded(newFood);
       form.reset();
       setSelectedTags([]);
-      setIsOpen(false);
     },
     onError: () => {
       toast({
@@ -131,328 +129,199 @@ export default function AddHomemadeFood({ onFoodAdded }: AddHomemadeFoodProps) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="w-full">
-          <ChefHat className="w-4 h-4 mr-2" />
-          Add Homemade Food
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <ChefHat className="w-5 h-5 text-orange-500" />
-            Add Homemade Food to Database
-          </DialogTitle>
-        </DialogHeader>
+    <div>
+      <div className="text-center mb-6">
+        <p className="rpg-text opacity-70">Share your homemade recipes with the community!</p>
+        <p className="text-xs rpg-text opacity-60 mt-1">Earn +25 XP for each contribution</p>
+      </div>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Basic Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium">Basic Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Food Name *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., Grandma's Chocolate Chip Cookies" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          {/* Basic Info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="rpg-text">Food Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} className="bg-parchment/10" placeholder="My Special Recipe" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="servingSize"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="rpg-text">Serving Size</FormLabel>
+                  <FormControl>
+                    <Input {...field} className="bg-parchment/10" placeholder="1 cup, 100g, etc." />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Category *</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select category" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {categories.map(cat => (
-                              <SelectItem key={cat.value} value={cat.value}>
-                                {cat.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+          <FormField
+            control={form.control}
+            name="category"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="rpg-text">Category</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="bg-parchment/10">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.value} value={cat.value}>
+                        {cat.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-                <FormField
-                  control={form.control}
-                  name="servingSize"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Serving Size *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., 2 cookies, 1 cup, 1 serving" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
+          {/* Nutrition Info */}
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="calories"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="rpg-text">Calories</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      {...field}
+                      className="bg-parchment/10"
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-            {/* Nutrition Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium">Nutrition Information</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <FormField
-                    control={form.control}
-                    name="calories"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Calories *</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            {...field} 
-                            onChange={(e) => field.onChange(Number(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            <FormField
+              control={form.control}
+              name="protein"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="rpg-text">Protein (g)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      {...field}
+                      className="bg-parchment/10"
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                  <FormField
-                    control={form.control}
-                    name="protein"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Protein (g) *</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            {...field} 
-                            onChange={(e) => field.onChange(Number(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+            <FormField
+              control={form.control}
+              name="carbs"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="rpg-text">Carbs (g)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      {...field}
+                      className="bg-parchment/10"
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <FormField
-                    control={form.control}
-                    name="carbs"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Carbs (g) *</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            {...field} 
-                            onChange={(e) => field.onChange(Number(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            <FormField
+              control={form.control}
+              name="fat"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="rpg-text">Fat (g)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      {...field}
+                      className="bg-parchment/10"
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-                  <FormField
-                    control={form.control}
-                    name="fat"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Fat (g) *</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            {...field} 
-                            onChange={(e) => field.onChange(Number(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-3 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="fiber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Fiber (g)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            {...field} 
-                            onChange={(e) => field.onChange(Number(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="sugar"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Sugar (g)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            {...field} 
-                            onChange={(e) => field.onChange(Number(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="sodium"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Sodium (mg)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            {...field} 
-                            onChange={(e) => field.onChange(Number(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Tags */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <Tag className="w-4 h-4" />
-                  Tags
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {commonTags.map(tag => (
-                    <Badge
-                      key={tag}
-                      variant={selectedTags.includes(tag) ? "default" : "outline"}
-                      className="cursor-pointer hover:bg-primary"
-                      onClick={() => toggleTag(tag)}
-                    >
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Optional Details */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium">Optional Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="ingredients"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Ingredients</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="List the main ingredients..."
-                          className="resize-none"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="recipe"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Recipe or Notes</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Cooking instructions or helpful notes..."
-                          className="resize-none"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="imageUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Photo URL</FormLabel>
-                      <FormControl>
-                        <Input placeholder="https://..." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            <div className="flex gap-3 pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                className="flex-1"
-                onClick={() => setIsOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                className="flex-1"
-                disabled={createFoodMutation.isPending}
-              >
-                {createFoodMutation.isPending ? "Adding..." : "Add to Database (+25 XP)"}
-              </Button>
+          {/* Tags */}
+          <div>
+            <label className="rpg-text text-sm font-medium">Tags (Optional)</label>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {commonTags.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => toggleTag(tag)}
+                  className={`px-3 py-1 text-xs rounded-full border transition-colors ${
+                    selectedTags.includes(tag)
+                      ? 'bg-fantasy-purple text-white border-fantasy-purple'
+                      : 'rpg-button text-xs'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
             </div>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+          </div>
+
+          {/* Recipe */}
+          <FormField
+            control={form.control}
+            name="recipe"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="rpg-text">Recipe (Optional)</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    {...field} 
+                    className="bg-parchment/10"
+                    placeholder="Share your recipe steps..."
+                    rows={3}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button 
+            type="submit" 
+            className="w-full rpg-button bg-fantasy-gold hover:bg-fantasy-gold/80 text-wood-dark" 
+            disabled={createFoodMutation.isPending}
+          >
+            {createFoodMutation.isPending ? "Adding Recipe..." : "Add Recipe & Earn 25 XP"}
+          </Button>
+        </form>
+      </Form>
+    </div>
   );
 }
