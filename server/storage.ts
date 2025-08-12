@@ -149,17 +149,17 @@ export class MemStorage implements IStorage {
     this.users.set(1, defaultUser);
     this.currentIds.users = 2;
 
-    // Create default character
+    // Create default character (starting at level 1)
     const defaultCharacter: Character = {
       id: 1,
       userId: 1,
       name: "Sir FitKnight",
-      level: 23,
-      currentXP: 2847,
-      nextLevelXP: 3200,
+      level: 1,
+      currentXP: 0,
+      nextLevelXP: 100,
       avatarUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
       class: "Warrior of Wellness",
-      totalXP: 23000,
+      totalXP: 0,
       createdAt: new Date(),
     };
     this.characters.set(1, defaultCharacter);
@@ -216,41 +216,8 @@ export class MemStorage implements IStorage {
     });
     this.currentIds.quests = 4;
 
-    // Create some default activities
-    const defaultActivities: Activity[] = [
-      {
-        id: 1,
-        characterId: 1,
-        type: "nutrition",
-        description: "Logged breakfast - Oatmeal with berries",
-        xpGained: 45,
-        metadata: { calories: 350, mealType: "breakfast" },
-        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-      },
-      {
-        id: 2,
-        characterId: 1,
-        type: "workout",
-        description: "Completed morning run - 5.2km",
-        xpGained: 180,
-        metadata: { duration: 35, caloriesBurned: 420 },
-        createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
-      },
-      {
-        id: 3,
-        characterId: 1,
-        type: "achievement",
-        description: "Achievement Unlocked: Weekly Warrior",
-        xpGained: 500,
-        metadata: { achievementName: "Weekly Warrior" },
-        createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // Yesterday
-      },
-    ];
-    
-    defaultActivities.forEach(activity => {
-      this.activities.set(activity.id, activity);
-    });
-    this.currentIds.activities = 4;
+    // Start with no default activities - fresh character
+    this.currentIds.activities = 1;
 
     // Initialize food database with real food items
     this.initializeFoodDatabase();

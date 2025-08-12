@@ -266,17 +266,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Update quest progress for workout logging
+      console.log('🎯 Checking quest progress for workout:', {
+        duration: workoutData.duration,
+        workoutType: workoutData.workoutType
+      });
+      
       const activeQuests = await storage.getActiveQuests(characterId);
+      console.log('📝 Active quests found:', activeQuests.length);
+      
       for (const quest of activeQuests) {
+        console.log(`🔍 Checking quest: ${quest.name} (${quest.type}) - Progress: ${quest.currentProgress}/${quest.targetValue}`);
+        
         if (questMatchesAction(quest, 'log_workout') || questMatchesAction(quest, 'workout_duration')) {
+          console.log(`✅ Quest ${quest.name} matches workout action`);
+          
           const progressToAdd = calculateProgressValue(quest, 'log_workout', workoutData.duration, {
             duration: workoutData.duration,
             workoutType: workoutData.workoutType
           });
           
+          console.log(`📈 Progress to add: ${progressToAdd}`);
+          
           if (progressToAdd > 0) {
             const newProgress = Math.min(quest.currentProgress + progressToAdd, quest.targetValue);
             const isNowCompleted = newProgress >= quest.targetValue;
+
+            console.log(`🎯 Updating quest ${quest.name}: ${quest.currentProgress} → ${newProgress}`);
 
             await storage.updateQuest(quest.id, {
               currentProgress: newProgress,
@@ -284,6 +299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
 
             if (!quest.isCompleted && isNowCompleted) {
+              console.log(`🎉 Quest ${quest.name} completed! Awarding ${quest.xpReward} XP`);
               await storage.updateCharacterXP(characterId, quest.xpReward);
               await storage.createActivity({
                 userId,
@@ -295,6 +311,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }, false);
             }
           }
+        } else {
+          console.log(`❌ Quest ${quest.name} does not match workout action`);
         }
       }
 
