@@ -6,7 +6,7 @@ import {
   insertNutritionLogSchema, insertWorkoutLogSchema, insertAchievementSchema,
   insertFoodDatabaseSchema, insertWorkoutTemplateSchema,
   insertExerciseSchema, insertWorkoutSessionSchema, insertExerciseEntrySchema,
-  updateCharacterProfileSchema
+  updateCharacterProfileSchema, DAILY_XP_CAPS
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -293,9 +293,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('🍎 Parsed nutrition data:', nutritionData);
       
-      const log = await storage.createNutritionLog(nutritionData);
+      // Check XP caps before awarding XP
+      const xpCheck = await storage.canAwardXp(
+        userId, 
+        characterId, 
+        'nutrition', 
+        nutritionData.xpGained,
+        nutritionData.mealType
+      );
       
-      console.log('🍎 Created nutrition log:', log);
+      if (!xpCheck.canAward) {
+        console.log('🚫 XP cap reached:', xpCheck.reason);
+        // Still create the nutrition log but with 0 XP
+        const logData = { ...nutritionData, xpGained: 0 };
+        const log = await storage.createNutritionLog(logData);
+        
+        return res.status(200).json({ 
+          ...log, 
+          xpCapReached: true, 
+          message: xpCheck.reason 
+        });
+      }
+      
+      // Update XP amount if capped
+      const finalXp = xpCheck.actualAmount;
+      const logData = { ...nutritionData, xpGained: finalXp };
+      const log = await storage.createNutritionLog(logData);
+      
+      console.log('🍎 Created nutrition log with final XP:', { originalXp: nutritionData.xpGained, finalXp });
+      
+      // Update daily XP tracking
+      const today = new Date().toISOString().split('T')[0];
+      const currentTracking = await storage.getDailyXpTracking(userId, characterId, today) || {
+        userId,
+        characterId,
+        date: today,
+        nutritionXp: 0,
+        workoutXp: 0,
+        hydrationXp: 0,
+        questCompletionXp: 0,
+        totalDailyXp: 0,
+        breakfastEntries: 0,
+        lunchEntries: 0,
+        dinnerEntries: 0,
+        snackEntries: 0,
+      };
+
+      // Increment meal entry count and update XP
+      const mealKey = `${nutritionData.mealType}Entries` as keyof typeof currentTracking;
+      const updatedTracking = {
+        ...currentTracking,
+        nutritionXp: currentTracking.nutritionXp + finalXp,
+        totalDailyXp: currentTracking.totalDailyXp + finalXp,
+        [mealKey]: (currentTracking[mealKey] as number) + 1,
+      };
+      
+      await storage.createOrUpdateDailyXpTracking(updatedTracking);
       
       // Create activity for XP gain
       await storage.createActivity({
@@ -303,11 +356,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         characterId: characterId,
         type: "nutrition",
         description: `Logged ${nutritionData.mealType} - ${nutritionData.foodName}`,
-        xpGained: nutritionData.xpGained,
+        xpGained: finalXp,
         metadata: { 
           calories: nutritionData.calories,
           mealType: nutritionData.mealType,
-          protein: nutritionData.protein || 0
+          protein: nutritionData.protein || 0,
+          xpCapped: finalXp < nutritionData.xpGained
         },
       });
 
@@ -399,7 +453,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
         characterId,
         userId,
       });
-      const log = await storage.createWorkoutLog(workoutData);
+      
+      // Check XP caps before awarding XP
+      const xpCheck = await storage.canAwardXp(
+        userId, 
+        characterId, 
+        'workout', 
+        workoutData.xpGained
+      );
+      
+      if (!xpCheck.canAward) {
+        console.log('🚫 Workout XP cap reached:', xpCheck.reason);
+        // Still create the workout log but with 0 XP
+        const logData = { ...workoutData, xpGained: 0 };
+        const log = await storage.createWorkoutLog(logData);
+        
+        return res.status(200).json({ 
+          ...log, 
+          xpCapReached: true, 
+          message: xpCheck.reason 
+        });
+      }
+      
+      // Update XP amount if capped
+      const finalXp = xpCheck.actualAmount;
+      const logData = { ...workoutData, xpGained: finalXp };
+      const log = await storage.createWorkoutLog(logData);
+      
+      console.log('💪 Created workout log with final XP:', { originalXp: workoutData.xpGained, finalXp });
+      
+      // Update daily XP tracking
+      const today = new Date().toISOString().split('T')[0];
+      const currentTracking = await storage.getDailyXpTracking(userId, characterId, today) || {
+        userId,
+        characterId,
+        date: today,
+        nutritionXp: 0,
+        workoutXp: 0,
+        hydrationXp: 0,
+        questCompletionXp: 0,
+        totalDailyXp: 0,
+        breakfastEntries: 0,
+        lunchEntries: 0,
+        dinnerEntries: 0,
+        snackEntries: 0,
+      };
+
+      const updatedTracking = {
+        ...currentTracking,
+        workoutXp: currentTracking.workoutXp + finalXp,
+        totalDailyXp: currentTracking.totalDailyXp + finalXp,
+      };
+      
+      await storage.createOrUpdateDailyXpTracking(updatedTracking);
       
       // Create activity for XP gain
       await storage.createActivity({
@@ -407,11 +513,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         characterId: characterId,
         type: "workout",
         description: `Completed ${workoutData.workoutType} - ${workoutData.duration} min`,
-        xpGained: workoutData.xpGained,
+        xpGained: finalXp,
         metadata: { 
           duration: workoutData.duration,
           caloriesBurned: workoutData.caloriesBurned,
-          workoutType: workoutData.workoutType
+          workoutType: workoutData.workoutType,
+          xpCapped: finalXp < workoutData.xpGained
         },
       });
 
@@ -523,6 +630,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to get daily stats" });
+    }
+  });
+
+  // Daily XP tracking endpoints
+  app.get("/api/xp/daily", async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const characterId = req.session.characterId;
+      const today = new Date().toISOString().split('T')[0];
+      
+      const tracking = await storage.getDailyXpTracking(userId, characterId, today);
+      
+      if (!tracking) {
+        // Return default tracking data if none exists
+        const defaultTracking = {
+          userId,
+          characterId,
+          date: today,
+          nutritionXp: 0,
+          workoutXp: 0,
+          hydrationXp: 0,
+          questCompletionXp: 0,
+          totalDailyXp: 0,
+          breakfastEntries: 0,
+          lunchEntries: 0,
+          dinnerEntries: 0,
+          snackEntries: 0,
+        };
+        return res.json({ tracking: defaultTracking, caps: DAILY_XP_CAPS });
+      }
+      
+      res.json({ tracking, caps: DAILY_XP_CAPS });
+    } catch (error) {
+      console.error('Failed to get daily XP tracking:', error);
+      res.status(500).json({ message: "Failed to get daily XP tracking" });
     }
   });
 

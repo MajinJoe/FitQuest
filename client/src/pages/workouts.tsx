@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BottomNavigation from "@/components/bottom-navigation";
+import DailyXpTracker from "@/components/daily-xp-tracker";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { WorkoutLog, WorkoutTemplate } from "@shared/schema";
@@ -92,8 +93,8 @@ export default function Workouts() {
       });
       return response.json();
     },
-    onSuccess: (data) => {
-      console.log('✅ Workout logged successfully:', data);
+    onSuccess: (result) => {
+      console.log('✅ Workout logged successfully:', result);
       console.log('🔄 Invalidating quest queries...');
       queryClient.invalidateQueries({ queryKey: ["/api/workouts"] });
       queryClient.invalidateQueries({ queryKey: ["/api/workouts/today"] });
@@ -101,11 +102,26 @@ export default function Workouts() {
       queryClient.invalidateQueries({ queryKey: ["/api/quests/active"] });
       queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats/daily"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/xp/daily"] });
       
-      toast({
-        title: "Workout Completed!",
-        description: "Great job! XP earned for your training!",
-      });
+      // Show appropriate toast based on XP cap status
+      if (result.xpCapReached) {
+        toast({
+          title: "Workout Completed (XP Cap Reached)",
+          description: result.message || "Daily workout XP limit reached",
+          variant: "destructive",
+        });
+      } else if (result.xpCapped) {
+        toast({
+          title: "Workout Completed (Partial XP)",
+          description: "Some XP was capped due to daily limits",
+        });
+      } else {
+        toast({
+          title: "Workout Completed!",
+          description: `Great job! XP earned for your training! (+${result.xpGained} XP)`,
+        });
+      }
       
       form.reset();
       setIsDialogOpen(false);
@@ -137,18 +153,33 @@ export default function Workouts() {
       });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["/api/workouts"] });
       queryClient.invalidateQueries({ queryKey: ["/api/workouts/today"] });
       queryClient.invalidateQueries({ queryKey: ["/api/character"] });
       queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats/daily"] });
       queryClient.invalidateQueries({ queryKey: ["/api/workout-templates"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/xp/daily"] });
       
-      toast({
-        title: "Workout Completed!",
-        description: "Awesome! You earned XP for completing this preset workout!",
-      });
+      // Show appropriate toast based on XP cap status
+      if (result.xpCapReached) {
+        toast({
+          title: "Workout Completed (XP Cap Reached)",
+          description: result.message || "Daily workout XP limit reached",
+          variant: "destructive",
+        });
+      } else if (result.xpCapped) {
+        toast({
+          title: "Workout Completed (Partial XP)",
+          description: "Some XP was capped due to daily limits",
+        });
+      } else {
+        toast({
+          title: "Workout Completed!",
+          description: `Awesome! You earned XP for completing this preset workout! (+${result.xpGained} XP)`,
+        });
+      }
       
       setSelectedTemplate(null);
     },
@@ -202,6 +233,11 @@ export default function Workouts() {
       </div>
 
       <main className="p-4 pb-20">
+        {/* Daily XP Tracker */}
+        <div className="mb-6">
+          <DailyXpTracker />
+        </div>
+
         {/* Today's Summary */}
         <div className="rpg-card mb-6 p-4">
           <h3 className="rpg-title text-fantasy-purple text-lg mb-4 text-center">Today's Training</h3>

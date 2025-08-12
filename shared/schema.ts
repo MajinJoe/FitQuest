@@ -90,6 +90,26 @@ export const achievements = pgTable("achievements", {
   unlockedAt: timestamp("unlocked_at").defaultNow().notNull(),
 });
 
+// Daily XP tracking for caps and retention
+export const dailyXpTracking = pgTable("daily_xp_tracking", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  characterId: integer("character_id").notNull(),
+  date: text("date").notNull(), // YYYY-MM-DD format
+  nutritionXp: integer("nutrition_xp").notNull().default(0),
+  workoutXp: integer("workout_xp").notNull().default(0),
+  hydrationXp: integer("hydration_xp").notNull().default(0),
+  questCompletionXp: integer("quest_completion_xp").notNull().default(0),
+  totalDailyXp: integer("total_daily_xp").notNull().default(0),
+  // Track meal entries by type for per-meal caps
+  breakfastEntries: integer("breakfast_entries").notNull().default(0),
+  lunchEntries: integer("lunch_entries").notNull().default(0),
+  dinnerEntries: integer("dinner_entries").notNull().default(0),
+  snackEntries: integer("snack_entries").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const foodDatabase = pgTable("food_database", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -316,3 +336,34 @@ export type InsertExerciseEntry = z.infer<typeof insertExerciseEntrySchema>;
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UpdateUserProfile = z.infer<typeof updateUserProfileSchema>;
+
+export const insertDailyXpTrackingSchema = createInsertSchema(dailyXpTracking).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type DailyXpTracking = typeof dailyXpTracking.$inferSelect;
+export type InsertDailyXpTracking = z.infer<typeof insertDailyXpTrackingSchema>;
+
+// Daily XP caps configuration
+export const DAILY_XP_CAPS = {
+  // Per meal type caps (25 XP per meal entry)
+  MEAL_ENTRY_XP: 25,
+  BREAKFAST_ENTRIES_MAX: 4, // 100 XP max from breakfast
+  LUNCH_ENTRIES_MAX: 4,     // 100 XP max from lunch  
+  DINNER_ENTRIES_MAX: 4,    // 100 XP max from dinner
+  SNACK_ENTRIES_MAX: 6,     // 150 XP max from snacks
+  
+  // Category caps
+  NUTRITION_DAILY_CAP: 200, // Total nutrition XP cap per day
+  WORKOUT_DAILY_CAP: 250,   // Workout XP cap per day
+  HYDRATION_DAILY_CAP: 100, // Hydration XP cap per day
+  
+  // Steps/activity caps
+  STEPS_TIER_1: { steps: 5000, xp: 50 },
+  STEPS_TIER_2: { steps: 10000, xp: 100 },
+  STEPS_TIER_3: { steps: 15000, xp: 150 },
+  
+  // Quest completion XP is uncapped to encourage completion
+} as const;

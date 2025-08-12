@@ -16,6 +16,7 @@ import BarcodeScanner from "@/components/barcode-scanner";
 import FoodDatabase from "@/components/food-database";
 import AddHomemadeFood from "@/components/add-homemade-food";
 import PopularFoods from "@/components/popular-foods";
+import DailyXpTracker from "@/components/daily-xp-tracker";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { NutritionLog, FoodDatabaseItem } from "@shared/schema";
@@ -68,7 +69,7 @@ export default function Nutrition() {
       });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["/api/nutrition"] });
       queryClient.invalidateQueries({ queryKey: ["/api/nutrition/today"] });
       queryClient.invalidateQueries({ queryKey: ["/api/character"] });
@@ -76,11 +77,26 @@ export default function Nutrition() {
       queryClient.invalidateQueries({ queryKey: ["/api/stats/daily"] });
       queryClient.invalidateQueries({ queryKey: ["/api/quests"] });
       queryClient.invalidateQueries({ queryKey: ["/api/quests/active"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/xp/daily"] });
       
-      toast({
-        title: "Meal Logged!",
-        description: "XP gained for nutritious eating!",
-      });
+      // Show appropriate toast based on XP cap status
+      if (result.xpCapReached) {
+        toast({
+          title: "Food logged (XP Cap Reached)",
+          description: result.message || "Daily XP limit reached for this meal type",
+          variant: "destructive",
+        });
+      } else if (result.xpCapped) {
+        toast({
+          title: "Food logged (Partial XP)",
+          description: "Some XP was capped due to daily limits",
+        });
+      } else {
+        toast({
+          title: "Meal Logged!",
+          description: `XP gained for nutritious eating! (+${result.xpGained} XP)`,
+        });
+      }
       
       form.reset();
       setIsDialogOpen(false);
@@ -183,6 +199,11 @@ export default function Nutrition() {
       </div>
 
       <main className="p-4 pb-20">
+        {/* Daily XP Tracker */}
+        <div className="mb-6">
+          <DailyXpTracker />
+        </div>
+
         {/* Today's Summary */}
         <div className="rpg-card mb-6 p-4">
           <h3 className="rpg-title text-fantasy-green text-lg mb-4 text-center">Today's Nutrition</h3>

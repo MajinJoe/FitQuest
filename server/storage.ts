@@ -1,6 +1,6 @@
 import { 
   users, characters, quests, activities, nutritionLogs, workoutLogs, achievements, foodDatabase, workoutTemplates,
-  exercises, workoutSessions, exerciseEntries,
+  exercises, workoutSessions, exerciseEntries, dailyXpTracking,
   type User, type InsertUser, type UpdateUserProfile,
   type Character, type InsertCharacter,
   type Quest, type InsertQuest,
@@ -12,7 +12,9 @@ import {
   type WorkoutTemplate, type InsertWorkoutTemplate,
   type Exercise, type InsertExercise,
   type WorkoutSession, type InsertWorkoutSession,
-  type ExerciseEntry, type InsertExerciseEntry
+  type ExerciseEntry, type InsertExerciseEntry,
+  type DailyXpTracking, type InsertDailyXpTracking,
+  DAILY_XP_CAPS
 } from "@shared/schema";
 
 export interface IStorage {
@@ -88,6 +90,11 @@ export interface IStorage {
   // Exercise Entry methods
   getExerciseEntriesBySession(sessionId: number): Promise<ExerciseEntry[]>;
   createExerciseEntry(entry: InsertExerciseEntry): Promise<ExerciseEntry>;
+  
+  // Daily XP tracking methods
+  getDailyXpTracking(userId: number, characterId: number, date: string): Promise<DailyXpTracking | undefined>;
+  createOrUpdateDailyXpTracking(data: InsertDailyXpTracking): Promise<DailyXpTracking>;
+  canAwardXp(userId: number, characterId: number, xpType: 'nutrition' | 'workout' | 'hydration', amount: number, mealType?: string): Promise<{ canAward: boolean; actualAmount: number; reason?: string }>;
 }
 
 export class MemStorage implements IStorage {
@@ -103,6 +110,7 @@ export class MemStorage implements IStorage {
   private exercises: Map<number, Exercise>;
   private workoutSessions: Map<number, WorkoutSession>;
   private exerciseEntries: Map<number, ExerciseEntry>;
+  private dailyXpTracking: Map<string, DailyXpTracking>; // Key: userId-characterId-date
   private currentIds: { [key: string]: number };
 
   constructor() {
@@ -118,6 +126,7 @@ export class MemStorage implements IStorage {
     this.exercises = new Map();
     this.workoutSessions = new Map();
     this.exerciseEntries = new Map();
+    this.dailyXpTracking = new Map();
     this.currentIds = {
       users: 1,
       characters: 1,
@@ -131,6 +140,7 @@ export class MemStorage implements IStorage {
       exercises: 1,
       workoutSessions: 1,
       exerciseEntries: 1,
+      dailyXpTracking: 1,
     };
     
     // Create default user, character and quests
@@ -1348,6 +1358,126 @@ export class MemStorage implements IStorage {
     };
     this.exerciseEntries.set(id, entry);
     return entry;
+  }
+
+  // Daily XP tracking methods
+  async getDailyXpTracking(userId: number, characterId: number, date: string): Promise<DailyXpTracking | undefined> {
+    const key = `${userId}-${characterId}-${date}`;
+    return this.dailyXpTracking.get(key);
+  }
+
+  async createOrUpdateDailyXpTracking(data: InsertDailyXpTracking): Promise<DailyXpTracking> {
+    const key = `${data.userId}-${data.characterId}-${data.date}`;
+    const existing = this.dailyXpTracking.get(key);
+    
+    if (existing) {
+      const updated: DailyXpTracking = {
+        ...existing,
+        ...data,
+        id: existing.id,
+        updatedAt: new Date(),
+      };
+      this.dailyXpTracking.set(key, updated);
+      return updated;
+    } else {
+      const id = this.currentIds.dailyXpTracking++;
+      const newTracking: DailyXpTracking = {
+        ...data,
+        id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      this.dailyXpTracking.set(key, newTracking);
+      return newTracking;
+    }
+  }
+
+  async canAwardXp(
+    userId: number, 
+    characterId: number, 
+    xpType: 'nutrition' | 'workout' | 'hydration', 
+    amount: number, 
+    mealType?: string
+  ): Promise<{ canAward: boolean; actualAmount: number; reason?: string }> {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const tracking = await this.getDailyXpTracking(userId, characterId, today) || {
+      userId,
+      characterId,
+      date: today,
+      nutritionXp: 0,
+      workoutXp: 0,
+      hydrationXp: 0,
+      questCompletionXp: 0,
+      totalDailyXp: 0,
+      breakfastEntries: 0,
+      lunchEntries: 0,
+      dinnerEntries: 0,
+      snackEntries: 0,
+    };
+
+    switch (xpType) {
+      case 'nutrition': {
+        // Check per-meal caps first
+        if (mealType) {
+          const mealKey = `${mealType}Entries` as keyof Pick<DailyXpTracking, 'breakfastEntries' | 'lunchEntries' | 'dinnerEntries' | 'snackEntries'>;
+          const currentEntries = tracking[mealKey] || 0;
+          const maxEntries = mealType === 'snack' ? DAILY_XP_CAPS.SNACK_ENTRIES_MAX : 
+                            DAILY_XP_CAPS.BREAKFAST_ENTRIES_MAX; // All non-snack meals have same cap
+          
+          if (currentEntries >= maxEntries) {
+            return { 
+              canAward: false, 
+              actualAmount: 0, 
+              reason: `Daily ${mealType} entry limit reached (${maxEntries} entries)` 
+            };
+          }
+        }
+
+        // Check daily nutrition cap
+        const remainingNutritionXp = DAILY_XP_CAPS.NUTRITION_DAILY_CAP - tracking.nutritionXp;
+        if (remainingNutritionXp <= 0) {
+          return { 
+            canAward: false, 
+            actualAmount: 0, 
+            reason: `Daily nutrition XP cap reached (${DAILY_XP_CAPS.NUTRITION_DAILY_CAP} XP)` 
+          };
+        }
+
+        const actualAmount = Math.min(amount, remainingNutritionXp);
+        return { canAward: true, actualAmount };
+      }
+
+      case 'workout': {
+        const remainingWorkoutXp = DAILY_XP_CAPS.WORKOUT_DAILY_CAP - tracking.workoutXp;
+        if (remainingWorkoutXp <= 0) {
+          return { 
+            canAward: false, 
+            actualAmount: 0, 
+            reason: `Daily workout XP cap reached (${DAILY_XP_CAPS.WORKOUT_DAILY_CAP} XP)` 
+          };
+        }
+
+        const actualAmount = Math.min(amount, remainingWorkoutXp);
+        return { canAward: true, actualAmount };
+      }
+
+      case 'hydration': {
+        const remainingHydrationXp = DAILY_XP_CAPS.HYDRATION_DAILY_CAP - tracking.hydrationXp;
+        if (remainingHydrationXp <= 0) {
+          return { 
+            canAward: false, 
+            actualAmount: 0, 
+            reason: `Daily hydration XP cap reached (${DAILY_XP_CAPS.HYDRATION_DAILY_CAP} XP)` 
+          };
+        }
+
+        const actualAmount = Math.min(amount, remainingHydrationXp);
+        return { canAward: true, actualAmount };
+      }
+
+      default:
+        return { canAward: false, actualAmount: 0, reason: 'Invalid XP type' };
+    }
   }
 }
 
