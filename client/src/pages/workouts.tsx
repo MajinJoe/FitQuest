@@ -79,16 +79,26 @@ export default function Workouts() {
       const intensityMultiplier = { light: 1, moderate: 1.5, intense: 2 };
       const xpGained = Math.floor(data.duration * intensityMultiplier[data.intensity] * 3);
       
+      console.log('🏃‍♂️ Logging workout:', data);
+      console.log('📈 Expected quest progress update:', {
+        type: 'cardio',
+        duration: data.duration,
+        expectedProgress: `+${data.duration} minutes`
+      });
+      
       const response = await apiRequest("POST", "/api/workouts", {
         ...data,
         xpGained,
       });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('✅ Workout logged successfully:', data);
+      console.log('🔄 Invalidating quest queries...');
       queryClient.invalidateQueries({ queryKey: ["/api/workouts"] });
       queryClient.invalidateQueries({ queryKey: ["/api/workouts/today"] });
       queryClient.invalidateQueries({ queryKey: ["/api/character"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/quests/active"] });
       queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats/daily"] });
       

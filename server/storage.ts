@@ -165,7 +165,7 @@ export class MemStorage implements IStorage {
     this.characters.set(1, defaultCharacter);
     this.currentIds.characters = 2;
 
-    // Create default quests
+    // Create default quests (starting from 0 progress)
     const defaultQuests: Quest[] = [
       {
         id: 1,
@@ -174,7 +174,7 @@ export class MemStorage implements IStorage {
         description: "Complete 30 minutes of cardio exercise",
         type: "cardio",
         targetValue: 30,
-        currentProgress: 18,
+        currentProgress: 0,
         xpReward: 150,
         isCompleted: false,
         isDaily: true,
@@ -188,7 +188,7 @@ export class MemStorage implements IStorage {
         description: "Log all meals and hit protein target",
         type: "nutrition",
         targetValue: 100,
-        currentProgress: 85,
+        currentProgress: 0,
         xpReward: 100,
         isCompleted: false,
         isDaily: true,
@@ -202,7 +202,7 @@ export class MemStorage implements IStorage {
         description: "Drink 8 glasses of water today",
         type: "hydration",
         targetValue: 8,
-        currentProgress: 5,
+        currentProgress: 0,
         xpReward: 50,
         isCompleted: false,
         isDaily: true,

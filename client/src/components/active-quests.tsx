@@ -6,6 +6,15 @@ interface ActiveQuestsProps {
 }
 
 export default function ActiveQuests({ quests }: ActiveQuestsProps) {
+  // Debug logging to track quest data
+  console.log('🎯 ActiveQuests render - Quest data:', quests);
+  console.log('📊 Quest progress details:', quests?.map(q => ({
+    name: q.name,
+    type: q.type,
+    progress: `${q.currentProgress}/${q.targetValue}`,
+    completed: q.isCompleted
+  })));
+
   const getQuestGradient = (type: string) => {
     switch (type) {
       case 'cardio':
