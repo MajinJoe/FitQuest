@@ -27,6 +27,7 @@ export interface IStorage {
   getCharacterByUserId(userId: number): Promise<Character | undefined>;
   createCharacter(character: InsertCharacter): Promise<Character>;
   updateCharacter(id: number, updates: Partial<Character>): Promise<Character | undefined>;
+  updateCharacterXP(id: number, xpToAdd: number): Promise<Character | undefined>;
   
   // Quest methods
   getCharacterQuests(characterId: number): Promise<Quest[]>;
@@ -715,6 +716,41 @@ export class MemStorage implements IStorage {
     if (!character) return undefined;
     
     const updatedCharacter = { ...character, ...updates };
+    this.characters.set(id, updatedCharacter);
+    return updatedCharacter;
+  }
+
+  async updateCharacterXP(id: number, xpToAdd: number): Promise<Character | undefined> {
+    const character = this.characters.get(id);
+    if (!character) return undefined;
+
+    let newTotalXP = character.totalXP + xpToAdd;
+    let newCurrentXP = character.currentXP + xpToAdd;
+    let newLevel = character.level;
+    let newNextLevelXP = character.nextLevelXP;
+
+    // Calculate level ups
+    while (newCurrentXP >= newNextLevelXP) {
+      newCurrentXP -= newNextLevelXP;
+      newLevel++;
+      newNextLevelXP = newLevel * 100; // Each level requires 100 more XP than the last
+      
+      // Trigger level up event
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('showLevelUp', { 
+          detail: { newLevel } 
+        }));
+      }
+    }
+
+    const updatedCharacter: Character = {
+      ...character,
+      totalXP: newTotalXP,
+      currentXP: newCurrentXP,
+      level: newLevel,
+      nextLevelXP: newNextLevelXP
+    };
+
     this.characters.set(id, updatedCharacter);
     return updatedCharacter;
   }

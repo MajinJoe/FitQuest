@@ -162,11 +162,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/nutrition", async (req, res) => {
     try {
+      console.log('🍎 Nutrition logging request:', {
+        body: req.body,
+        characterId,
+        userId
+      });
+      
       const nutritionData = insertNutritionLogSchema.parse({
         ...req.body,
         characterId,
+        userId,
       });
+      
+      console.log('🍎 Parsed nutrition data:', nutritionData);
+      
       const log = await storage.createNutritionLog(nutritionData);
+      
+      console.log('🍎 Created nutrition log:', log);
       
       // Create activity for XP gain
       await storage.createActivity({
@@ -217,7 +229,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(201).json(log);
     } catch (error) {
+      console.error('🍎 Nutrition logging error:', error);
       if (error instanceof z.ZodError) {
+        console.error('🍎 Validation errors:', error.errors);
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to create nutrition log" });
