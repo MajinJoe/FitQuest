@@ -791,7 +791,7 @@ export class MemStorage implements IStorage {
       .slice(0, limit);
   }
 
-  async createActivity(insertActivity: InsertActivity): Promise<Activity> {
+  async createActivity(insertActivity: InsertActivity, updateQuests = true): Promise<Activity> {
     const id = this.currentIds.activities++;
     const activity: Activity = {
       ...insertActivity,
@@ -799,7 +799,97 @@ export class MemStorage implements IStorage {
       createdAt: new Date(),
     };
     this.activities.set(id, activity);
+    
+    // Update quest progress based on activity type (skip for quest completion activities)
+    if (updateQuests && activity.type !== "quest") {
+      await this.updateQuestProgress(activity.characterId, activity.type, activity.metadata);
+    }
+    
     return activity;
+  }
+
+  // Update quest progress when activities are logged
+  private async updateQuestProgress(characterId: number, activityType: string, metadata: any): Promise<void> {
+    const activeQuests = Array.from(this.quests.values())
+      .filter(quest => quest.characterId === characterId && !quest.isCompleted);
+
+    for (const quest of activeQuests) {
+      let progressToAdd = 0;
+
+      // Map activity types to quest types and calculate progress
+      switch (quest.type) {
+        case "cardio":
+          if (activityType === "workout") {
+            // Any workout counts toward cardio progress (add duration in minutes)
+            if (metadata?.duration) {
+              progressToAdd = metadata.duration;
+            }
+          }
+          break;
+        
+        case "nutrition":
+          if (activityType === "nutrition") {
+            // Count protein grams for nutrition quest (adjust based on quest description)
+            if (quest.name.includes("protein") && metadata?.protein) {
+              progressToAdd = metadata.protein;
+            } else if (metadata?.calories) {
+              // For general nutrition goals, count calories
+              progressToAdd = Math.floor(metadata.calories / 10); // Scale down calories for progress
+            }
+          }
+          break;
+        
+        case "hydration":
+          if (activityType === "hydration") {
+            progressToAdd = 1; // Add 1 glass of water
+          }
+          break;
+        
+        case "strength":
+          if (activityType === "workout" && 
+              (metadata?.workoutType === "strength" || 
+               metadata?.workoutType === "resistance" ||
+               metadata?.workoutType === "weightlifting")) {
+            progressToAdd = metadata.duration || 1; // Add workout duration or session count
+          }
+          break;
+      }
+
+      // Update quest progress
+      if (progressToAdd > 0) {
+        const newProgress = Math.min(quest.currentProgress + progressToAdd, quest.targetValue);
+        const wasCompleted = quest.isCompleted;
+        const isNowCompleted = newProgress >= quest.targetValue;
+
+        await this.updateQuest(quest.id, {
+          currentProgress: newProgress,
+          isCompleted: isNowCompleted
+        });
+
+        // If quest was just completed, award XP and log completion activity
+        if (!wasCompleted && isNowCompleted) {
+          await this.awardQuestCompletionXP(characterId, quest);
+        }
+      }
+    }
+  }
+
+  private async awardQuestCompletionXP(characterId: number, quest: Quest): Promise<void> {
+    // Award XP for quest completion
+    const character = await this.getCharacter(characterId);
+    if (character) {
+      await this.updateCharacterXP(characterId, quest.xpReward);
+      
+      // Log quest completion activity (don't update quests to avoid recursion)
+      await this.createActivity({
+        userId: 1, // Default user for demo
+        characterId,
+        type: "quest",
+        description: `Quest Completed: ${quest.name}`,
+        xpGained: quest.xpReward,
+        metadata: { questId: quest.id, questName: quest.name }
+      }, false);
+    }
   }
 
   // Nutrition methods

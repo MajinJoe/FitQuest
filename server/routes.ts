@@ -170,6 +170,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create activity for XP gain
       await storage.createActivity({
+        userId,
         characterId,
         type: "nutrition",
         description: `Logged ${nutritionData.mealType} - ${nutritionData.foodName}`,
@@ -218,13 +219,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create activity for XP gain
       await storage.createActivity({
+        userId,
         characterId,
         type: "workout",
         description: `Completed ${workoutData.workoutType} - ${workoutData.duration} min`,
         xpGained: workoutData.xpGained,
         metadata: { 
           duration: workoutData.duration,
-          caloriesBurned: workoutData.caloriesBurned 
+          caloriesBurned: workoutData.caloriesBurned,
+          workoutType: workoutData.workoutType
         },
       });
 
@@ -278,6 +281,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Hydration tracking endpoint
+  app.post("/api/hydration", async (req, res) => {
+    try {
+      const { glasses = 1 } = req.body;
+      
+      // Create activity for hydration
+      await storage.createActivity({
+        userId,
+        characterId,
+        type: "hydration",
+        description: `Drank ${glasses} glass${glasses > 1 ? 'es' : ''} of water`,
+        xpGained: glasses * 5, // 5 XP per glass
+        metadata: { glasses },
+      });
+
+      res.json({ success: true, glasses, xpGained: glasses * 5 });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to log hydration" });
+    }
+  });
+
   // XP gain endpoint
   app.post("/api/character/xp", async (req, res) => {
     try {
@@ -313,6 +337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create activity
       await storage.createActivity({
+        userId,
         characterId,
         type: "xp_gain",
         description,
@@ -400,6 +425,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Award XP for contributing to the database
       await storage.createActivity({
+        userId,
         characterId,
         type: "food_contribution",
         description: `Added "${food.name}" to the food database`,
