@@ -1,0 +1,104 @@
+// lib/questService.ts - Quest management service
+
+export interface QuestProgress {
+  questId: number;
+  currentProgress: number;
+  completed: boolean;
+  xpAwarded?: number;
+}
+
+export class QuestManager {
+  // Update quest progress when user performs actions
+  static async updateQuestProgress(
+    action: string, 
+    value: number = 1, 
+    metadata?: any
+  ): Promise<QuestProgress[]> {
+    try {
+      const response = await fetch('/api/quests/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action,
+          value,
+          metadata
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update quest progress');
+      }
+
+      const updatedQuests = await response.json();
+      
+      // Trigger XP notifications for completed quests
+      updatedQuests.forEach((quest: QuestProgress) => {
+        if (quest.completed && quest.xpAwarded) {
+          this.triggerXPNotification(quest.xpAwarded);
+        }
+      });
+
+      return updatedQuests;
+    } catch (error) {
+      console.error('Error updating quest progress:', error);
+      return [];
+    }
+  }
+
+  // Trigger XP gain notification
+  static triggerXPNotification(amount: number, leveledUp: boolean = false, newLevel?: number) {
+    const event = new CustomEvent('showXPGain', {
+      detail: { amount, leveledUp, newLevel }
+    });
+    window.dispatchEvent(event);
+  }
+
+  // Check for quest completion and trigger rewards
+  static async checkQuestCompletion(questId: number) {
+    try {
+      const response = await fetch(`/api/quests/${questId}/complete`, {
+        method: 'POST'
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.completed) {
+          this.triggerXPNotification(result.xpReward, result.leveledUp, result.newLevel);
+          
+          // Trigger quest completed event for UI updates
+          const questCompleteEvent = new CustomEvent('questCompleted', {
+            detail: { questId, xpReward: result.xpReward }
+          });
+          window.dispatchEvent(questCompleteEvent);
+        }
+        return result;
+      }
+    } catch (error) {
+      console.error('Error checking quest completion:', error);
+    }
+  }
+}
+
+// Action types that can trigger quest progress
+export const QUEST_ACTIONS = {
+  // Nutrition actions
+  LOG_MEAL: 'log_meal',
+  LOG_WATER: 'log_water',
+  HIT_CALORIE_TARGET: 'hit_calorie_target',
+  HIT_PROTEIN_TARGET: 'hit_protein_target',
+  COMPLETE_DAILY_NUTRITION: 'complete_daily_nutrition',
+  
+  // Fitness actions
+  LOG_WORKOUT: 'log_workout',
+  COMPLETE_CARDIO: 'complete_cardio',
+  WORKOUT_DURATION: 'workout_duration',
+  HIT_STEP_GOAL: 'hit_step_goal',
+  
+  // Community actions
+  ADD_RECIPE: 'add_recipe',
+  RECIPE_LIKED: 'recipe_liked',
+  
+  // General actions
+  DAILY_LOGIN: 'daily_login',
+  MAINTAIN_STREAK: 'maintain_streak'
+} as const;

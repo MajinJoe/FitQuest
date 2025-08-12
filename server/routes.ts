@@ -177,9 +177,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         xpGained: nutritionData.xpGained,
         metadata: { 
           calories: nutritionData.calories,
-          mealType: nutritionData.mealType 
+          mealType: nutritionData.mealType,
+          protein: nutritionData.protein || 0
         },
       });
+
+      // Update quest progress for nutrition logging
+      const activeQuests = await storage.getActiveQuests(characterId);
+      for (const quest of activeQuests) {
+        if (questMatchesAction(quest, 'log_meal')) {
+          const progressToAdd = calculateProgressValue(quest, 'log_meal', 1, {
+            calories: nutritionData.calories,
+            protein: nutritionData.protein || 0
+          });
+          
+          if (progressToAdd > 0) {
+            const newProgress = Math.min(quest.currentProgress + progressToAdd, quest.targetValue);
+            const isNowCompleted = newProgress >= quest.targetValue;
+
+            await storage.updateQuest(quest.id, {
+              currentProgress: newProgress,
+              isCompleted: isNowCompleted
+            });
+
+            if (!quest.isCompleted && isNowCompleted) {
+              await storage.updateCharacterXP(characterId, quest.xpReward);
+              await storage.createActivity({
+                userId,
+                characterId,
+                type: "quest",
+                description: `Quest Completed: ${quest.name}`,
+                xpGained: quest.xpReward,
+                metadata: { questId: quest.id, questName: quest.name }
+              }, false);
+            }
+          }
+        }
+      }
 
       res.status(201).json(log);
     } catch (error) {
@@ -231,6 +265,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
 
+      // Update quest progress for workout logging
+      const activeQuests = await storage.getActiveQuests(characterId);
+      for (const quest of activeQuests) {
+        if (questMatchesAction(quest, 'log_workout') || questMatchesAction(quest, 'workout_duration')) {
+          const progressToAdd = calculateProgressValue(quest, 'log_workout', workoutData.duration, {
+            duration: workoutData.duration,
+            workoutType: workoutData.workoutType
+          });
+          
+          if (progressToAdd > 0) {
+            const newProgress = Math.min(quest.currentProgress + progressToAdd, quest.targetValue);
+            const isNowCompleted = newProgress >= quest.targetValue;
+
+            await storage.updateQuest(quest.id, {
+              currentProgress: newProgress,
+              isCompleted: isNowCompleted
+            });
+
+            if (!quest.isCompleted && isNowCompleted) {
+              await storage.updateCharacterXP(characterId, quest.xpReward);
+              await storage.createActivity({
+                userId,
+                characterId,
+                type: "quest",
+                description: `Quest Completed: ${quest.name}`,
+                xpGained: quest.xpReward,
+                metadata: { questId: quest.id, questName: quest.name }
+              }, false);
+            }
+          }
+        }
+      }
+
       res.status(201).json(log);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -281,6 +348,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Quest progress tracking endpoint
+  app.post("/api/quests/progress", async (req, res) => {
+    try {
+      const { action, value, metadata } = req.body;
+      
+      // Get active quests for the character
+      const activeQuests = await storage.getActiveQuests(characterId);
+      const updatedQuests = [];
+
+      for (const quest of activeQuests) {
+        // Check if this action contributes to this quest
+        if (questMatchesAction(quest, action)) {
+          const oldProgress = quest.currentProgress;
+          const progressToAdd = calculateProgressValue(quest, action, value, metadata);
+          
+          if (progressToAdd > 0) {
+            const newProgress = Math.min(quest.currentProgress + progressToAdd, quest.targetValue);
+            const wasCompleted = quest.isCompleted;
+            const isNowCompleted = newProgress >= quest.targetValue;
+
+            await storage.updateQuest(quest.id, {
+              currentProgress: newProgress,
+              isCompleted: isNowCompleted
+            });
+
+            // If quest was just completed, award XP
+            if (!wasCompleted && isNowCompleted) {
+              await storage.updateCharacterXP(characterId, quest.xpReward);
+              
+              // Log quest completion activity
+              await storage.createActivity({
+                userId,
+                characterId,
+                type: "quest",
+                description: `Quest Completed: ${quest.name}`,
+                xpGained: quest.xpReward,
+                metadata: { questId: quest.id, questName: quest.name }
+              }, false);
+
+              updatedQuests.push({
+                questId: quest.id,
+                currentProgress: newProgress,
+                completed: true,
+                xpAwarded: quest.xpReward
+              });
+            } else if (newProgress !== oldProgress) {
+              updatedQuests.push({
+                questId: quest.id,
+                currentProgress: newProgress,
+                completed: false
+              });
+            }
+          }
+        }
+      }
+
+      res.json(updatedQuests);
+    } catch (error) {
+      console.error('Error updating quest progress:', error);
+      res.status(500).json({ error: 'Failed to update quest progress' });
+    }
+  });
+
   // Hydration tracking endpoint
   app.post("/api/hydration", async (req, res) => {
     try {
@@ -295,6 +425,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         xpGained: glasses * 5, // 5 XP per glass
         metadata: { glasses },
       });
+
+      // Update quest progress for hydration
+      const activeQuests = await storage.getActiveQuests(characterId);
+      for (const quest of activeQuests) {
+        if (questMatchesAction(quest, 'log_water')) {
+          const progressToAdd = calculateProgressValue(quest, 'log_water', glasses, { glasses });
+          
+          if (progressToAdd > 0) {
+            const newProgress = Math.min(quest.currentProgress + progressToAdd, quest.targetValue);
+            const isNowCompleted = newProgress >= quest.targetValue;
+
+            await storage.updateQuest(quest.id, {
+              currentProgress: newProgress,
+              isCompleted: isNowCompleted
+            });
+
+            if (!quest.isCompleted && isNowCompleted) {
+              await storage.updateCharacterXP(characterId, quest.xpReward);
+              await storage.createActivity({
+                userId,
+                characterId,
+                type: "quest",
+                description: `Quest Completed: ${quest.name}`,
+                xpGained: quest.xpReward,
+                metadata: { questId: quest.id, questName: quest.name }
+              }, false);
+            }
+          }
+        }
+      }
 
       res.json({ success: true, glasses, xpGained: glasses * 5 });
     } catch (error) {
@@ -714,4 +874,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
   return httpServer;
+}
+
+// Helper function to check if an action matches a quest type
+function questMatchesAction(quest: any, action: string): boolean {
+  const questActionMap: Record<string, string[]> = {
+    'hydration': ['log_water'],
+    'cardio': ['complete_cardio', 'workout_duration', 'log_workout'],
+    'nutrition': ['log_meal', 'hit_protein_target', 'hit_calorie_target'],
+    'strength': ['log_workout'],
+    'community': ['add_recipe']
+  };
+
+  return questActionMap[quest.type]?.includes(action) || false;
+}
+
+// Helper function to calculate progress value based on quest type and action
+function calculateProgressValue(quest: any, action: string, value: number, metadata: any): number {
+  switch (quest.type) {
+    case 'hydration':
+      if (action === 'log_water') {
+        return value; // Direct glass count
+      }
+      break;
+    
+    case 'cardio':
+      if (action === 'workout_duration' || action === 'complete_cardio') {
+        return value; // Duration in minutes
+      } else if (action === 'log_workout') {
+        // All workouts count as cardio for the cardio quest
+        return metadata?.duration || 1;
+      }
+      break;
+    
+    case 'nutrition':
+      if (action === 'log_meal') {
+        // For nutrition quests, count calories/protein based on quest description
+        if (quest.name.includes('protein') && metadata?.protein) {
+          return metadata.protein;
+        } else if (metadata?.calories) {
+          return Math.floor(metadata.calories / 10); // Scale down calories
+        }
+        return 1;
+      }
+      break;
+    
+    case 'strength':
+      if (action === 'log_workout' && 
+          (metadata?.workoutType === 'strength' || 
+           metadata?.workoutType === 'resistance' ||
+           metadata?.workoutType === 'weightlifting')) {
+        return metadata.duration || 1;
+      }
+      break;
+  }
+  
+  return 0;
 }

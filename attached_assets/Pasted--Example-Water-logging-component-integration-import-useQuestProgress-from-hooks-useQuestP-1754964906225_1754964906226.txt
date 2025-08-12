@@ -1,0 +1,168 @@
+// Example: Water logging component integration
+import { useQuestProgress } from '@/hooks/useQuestProgress';
+
+export function WaterTracker() {
+  const { logWater } = useQuestProgress();
+  const [glasses, setGlasses] = useState(0);
+
+  const handleAddWater = async () => {
+    setGlasses(prev => prev + 1);
+    
+    // This will automatically update water-related quests
+    await logWater(1);
+  };
+
+  return (
+    <div>
+      <p>Water: {glasses} glasses</p>
+      <button onClick={handleAddWater}>Add Glass</button>
+    </div>
+  );
+}
+
+// Example: Meal logging component integration
+export function MealLogger() {
+  const { logMeal, checkDailyTargets } = useQuestProgress();
+
+  const handleMealSubmit = async (mealData: any) => {
+    // Save meal to database first
+    const savedMeal = await saveMealToDatabase(mealData);
+    
+    // Update quest progress
+    await logMeal(savedMeal);
+    
+    // Check if daily nutrition targets are met
+    const dailyNutrition = await getDailyNutritionSummary();
+    await checkDailyTargets(dailyNutrition);
+  };
+
+  return (
+    // Your meal logging form
+    <form onSubmit={handleMealSubmit}>
+      {/* form fields */}
+    </form>
+  );
+}
+
+// Example: Workout logging integration
+export function WorkoutLogger() {
+  const { logWorkout } = useQuestProgress();
+
+  const handleWorkoutComplete = async (workoutData: any) => {
+    // Save workout to database
+    const savedWorkout = await saveWorkoutToDatabase(workoutData);
+    
+    // Update quest progress (handles multiple quest types automatically)
+    await logWorkout(savedWorkout);
+  };
+
+  return (
+    // Your workout form
+    <form onSubmit={handleWorkoutComplete}>
+      {/* workout form fields */}
+    </form>
+  );
+}
+
+// Example: Recipe creation integration (already partially implemented)
+export function AddHomemadeFood({ onFoodAdded }: any) {
+  const { addRecipe } = useQuestProgress();
+
+  const createFoodMutation = useMutation({
+    mutationFn: async (data: any) => {
+      // Your existing food creation logic
+      const response = await apiRequest("POST", "/api/food", data);
+      return response.json();
+    },
+    onSuccess: async (newFood) => {
+      // Update quest progress for recipe creation
+      await addRecipe(newFood);
+      
+      // Your existing success logic
+      onFoodAdded(newFood);
+      // ... rest of existing code
+    },
+  });
+
+  // ... rest of component
+}
+
+// Backend API endpoint example (Node.js/Express)
+// POST /api/quests/progress
+export async function updateQuestProgress(req: Request, res: Response) {
+  const { action, value, metadata } = req.body;
+  const userId = req.user.id;
+
+  try {
+    // Get user's active quests
+    const activeQuests = await Quest.findAll({
+      where: {
+        userId,
+        completed: false,
+        deadline: { [Op.gt]: new Date() }
+      }
+    });
+
+    const updatedQuests = [];
+
+    for (const quest of activeQuests) {
+      // Check if this action contributes to this quest
+      if (questMatchesAction(quest, action)) {
+        const oldProgress = quest.currentProgress;
+        quest.currentProgress = Math.min(
+          quest.currentProgress + value, 
+          quest.targetValue
+        );
+
+        // Check if quest is now completed
+        if (quest.currentProgress >= quest.targetValue && !quest.completed) {
+          quest.completed = true;
+          quest.completedAt = new Date();
+          
+          // Award XP
+          await awardXP(userId, quest.xpReward);
+          
+          // Create activity log
+          await Activity.create({
+            userId,
+            type: 'achievement',
+            description: `Completed quest: ${quest.name}`,
+            xpGained: quest.xpReward
+          });
+
+          updatedQuests.push({
+            questId: quest.id,
+            currentProgress: quest.currentProgress,
+            completed: true,
+            xpAwarded: quest.xpReward
+          });
+        } else if (quest.currentProgress !== oldProgress) {
+          updatedQuests.push({
+            questId: quest.id,
+            currentProgress: quest.currentProgress,
+            completed: false
+          });
+        }
+
+        await quest.save();
+      }
+    }
+
+    res.json(updatedQuests);
+  } catch (error) {
+    console.error('Error updating quest progress:', error);
+    res.status(500).json({ error: 'Failed to update quest progress' });
+  }
+}
+
+function questMatchesAction(quest: Quest, action: string): boolean {
+  const questActionMap = {
+    'hydration': ['log_water'],
+    'cardio': ['complete_cardio', 'workout_duration'],
+    'nutrition': ['log_meal', 'hit_protein_target', 'hit_calorie_target'],
+    'strength': ['log_workout'],
+    'community': ['add_recipe']
+  };
+
+  return questActionMap[quest.type]?.includes(action) || false;
+}

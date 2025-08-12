@@ -1,0 +1,84 @@
+// hooks/useQuestProgress.ts
+import { useState, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { QuestManager, QUEST_ACTIONS } from '@/lib/questService';
+
+export const useQuestProgress = () => {
+  const [isUpdating, setIsUpdating] = useState(false);
+  const queryClient = useQueryClient();
+
+  const updateProgress = useCallback(async (
+    action: string, 
+    value: number = 1, 
+    metadata?: any
+  ) => {
+    setIsUpdating(true);
+    
+    try {
+      const updatedQuests = await QuestManager.updateQuestProgress(action, value, metadata);
+      
+      // Invalidate quest-related queries to refresh UI
+      queryClient.invalidateQueries({ queryKey: ['/api/quests/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/activities'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/character'] });
+      
+      return updatedQuests;
+    } catch (error) {
+      console.error('Failed to update quest progress:', error);
+    } finally {
+      setIsUpdating(false);
+    }
+  }, [queryClient]);
+
+  // Convenience methods for common actions
+  const logWater = useCallback((glasses: number = 1) => {
+    return updateProgress(QUEST_ACTIONS.LOG_WATER, glasses);
+  }, [updateProgress]);
+
+  const logMeal = useCallback((mealData: any) => {
+    return updateProgress(QUEST_ACTIONS.LOG_MEAL, 1, mealData);
+  }, [updateProgress]);
+
+  const logWorkout = useCallback((workoutData: any) => {
+    const duration = workoutData.duration || 0;
+    
+    // Update multiple quest types for workout
+    updateProgress(QUEST_ACTIONS.LOG_WORKOUT, 1, workoutData);
+    
+    if (workoutData.type === 'cardio' || workoutData.workoutType?.includes('cardio')) {
+      updateProgress(QUEST_ACTIONS.COMPLETE_CARDIO, duration, workoutData);
+    }
+    
+    if (duration > 0) {
+      updateProgress(QUEST_ACTIONS.WORKOUT_DURATION, duration, workoutData);
+    }
+  }, [updateProgress]);
+
+  const addRecipe = useCallback((recipeData: any) => {
+    return updateProgress(QUEST_ACTIONS.ADD_RECIPE, 1, recipeData);
+  }, [updateProgress]);
+
+  const checkDailyTargets = useCallback(async (nutritionData: any) => {
+    const { calories, protein, targetCalories, targetProtein } = nutritionData;
+    
+    // Check calorie target (within ±150 calories)
+    if (Math.abs(calories - targetCalories) <= 150) {
+      await updateProgress(QUEST_ACTIONS.HIT_CALORIE_TARGET, 1, { calories, target: targetCalories });
+    }
+    
+    // Check protein target
+    if (protein >= targetProtein) {
+      await updateProgress(QUEST_ACTIONS.HIT_PROTEIN_TARGET, protein, { protein, target: targetProtein });
+    }
+  }, [updateProgress]);
+
+  return {
+    updateProgress,
+    logWater,
+    logMeal,
+    logWorkout,
+    addRecipe,
+    checkDailyTargets,
+    isUpdating
+  };
+};
