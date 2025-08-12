@@ -38,7 +38,7 @@ export default function PopularFoods({ onSelectFood }: PopularFoodsProps) {
   }
 
   return (
-    <div className="space-y-3 h-full overflow-y-auto">
+    <div className="space-y-3">
       {popularFoods.slice(0, 12).map((food, index) => (
         <Card 
           key={food.id} 

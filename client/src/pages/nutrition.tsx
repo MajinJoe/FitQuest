@@ -251,8 +251,8 @@ export default function Nutrition() {
           <DialogTrigger asChild>
             <div style={{ display: 'none' }} />
           </DialogTrigger>
-          <DialogContent className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-md w-[90vw] max-h-[90vh] overflow-hidden z-50 bg-parchment rounded-lg shadow-xl border border-wood-brown">
-            <DialogHeader className="pb-4 border-b border-wood-brown/20">
+          <DialogContent className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-md w-[90vw] max-h-[90vh] z-50 bg-parchment rounded-lg shadow-xl border border-wood-brown flex flex-col">
+            <DialogHeader className="pb-4 border-b border-wood-brown/20 flex-shrink-0">
               <DialogTitle className="flex items-center gap-3 text-xl font-bold rpg-text text-wood-dark">
                 <Apple className="w-6 h-6 text-fantasy-gold" />
                 Add Meal
@@ -261,6 +261,7 @@ export default function Nutrition() {
                 Log your meal and gain XP for healthy eating
               </DialogDescription>
             </DialogHeader>
+            <div className="flex-1 overflow-y-auto min-h-0 pr-2">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
@@ -386,13 +387,14 @@ export default function Nutrition() {
                 </Button>
               </form>
             </Form>
+            </div>
           </DialogContent>
         </Dialog>
 
         {/* Food Search Dialog */}
         <Dialog open={isSearchDialogOpen} onOpenChange={setIsSearchDialogOpen}>
-          <DialogContent className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-4xl w-[95vw] max-h-[95vh] overflow-hidden z-50 bg-parchment rounded-lg shadow-xl border border-wood-brown">
-            <DialogHeader className="pb-4 border-b border-wood-brown/20">
+          <DialogContent className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-4xl w-[95vw] max-h-[95vh] z-50 bg-parchment rounded-lg shadow-xl border border-wood-brown flex flex-col">
+            <DialogHeader className="pb-4 border-b border-wood-brown/20 flex-shrink-0">
               <DialogTitle className="flex items-center gap-3 text-2xl font-bold rpg-text text-wood-dark">
                 <Search className="w-8 h-8 text-fantasy-blue" />
                 Food Database Search
@@ -401,7 +403,7 @@ export default function Nutrition() {
                 Search through thousands of foods from USDA and global databases
               </DialogDescription>
             </DialogHeader>
-            <div className="overflow-y-auto flex-1 pr-2">
+            <div className="flex-1 overflow-y-auto min-h-0 pr-2">
               <FoodDatabase onSelectFood={handleFoodSelection} />
             </div>
           </DialogContent>
@@ -409,8 +411,8 @@ export default function Nutrition() {
 
         {/* Popular Foods Dialog */}
         <Dialog open={isPopularDialogOpen} onOpenChange={setIsPopularDialogOpen}>
-          <DialogContent className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-3xl w-[90vw] max-h-[90vh] overflow-hidden z-50 bg-parchment rounded-lg shadow-xl border border-wood-brown">
-            <DialogHeader className="pb-4 border-b border-wood-brown/20">
+          <DialogContent className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-3xl w-[90vw] max-h-[90vh] z-50 bg-parchment rounded-lg shadow-xl border border-wood-brown flex flex-col">
+            <DialogHeader className="pb-4 border-b border-wood-brown/20 flex-shrink-0">
               <DialogTitle className="flex items-center gap-3 text-2xl font-bold rpg-text text-wood-dark">
                 <TrendingUp className="w-8 h-8 text-fantasy-purple" />
                 Popular Foods in the Realm
@@ -419,7 +421,7 @@ export default function Nutrition() {
                 Quick access to foods commonly used by the community
               </DialogDescription>
             </DialogHeader>
-            <div className="overflow-y-auto flex-1 pr-2">
+            <div className="flex-1 overflow-y-auto min-h-0 pr-2">
               <PopularFoods onSelectFood={handleFoodSelection} />
             </div>
           </DialogContent>
@@ -427,8 +429,8 @@ export default function Nutrition() {
 
         {/* Recipe Creator Dialog */}
         <Dialog open={isRecipeDialogOpen} onOpenChange={setIsRecipeDialogOpen}>
-          <DialogContent className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-4xl w-[95vw] max-h-[95vh] overflow-hidden z-50 bg-parchment rounded-lg shadow-xl border border-wood-brown">
-            <DialogHeader className="pb-4 border-b border-wood-brown/20">
+          <DialogContent className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-4xl w-[95vw] max-h-[95vh] z-50 bg-parchment rounded-lg shadow-xl border border-wood-brown flex flex-col">
+            <DialogHeader className="pb-4 border-b border-wood-brown/20 flex-shrink-0">
               <DialogTitle className="flex items-center gap-3 text-2xl font-bold rpg-text text-wood-dark">
                 <ChefHat className="w-8 h-8 text-fantasy-green" />
                 Create Your Recipe
@@ -437,7 +439,7 @@ export default function Nutrition() {
                 Share your homemade recipes with the community and earn 25 XP
               </DialogDescription>
             </DialogHeader>
-            <div className="overflow-y-auto flex-1 pr-2">
+            <div className="flex-1 overflow-y-auto min-h-0 pr-2">
               <AddHomemadeFood onFoodAdded={handleHomemadeFoodAdded} />
             </div>
           </DialogContent>
