@@ -52,6 +52,46 @@ const ensureUserSession = async (req: any, res: any, next: any) => {
         class: "Warrior of Wellness",
         avatarUrl: "/api/avatar/knight.svg"
       });
+
+      // Create default quests for the new character
+      await storage.createQuest({
+        characterId: character.id,
+        userId: user.id,
+        name: "Daily Nutrition",
+        description: "Log 3 meals today",
+        type: "nutrition",
+        targetValue: 3,
+        currentProgress: 0,
+        xpReward: 100,
+        difficulty: "easy",
+        isCompleted: false,
+      });
+
+      await storage.createQuest({
+        characterId: character.id,
+        userId: user.id,
+        name: "Calorie Goal",
+        description: "Consume 200 calories units today",
+        type: "nutrition",
+        targetValue: 200,
+        currentProgress: 0,
+        xpReward: 150,
+        difficulty: "normal",
+        isCompleted: false,
+      });
+
+      await storage.createQuest({
+        characterId: character.id,
+        userId: user.id,
+        name: "Stay Hydrated",
+        description: "Drink 8 glasses of water",
+        type: "hydration",
+        targetValue: 8,
+        currentProgress: 0,
+        xpReward: 75,
+        difficulty: "easy",
+        isCompleted: false,
+      });
     }
     
     req.session.characterId = character.id;
@@ -273,16 +313,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Update quest progress for nutrition logging
       const activeQuests = await storage.getActiveQuests(characterId);
+      console.log('🎯 Found active quests for nutrition progress:', activeQuests.length);
+      
       for (const quest of activeQuests) {
+        console.log(`🔍 Checking quest: ${quest.name} (${quest.type}) for nutrition action`);
+        
         if (questMatchesAction(quest, 'log_meal')) {
+          console.log(`✅ Quest ${quest.name} matches log_meal action`);
+          
           const progressToAdd = calculateProgressValue(quest, 'log_meal', 1, {
             calories: nutritionData.calories,
             protein: nutritionData.protein || 0
           });
           
+          console.log(`📈 Progress to add for quest ${quest.name}: ${progressToAdd} (calories: ${nutritionData.calories}, protein: ${nutritionData.protein})`);
+          
           if (progressToAdd > 0) {
             const newProgress = Math.min(quest.currentProgress + progressToAdd, quest.targetValue);
             const isNowCompleted = newProgress >= quest.targetValue;
+
+            console.log(`🎯 Updating quest ${quest.name}: ${quest.currentProgress} → ${newProgress}`);
 
             await storage.updateQuest(quest.id, {
               currentProgress: newProgress,
@@ -290,10 +340,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
 
             if (!quest.isCompleted && isNowCompleted) {
+              console.log(`🎉 Quest ${quest.name} completed! Awarding ${quest.xpReward} XP`);
               await storage.updateCharacterXP(characterId, quest.xpReward);
               await storage.createActivity({
-                userId,
-                characterId,
+                userId: userId,
+                characterId: characterId,
                 type: "quest",
                 description: `Quest Completed: ${quest.name}`,
                 xpGained: quest.xpReward,
@@ -301,6 +352,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }, false);
             }
           }
+        } else {
+          console.log(`❌ Quest ${quest.name} does not match nutrition action`);
         }
       }
 

@@ -74,6 +74,8 @@ export default function Nutrition() {
       queryClient.invalidateQueries({ queryKey: ["/api/character"] });
       queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats/daily"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/quests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/quests/active"] });
       
       toast({
         title: "Meal Logged!",
