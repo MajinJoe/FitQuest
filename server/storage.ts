@@ -1,6 +1,7 @@
 import { 
-  characters, quests, activities, nutritionLogs, workoutLogs, achievements, foodDatabase, workoutTemplates,
+  users, characters, quests, activities, nutritionLogs, workoutLogs, achievements, foodDatabase, workoutTemplates,
   exercises, workoutSessions, exerciseEntries,
+  type User, type InsertUser, type UpdateUserProfile,
   type Character, type InsertCharacter,
   type Quest, type InsertQuest,
   type Activity, type InsertActivity,
@@ -15,8 +16,15 @@ import {
 } from "@shared/schema";
 
 export interface IStorage {
+  // User methods
+  getUserById(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  updateUserProfile(id: number, updates: UpdateUserProfile): Promise<User | undefined>;
+  
   // Character methods
   getCharacter(id: number): Promise<Character | undefined>;
+  getCharacterByUserId(userId: number): Promise<Character | undefined>;
   createCharacter(character: InsertCharacter): Promise<Character>;
   updateCharacter(id: number, updates: Partial<Character>): Promise<Character | undefined>;
   
@@ -82,6 +90,7 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
+  private users: Map<number, User>;
   private characters: Map<number, Character>;
   private quests: Map<number, Quest>;
   private activities: Map<number, Activity>;
@@ -96,6 +105,7 @@ export class MemStorage implements IStorage {
   private currentIds: { [key: string]: number };
 
   constructor() {
+    this.users = new Map();
     this.characters = new Map();
     this.quests = new Map();
     this.activities = new Map();
@@ -108,6 +118,7 @@ export class MemStorage implements IStorage {
     this.workoutSessions = new Map();
     this.exerciseEntries = new Map();
     this.currentIds = {
+      users: 1,
       characters: 1,
       quests: 1,
       activities: 1,
@@ -121,14 +132,27 @@ export class MemStorage implements IStorage {
       exerciseEntries: 1,
     };
     
-    // Create default character and quests
+    // Create default user, character and quests
     this.initializeDefaultData();
   }
 
   private initializeDefaultData() {
+    // Create default user
+    const defaultUser: User = {
+      id: 1,
+      username: "FitHero",
+      email: "fithero@example.com",
+      profileImageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.users.set(1, defaultUser);
+    this.currentIds.users = 2;
+
     // Create default character
     const defaultCharacter: Character = {
       id: 1,
+      userId: 1,
       name: "Sir FitKnight",
       level: 23,
       currentXP: 2847,
@@ -666,7 +690,44 @@ export class MemStorage implements IStorage {
     this.currentIds.exercises = exerciseData.length + 1;
   }
 
+  // User methods
+  async getUserById(id: number): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(user => user.username === username);
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const id = this.currentIds.users++;
+    const user: User = {
+      ...insertUser,
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.users.set(id, user);
+    return user;
+  }
+
+  async updateUserProfile(id: number, updates: UpdateUserProfile): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updatedUser: User = { 
+      ...user, 
+      ...updates, 
+      updatedAt: new Date() 
+    };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
   // Character methods
+  async getCharacterByUserId(userId: number): Promise<Character | undefined> {
+    return Array.from(this.characters.values()).find(character => character.userId === userId);
+  }
   async getCharacter(id: number): Promise<Character | undefined> {
     return this.characters.get(id);
   }

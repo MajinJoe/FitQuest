@@ -6,12 +6,42 @@ import {
   insertNutritionLogSchema, insertWorkoutLogSchema, insertAchievementSchema,
   insertFoodDatabaseSchema, insertWorkoutTemplateSchema,
   insertExerciseSchema, insertWorkoutSessionSchema, insertExerciseEntrySchema,
-  updateCharacterProfileSchema
+  updateCharacterProfileSchema, updateUserProfileSchema
 } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  const userId = 1; // Default user for demo
   const characterId = 1; // Default character for demo
+
+  // User routes
+  app.get("/api/user", async (req, res) => {
+    try {
+      const user = await storage.getUserById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get user" });
+    }
+  });
+
+  app.put("/api/user/profile", async (req, res) => {
+    try {
+      const updates = updateUserProfileSchema.parse(req.body);
+      const user = await storage.updateUserProfile(userId, updates);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(user);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update user profile" });
+    }
+  });
 
   // Character routes
   app.get("/api/character", async (req, res) => {

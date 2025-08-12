@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { Trophy, User, Star, Award } from "lucide-react";
+import { Trophy, User, Star, Award, Settings } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import BottomNavigation from "@/components/bottom-navigation";
 import type { Character, Achievement } from "@shared/schema";
+import { Link } from "wouter";
 
 export default function CharacterPage() {
   const { data: character } = useQuery<Character>({
@@ -27,10 +29,16 @@ export default function CharacterPage() {
   return (
     <div className="max-w-sm mx-auto fantasy-bg min-h-screen">
       <div className="rpg-card m-4 p-4">
-        <h1 className="rpg-title text-2xl flex items-center justify-center mb-2">
-          <User className="mr-3 text-fantasy-gold" size={28} />
-          Character Profile
-        </h1>
+        <div className="flex items-center justify-between mb-2">
+          <div className="w-10" /> {/* Spacer for centering */}
+          <h1 className="rpg-title text-2xl flex items-center">
+            <User className="mr-3 text-fantasy-gold" size={28} />
+            Character Profile
+          </h1>
+          <Link to="/profile" className="rpg-button-secondary p-2 rounded" data-testid="button-profile-settings">
+            <Settings size={20} />
+          </Link>
+        </div>
         <p className="rpg-text text-center">Your fitness journey</p>
       </div>
 

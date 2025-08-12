@@ -2,8 +2,19 @@ import { pgTable, text, serial, integer, boolean, timestamp, json, numeric } fro
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// User profile table
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  email: text("email"),
+  profileImageUrl: text("profile_image_url"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const characters = pgTable("characters", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
   name: text("name").notNull(),
   level: integer("level").notNull().default(1),
   currentXP: integer("current_xp").notNull().default(0),
@@ -16,6 +27,7 @@ export const characters = pgTable("characters", {
 
 export const quests = pgTable("quests", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
   characterId: integer("character_id").notNull(),
   name: text("name").notNull(),
   description: text("description").notNull(),
@@ -31,6 +43,7 @@ export const quests = pgTable("quests", {
 
 export const activities = pgTable("activities", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
   characterId: integer("character_id").notNull(),
   type: text("type").notNull(), // 'nutrition', 'workout', 'hydration'
   description: text("description").notNull(),
@@ -41,6 +54,7 @@ export const activities = pgTable("activities", {
 
 export const nutritionLogs = pgTable("nutrition_logs", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
   characterId: integer("character_id").notNull(),
   foodName: text("food_name").notNull(),
   calories: integer("calories").notNull(),
@@ -54,6 +68,7 @@ export const nutritionLogs = pgTable("nutrition_logs", {
 
 export const workoutLogs = pgTable("workout_logs", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
   characterId: integer("character_id").notNull(),
   workoutType: text("workout_type").notNull(),
   duration: integer("duration").notNull(), // in minutes
@@ -66,6 +81,7 @@ export const workoutLogs = pgTable("workout_logs", {
 
 export const achievements = pgTable("achievements", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
   characterId: integer("character_id").notNull(),
   name: text("name").notNull(),
   description: text("description").notNull(),
@@ -247,6 +263,21 @@ export const insertExerciseEntrySchema = createInsertSchema(exerciseEntries).omi
   createdAt: true,
 });
 
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const updateUserProfileSchema = createInsertSchema(users)
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+    email: true,
+  })
+  .partial();
+
 // Types
 export type Character = typeof characters.$inferSelect;
 export type InsertCharacter = z.infer<typeof insertCharacterSchema>;
@@ -281,3 +312,7 @@ export type InsertWorkoutSession = z.infer<typeof insertWorkoutSessionSchema>;
 
 export type ExerciseEntry = typeof exerciseEntries.$inferSelect;
 export type InsertExerciseEntry = z.infer<typeof insertExerciseEntrySchema>;
+
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UpdateUserProfile = z.infer<typeof updateUserProfileSchema>;
