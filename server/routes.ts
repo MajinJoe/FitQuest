@@ -10,15 +10,70 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 
+// Extend Express Request type to include session
+declare module 'express-session' {
+  interface SessionData {
+    userId?: number;
+    characterId?: number;
+  }
+}
+
+// Middleware to ensure user has a session
+const ensureUserSession = async (req: any, res: any, next: any) => {
+  if (!req.session.userId) {
+    // Generate a unique user ID based on session ID and current timestamp
+    const sessionId = req.session.id || 'anonymous';
+    const timestamp = Date.now();
+    const userIdNumber = parseInt(sessionId.slice(-8), 16) || timestamp % 1000000;
+    
+    console.log('🔐 Creating new user session:', { sessionId: sessionId.slice(0, 8), userId: userIdNumber });
+    
+    // Create user if doesn't exist
+    let user = await storage.getUserById(userIdNumber);
+    if (!user) {
+      user = await storage.createUser({
+        username: `User_${userIdNumber}`,
+        email: `user_${userIdNumber}@fitness-rpg.com`,
+      });
+    }
+    
+    req.session.userId = user.id;
+    
+    // Create character if doesn't exist
+    let character = await storage.getCharacterByUserId(user.id);
+    if (!character) {
+      character = await storage.createCharacter({
+        userId: user.id,
+        name: `Sir FitKnight`,
+        level: 1,
+        currentXP: 0,
+        nextLevelXP: 100,
+        totalXP: 0,
+        class: "Warrior of Wellness",
+        avatarUrl: "/api/avatar/knight.svg"
+      });
+    }
+    
+    req.session.characterId = character.id;
+    
+    console.log('✅ Session established:', { userId: user.id, characterId: character.id });
+  }
+  
+  next();
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
-  const userId = 1; // Default user for demo
-  const characterId = 1; // Default character for demo
+  // Apply session middleware to all routes
+  app.use('/api', ensureUserSession);
 
   // Character routes
-  app.get("/api/character", async (req, res) => {
+  app.get("/api/character", async (req: any, res) => {
     try {
+      const userId = req.session.userId;
+      const characterId = req.session.characterId;
+      
       const character = await storage.getCharacter(characterId);
-      if (!character) {
+      if (!character || character.userId !== userId) {
         return res.status(404).json({ message: "Character not found" });
       }
       res.json(character);
@@ -27,15 +82,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/character", async (req, res) => {
+  app.patch("/api/character", async (req: any, res) => {
     try {
+      const userId = req.session.userId;
+      const characterId = req.session.characterId;
+      
       const updateSchema = insertCharacterSchema.partial();
       const updates = updateSchema.parse(req.body);
-      const character = await storage.updateCharacter(characterId, updates);
-      if (!character) {
+      
+      // Verify character belongs to user
+      const character = await storage.getCharacter(characterId);
+      if (!character || character.userId !== userId) {
         return res.status(404).json({ message: "Character not found" });
       }
-      res.json(character);
+      
+      const updatedCharacter = await storage.updateCharacter(characterId, updates);
+      res.json(updatedCharacter);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
@@ -45,14 +107,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Character profile update (name, avatar only)
-  app.patch("/api/character/profile", async (req, res) => {
+  app.patch("/api/character/profile", async (req: any, res) => {
     try {
-      const updates = updateCharacterProfileSchema.parse(req.body);
-      const character = await storage.updateCharacter(characterId, updates);
-      if (!character) {
+      const userId = req.session.userId;
+      const characterId = req.session.characterId;
+      
+      // Verify character belongs to user
+      const character = await storage.getCharacter(characterId);
+      if (!character || character.userId !== userId) {
         return res.status(404).json({ message: "Character not found" });
       }
-      res.json(character);
+      
+      const updates = updateCharacterProfileSchema.parse(req.body);
+      const updatedCharacter = await storage.updateCharacter(characterId, updates);
+      res.json(updatedCharacter);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
@@ -62,8 +130,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Quest routes
-  app.get("/api/quests", async (req, res) => {
+  app.get("/api/quests", async (req: any, res) => {
     try {
+      const characterId = req.session.characterId;
       const quests = await storage.getCharacterQuests(characterId);
       res.json(quests);
     } catch (error) {
@@ -71,8 +140,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/quests/active", async (req, res) => {
+  app.get("/api/quests/active", async (req: any, res) => {
     try {
+      const characterId = req.session.characterId;
       const quests = await storage.getActiveQuests(characterId);
       res.json(quests);
     } catch (error) {
@@ -80,8 +150,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/quests", async (req, res) => {
+  app.post("/api/quests", async (req: any, res) => {
     try {
+      const characterId = req.session.characterId;
       const questData = insertQuestSchema.parse({
         ...req.body,
         characterId,
@@ -115,8 +186,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Activity routes
-  app.get("/api/activities", async (req, res) => {
+  app.get("/api/activities", async (req: any, res) => {
     try {
+      const characterId = req.session.characterId;
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
       const activities = await storage.getCharacterActivities(characterId, limit);
       res.json(activities);
@@ -142,8 +214,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Nutrition routes
-  app.get("/api/nutrition", async (req, res) => {
+  app.get("/api/nutrition", async (req: any, res) => {
     try {
+      const characterId = req.session.characterId;
       const logs = await storage.getCharacterNutritionLogs(characterId);
       res.json(logs);
     } catch (error) {
@@ -151,8 +224,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/nutrition/today", async (req, res) => {
+  app.get("/api/nutrition/today", async (req: any, res) => {
     try {
+      const characterId = req.session.characterId;
       const logs = await storage.getTodayNutritionLogs(characterId);
       res.json(logs);
     } catch (error) {
@@ -160,8 +234,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/nutrition", async (req, res) => {
+  app.post("/api/nutrition", async (req: any, res) => {
     try {
+      const userId = req.session.userId;
+      const characterId = req.session.characterId;
+      
       console.log('🍎 Nutrition logging request:', {
         body: req.body,
         characterId,
@@ -182,8 +259,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create activity for XP gain
       await storage.createActivity({
-        userId,
-        characterId,
+        userId: userId,
+        characterId: characterId,
         type: "nutrition",
         description: `Logged ${nutritionData.mealType} - ${nutritionData.foodName}`,
         xpGained: nutritionData.xpGained,
@@ -239,8 +316,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Workout routes
-  app.get("/api/workouts", async (req, res) => {
+  app.get("/api/workouts", async (req: any, res) => {
     try {
+      const characterId = req.session.characterId;
       const logs = await storage.getCharacterWorkoutLogs(characterId);
       res.json(logs);
     } catch (error) {
@@ -248,8 +326,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/workouts/today", async (req, res) => {
+  app.get("/api/workouts/today", async (req: any, res) => {
     try {
+      const characterId = req.session.characterId;
       const logs = await storage.getTodayWorkoutLogs(characterId);
       res.json(logs);
     } catch (error) {
@@ -257,18 +336,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/workouts", async (req, res) => {
+  app.post("/api/workouts", async (req: any, res) => {
     try {
+      const userId = req.session.userId;
+      const characterId = req.session.characterId;
+      
       const workoutData = insertWorkoutLogSchema.parse({
         ...req.body,
         characterId,
+        userId,
       });
       const log = await storage.createWorkoutLog(workoutData);
       
       // Create activity for XP gain
       await storage.createActivity({
-        userId,
-        characterId,
+        userId: userId,
+        characterId: characterId,
         type: "workout",
         description: `Completed ${workoutData.workoutType} - ${workoutData.duration} min`,
         xpGained: workoutData.xpGained,
@@ -340,8 +423,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Achievement routes
-  app.get("/api/achievements", async (req, res) => {
+  app.get("/api/achievements", async (req: any, res) => {
     try {
+      const characterId = req.session.characterId;
       const achievements = await storage.getCharacterAchievements(characterId);
       res.json(achievements);
     } catch (error) {
@@ -350,8 +434,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Daily stats calculation
-  app.get("/api/stats/daily", async (req, res) => {
+  app.get("/api/stats/daily", async (req: any, res) => {
     try {
+      const characterId = req.session.characterId;
       const todayActivities = await storage.getCharacterActivities(characterId, 50);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -381,8 +466,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Quest progress tracking endpoint
-  app.post("/api/quests/progress", async (req, res) => {
+  app.post("/api/quests/progress", async (req: any, res) => {
     try {
+      const userId = req.session.userId;
+      const characterId = req.session.characterId;
       const { action, value, metadata } = req.body;
       
       // Get active quests for the character
@@ -411,8 +498,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Log quest completion activity
               await storage.createActivity({
-                userId,
-                characterId,
+                userId: userId,
+                characterId: characterId,
                 type: "quest",
                 description: `Quest Completed: ${quest.name}`,
                 xpGained: quest.xpReward,
@@ -444,14 +531,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Hydration tracking endpoint
-  app.post("/api/hydration", async (req, res) => {
+  app.post("/api/hydration", async (req: any, res) => {
     try {
+      const userId = req.session.userId;
+      const characterId = req.session.characterId;
       const { glasses = 1 } = req.body;
       
       // Create activity for hydration
       await storage.createActivity({
-        userId,
-        characterId,
+        userId: userId,
+        characterId: characterId,
         type: "hydration",
         description: `Drank ${glasses} glass${glasses > 1 ? 'es' : ''} of water`,
         xpGained: glasses * 5, // 5 XP per glass
@@ -495,8 +584,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // XP gain endpoint
-  app.post("/api/character/xp", async (req, res) => {
+  app.post("/api/character/xp", async (req: any, res) => {
     try {
+      const userId = req.session.userId;
+      const characterId = req.session.characterId;
       const { amount, description } = req.body;
       if (!amount || !description) {
         return res.status(400).json({ message: "Amount and description required" });
@@ -529,8 +620,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create activity
       await storage.createActivity({
-        userId,
-        characterId,
+        userId: userId,
+        characterId: characterId,
         type: "xp_gain",
         description,
         xpGained: amount,
@@ -605,8 +696,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/food", async (req, res) => {
+  app.post("/api/food", async (req: any, res) => {
     try {
+      const userId = req.session.userId;
+      const characterId = req.session.characterId;
+      
       const foodData = insertFoodDatabaseSchema.parse({
         ...req.body,
         contributedBy: req.body.contributedBy || characterId, // Default to current character
@@ -617,8 +711,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Award XP for contributing to the database
       await storage.createActivity({
-        userId,
-        characterId,
+        userId: userId,
+        characterId: characterId,
         type: "food_contribution",
         description: `Added "${food.name}" to the food database`,
         xpGained: 25,
@@ -646,8 +740,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/food/user-contributions", async (req, res) => {
+  app.get("/api/food/user-contributions", async (req: any, res) => {
     try {
+      const characterId = req.session.characterId;
       const userFoods = await storage.getUserContributedFoods(characterId);
       res.json(userFoods);
     } catch (error) {
@@ -821,8 +916,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Workout Session routes
-  app.get("/api/workout-sessions", async (req, res) => {
+  app.get("/api/workout-sessions", async (req: any, res) => {
     try {
+      const characterId = req.session.characterId;
       const sessions = await storage.getCharacterWorkoutSessions(characterId);
       res.json(sessions);
     } catch (error) {
@@ -846,8 +942,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/workout-sessions", async (req, res) => {
+  app.post("/api/workout-sessions", async (req: any, res) => {
     try {
+      const characterId = req.session.characterId;
       const sessionData = insertWorkoutSessionSchema.parse({
         ...req.body,
         characterId,
