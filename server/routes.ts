@@ -499,6 +499,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
       const xpGained = todaysActivities.reduce((sum, activity) => sum + activity.xpGained, 0);
+      
+      // Calculate calories consumed from nutrition activities
+      const caloriesConsumed = todaysActivities
+        .filter(activity => activity.type === "nutrition" && activity.metadata && typeof activity.metadata === 'object' && 'calories' in activity.metadata)
+        .reduce((sum, activity) => sum + (activity.metadata as any).calories, 0);
+      
+      // Calculate calories burned from workout activities
       const caloriesBurned = todaysActivities
         .filter(activity => activity.metadata && typeof activity.metadata === 'object' && 'caloriesBurned' in activity.metadata)
         .reduce((sum, activity) => sum + (activity.metadata as any).caloriesBurned, 0);
@@ -509,6 +516,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({
         xpGained,
+        calories: caloriesConsumed, // Changed to show consumed calories
         caloriesBurned,
         workoutsCompleted,
         totalWorkouts: 3, // Target for the day

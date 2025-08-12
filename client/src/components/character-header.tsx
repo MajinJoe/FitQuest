@@ -6,6 +6,7 @@ interface CharacterHeaderProps {
   character: Character;
   dailyStats?: {
     xpGained: number;
+    calories: number;
     caloriesBurned: number;
     workoutsCompleted: number;
     totalWorkouts: number;
@@ -63,7 +64,7 @@ export default function CharacterHeader({ character, dailyStats }: CharacterHead
             <div className="rpg-text text-xs">XP Today</div>
           </div>
           <div className="rpg-card bg-fantasy-blue bg-opacity-10 p-3 text-center">
-            <div className="rpg-title text-fantasy-blue text-lg">{dailyStats.caloriesBurned}</div>
+            <div className="rpg-title text-fantasy-blue text-lg">{dailyStats.calories || 0}</div>
             <div className="rpg-text text-xs">Calories</div>
           </div>
           <div className="rpg-card bg-fantasy-purple bg-opacity-10 p-3 text-center">

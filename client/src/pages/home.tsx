@@ -24,6 +24,7 @@ export default function Home() {
 
   const { data: dailyStats } = useQuery<{
     xpGained: number;
+    calories: number;
     caloriesBurned: number;
     workoutsCompleted: number;
     totalWorkouts: number;
