@@ -35,7 +35,7 @@ export default function CharacterPage() {
             <User className="mr-3 text-fantasy-gold" size={28} />
             Character Profile
           </h1>
-          <Link to="/profile" className="rpg-button-secondary p-2 rounded" data-testid="button-profile-settings">
+          <Link to="/profile/settings" className="rpg-button-secondary p-2 rounded" data-testid="button-profile-settings">
             <Settings size={20} />
           </Link>
         </div>
