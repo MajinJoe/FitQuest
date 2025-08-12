@@ -24,19 +24,51 @@ export default function LevelUpModal() {
 
   if (!isVisible) return null;
 
+  const encouragementMessages = [
+    "You've come a long way on your fitness journey, traveler!",
+    "Your dedication to wellness grows stronger with each step!",
+    "The path to health mastery reveals itself to those who persist!",
+    "Your body and spirit grow mightier through your commitment!",
+    "Every workout brings you closer to your legendary potential!",
+    "Your fitness journey inspires others to follow in your footsteps!",
+    "Through discipline and determination, you forge ahead!"
+  ];
+
+  const getRandomEncouragement = () => {
+    return encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-      <div className="bg-gradient-to-br from-fantasy-gold to-yellow-600 rounded-2xl p-8 text-center max-w-sm mx-4 animate-level-up">
-        <div className="text-6xl mb-4">🏆</div>
-        <h2 className="text-3xl font-bold text-dark-slate mb-2">LEVEL UP!</h2>
-        <p className="text-dark-slate mb-4">You've reached Level {newLevel}!</p>
-        <p className="text-sm text-gray-800 mb-6">New abilities and rewards unlocked!</p>
-        <Button 
-          onClick={handleClose}
-          className="bg-dark-slate text-fantasy-gold hover:bg-slate-700"
-        >
-          Continue Adventure
-        </Button>
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="rpg-card max-w-lg w-full mx-4 relative overflow-hidden">
+        {/* Background pattern */}
+        <div className="absolute inset-0 bg-gradient-to-br from-fantasy-gold/20 to-yellow-600/20"></div>
+        
+        {/* Content */}
+        <div className="relative p-8 text-center">
+          <div className="text-7xl mb-6 animate-bounce">⚔️</div>
+          <h2 className="rpg-title text-4xl mb-4 text-fantasy-gold">
+            LEVEL UP!
+          </h2>
+          <div className="mb-6">
+            <p className="rpg-text text-xl mb-2">
+              You've reached Level {newLevel}!
+            </p>
+            <p className="rpg-text text-base italic mb-4 text-fantasy-gold/90">
+              {getRandomEncouragement()}
+            </p>
+            <div className="flex items-center justify-center space-x-2 text-fantasy-gold/80">
+              <span className="text-sm">✨ New abilities unlocked ✨</span>
+            </div>
+          </div>
+          <Button 
+            onClick={handleClose}
+            className="bg-fantasy-gold text-wood-dark hover:bg-fantasy-gold/90 font-bold px-8 py-3 text-lg pixel-border"
+            data-testid="button-continue-adventure"
+          >
+            Continue Your Quest
+          </Button>
+        </div>
       </div>
     </div>
   );
